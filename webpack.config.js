@@ -1,3 +1,5 @@
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+
 module.exports = {
 
     // Enable sourcemaps for debugging webpack's output.
@@ -27,5 +29,7 @@ module.exports = {
                 loader: "source-map-loader"
             }
         ]
-    }
+    },
+
+    plugins: [new HtmlWebpackPlugin()]
 };
