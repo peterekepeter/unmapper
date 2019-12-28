@@ -2,11 +2,11 @@ import { Vector } from "./Vector";
 
 export class Polygon
 {
-    public item : string; 
-    public flags : number;
-    public origin : Vector;
-    public normal: Vector;
-    public textureU : Vector;
-    public textureV : Vector;
-    public vertexes : Vector[];
+    public item : string = ''; 
+    public flags : number = 0;
+    public origin : Vector = Vector.zero;
+    public normal: Vector = Vector.zUnit;
+    public textureU : Vector = Vector.xUnit;
+    public textureV : Vector = Vector.yUnit;
+    public vertexes : Vector[] = [];
 }

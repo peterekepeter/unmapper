@@ -27,6 +27,17 @@ export class Parser {
         }
         return value;
     }
+
+    public parseIntAndMoveToNext() : number {
+        var token = this.getCurrentToken();
+        this.moveToNext();
+        const value = Number.parseInt(token);
+        if (isNaN(value)){
+            this.error("Expected int");
+        }
+        return value;
+    }
+    
     
     public moveToNext() {
         this._index += 1;

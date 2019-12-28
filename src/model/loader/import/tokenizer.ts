@@ -27,7 +27,6 @@ export function tokenize(input : string) : string[] {
             }
             else if (isOperator(prevChr)) {
                 split = true;
-                save = !isIgnorableOperator(prevChr);
             }
         }
 
@@ -56,8 +55,4 @@ function isWhitespaceChar(s:string){
 
 function isOperator(s:string){
     return s === '=' || s === '(' || s === ')' || s === ',';
-}
-
-function isIgnorableOperator(s:string){
-    return s === ',';
 }

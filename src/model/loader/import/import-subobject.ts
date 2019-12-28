@@ -19,6 +19,11 @@ export function importSubobject(arg : Parser | string) : { [key:string]: string 
                 throw new Error("Expecting object property value");
             }
             result[key] = value;
+            
+            // skip commas
+            if (parser.getCurrentToken() === ','){
+                parser.moveToNext();
+            }
         }
     }
     return result;

@@ -1,4 +1,4 @@
-import { vectorFromString, importVector } from "../vector-importer"
+import { importVector } from "../import-vector"
 import { Vector } from "../../../Vector";
 
 test("can parse vector format", () => parseAndCheck(
