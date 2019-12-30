@@ -8,7 +8,7 @@ export class Actor
     public location : Vector = Vector.zero;
     public oldLocation : Vector = Vector.zero;
     public group : string[] = [];
-    brushModel: BrushModel;
+    brushModel: BrushModel | null = null;
     
     // additional unsupported props go here, these still need to be reencoded
     public unsupportedProperties : { [key:string] : string | object } = {};
