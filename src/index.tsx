@@ -2,8 +2,14 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { Application } from "./components/Application";
+import { createController } from "./controller";
+import { dummyAppData } from "./dummyAppData";
 
-ReactDOM.render(<Application/>, createRootElement());
+let controller = createController();
+controller.loadFromString(dummyAppData);
+
+ReactDOM.render(<Application controller={controller}/>, createRootElement());
+
 
 function createRootElement(){
     const mainElement = document.createElement('main');
