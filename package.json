@@ -7,8 +7,9 @@
   "scripts": {
     "test": "jest",
     "build": "webpack --mode 'production'",
-    "start": "webpack-dev-server --open --contentBase ./dist",
-    "tdd": "jest --watch"
+    "start": "concurrently -n webpack,jest npm:start-dev-server npm:start-tdd",
+    "start-dev-server": "webpack-dev-server --open --contentBase ./dist",
+    "start-tdd": "jest --watch"
   },
   "author": "",
   "license": "MIT",

@@ -4,6 +4,8 @@ import { Parser } from "./Parser";
 import { importSubobject } from "./import-subobject";
 import { importVector } from "./import-vector";
 import { importBrushModel } from "./import-brushmodel";
+import { CsgOperation } from "../../CsgOperation";
+import { csgOperationFromString } from "../csgOperationStringConversion";
 
 export function importActor(arg : Parser | string) : Actor {
     const parser = makeParser(arg);
@@ -53,6 +55,10 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             actor.group = parseSetPropertyValue(parser);
             break;
 
+        case "CsgOper":
+            actor.csgOperation = parseCsgOperation(parser);
+            break;
+
         default:
             let value : string | object = parser.getCurrentToken();
             if (value === '('){
@@ -63,6 +69,14 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             actor.unsupportedProperties[key] = value;
             break;
         }
+}
+
+function parseCsgOperation(parser : Parser)
+{
+    let result : CsgOperation | null = null;
+    const token = parser.getCurrentToken();
+    parser.moveToNext();
+    return csgOperationFromString(token);
 }
 
 function parseSetPropertyValue(parser : Parser){

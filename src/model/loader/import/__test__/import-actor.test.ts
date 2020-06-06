@@ -1,6 +1,7 @@
 import { importActor } from "../import-actor";
 import { Actor } from "../../../Actor";
 import { Vector } from "../../../Vector";
+import { CsgOperation } from "../../../CsgOperation";
 
 
 test('can import empty actor', () => {
@@ -44,6 +45,15 @@ test('can import actor multiple group', () => {
     `);
     expect(actor.group).toEqual(["None", "Test Group 1", "Cube"]);
 });
+
+test('can import brush csg operation', () => {
+    const actor = importActor(`
+        Begin Actor Class=Brush Name=Brush10
+            CsgOper=CSG_Subtract
+        End Actor
+    `);
+    expect(actor.csgOperation).toBe(CsgOperation.Subtract);
+})
 
 test('can import brush actor', () => {
     const actor = importActor(`

@@ -1,33 +1,15 @@
 import React = require("react");
 import { UnrealMap } from "../model/UnrealMap";
-import { CSSProperties } from "styled-components";
-import { HoverEffect } from "./HoverEffect";
-
-const font : CSSProperties = {
-    fontFamily : 'Segoe UI, sans-serif'
-};
-
-const uiTextStyle : CSSProperties = {
-    ...font
-};
-
-function UiText({children=''}){
-    return <span style={uiTextStyle}>{children}</span>
-}
-
-const uiActorClassStyle : CSSProperties = {
-    ...font,
-    color : '#ccc',
-    marginLeft: '1em'
-};
-
-function UiActorClass({children=''}){
-    return <span style={uiActorClassStyle}>{children}</span>
-}
+import { HoverEffect } from "../ui/HoverEffect";
+import { UiActorClass } from "../ui/UiActorClass";
+import { UiText } from "../ui/UiText";
+import { SectionTitle } from "../ui/SectionTitle";
 
 export function ActorList({ map = new UnrealMap() }) {
 
-    return <div>{
+    return <div>
+        <SectionTitle>Actor list</SectionTitle>
+        {
         map.actors.map(actor => 
             <HoverEffect hoverStyle={{background: 'red', cursor: 'pointer'}}>
                 <UiText>{actor.name}</UiText>

@@ -1,5 +1,6 @@
 import { Vector } from "./Vector";
 import { BrushModel } from "./BrushModel";
+import { CsgOperation } from "./CsgOperation";
 
 export class Actor
 {
@@ -8,7 +9,8 @@ export class Actor
     public location : Vector = Vector.zero;
     public oldLocation : Vector = Vector.zero;
     public group : string[] = [];
-    brushModel: BrushModel | null = null;
+    public brushModel: BrushModel | null = null;
+    public csgOperation: CsgOperation | null = null;
     
     // additional unsupported props go here, these still need to be reencoded
     public unsupportedProperties : { [key:string] : string | object } = {};
