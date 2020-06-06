@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "build": "webpack --mode 'production'",
-    "start": "concurrently -n webpack,jest npm:start-dev-server npm:start-tdd",
+    "start": "concurrently -n wp,jest npm:start-dev-server npm:start-tdd",
     "start-dev-server": "webpack-dev-server --open --contentBase ./dist",
     "start-tdd": "jest --watch"
   },
@@ -16,14 +16,12 @@
   "dependencies": {
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "reactive-signals": "^1.0.1",
-    "styled-components": "^4.4.1"
+    "reactive-signals": "^1.0.1"
   },
   "devDependencies": {
     "@types/jest": "^24.9.1",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
-    "@types/styled-components": "^4.4.3",
     "concurrently": "^5.2.0",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
