@@ -21,7 +21,7 @@ function getBrushWireColor(actor: Actor): string {
     }
 }
 
-export function WireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
+export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     const context = canvas.getContext("2d");
     const { width, height } = canvas;
     const deviceSize = Math.min(width, height);
