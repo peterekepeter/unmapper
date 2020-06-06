@@ -41,26 +41,27 @@ export function WireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
     function renderActor(actor: Actor) {
         if (actor.brushModel != null) {
-            tx += actor.location.x;
-            ty += actor.location.y;
+            let save_tx = tx, save_ty = ty, save_tz = tz;
+            tx -= actor.location.x;
+            ty -= actor.location.y;
+            tz -= actor.location.z;
             const polygons = actor.brushModel.polygons;
             context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.0;
             for (const polygon of polygons) {
                 renderPolygon(polygon, actor.location);
             }
-            tx -= actor.location.x;
-            ty -= actor.location.y;
+            tx = save_tx, ty = save_ty, tz = save_tz;
         }
     }
 
     function renderPolygon(polygon: Polygon, location: Vector) {
         const last = polygon.vertexes[polygon.vertexes.length - 1];
         context.beginPath();
-        const lastPosition = last;//.add(location.x, location.y, location.z);
+        const lastPosition = last;
         context.moveTo(getTransformedX(lastPosition), getTransformedY(lastPosition));
         for (const vertex of polygon.vertexes) {
-            const position = vertex;//.add(location.x, location.y, location.z);
+            const position = vertex;
             context.lineTo(
                 getTransformedX(position),
                 getTransformedY(position));
@@ -109,21 +110,21 @@ export function WireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         getTransformedX = vector =>
             (vector.x - tx) * deviceSize * scale + width/2;
         getTransformedY = vector =>
-            (vector.y - ty) * -deviceSize * scale + height/2;
+            (vector.y - ty) * deviceSize * scale + height/2;
     }
 
     function setFrontMode(scale: number): void {
         getTransformedX = vector =>
             (vector.x - tx) * deviceSize * scale + width/2;
         getTransformedY = vector =>
-            (vector.z - tz) * -deviceSize * scale + height/2;
+            (vector.z - tz) * -1 * deviceSize * scale + height/2;
     }
 
     function setSideMode(scale: number): void {
         getTransformedX = vector =>
             (vector.y - ty) * deviceSize * scale + width/2;
         getTransformedY = vector =>
-            (vector.z - tz) * -deviceSize * scale + height/2;
+            (vector.z - tz) * -1 * deviceSize * scale + height/2;
     }
 
     const s: IRenderer = {
