@@ -76,7 +76,7 @@ export const Viewport = ({
     function onPointerDown(event : React.PointerEvent<HTMLCanvasElement>)
     {
         canvas.setPointerCapture(event.pointerId);
-        if (usePointerLock){
+        if (usePointerLock && canvas.requestPointerLock){
             canvas.requestPointerLock();
         }
         setMouseDown(true);
@@ -85,7 +85,7 @@ export const Viewport = ({
     function onPointerUp(event : React.PointerEvent<HTMLCanvasElement>)
     {
         canvas.releasePointerCapture(event.pointerId);
-        if (usePointerLock){
+        if (usePointerLock && document.exitPointerLock){
             document.exitPointerLock();
         }
         setMouseDown(false);
