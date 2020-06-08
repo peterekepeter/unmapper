@@ -10,9 +10,27 @@ export function ViewportPanel({
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }
 ) {
-    return <div>
+
+    let [viewportWidth, setViewportWidth] = React.useState(10);
+    let [viewportHeight, setViewportHeight] = React.useState(10);
+
+    function panelRef(p : HTMLDivElement){
+        if (p!= null){
+            if (viewportWidth === 10){
+                setViewportWidth(p.clientWidth);
+            }
+            if (viewportHeight === 10){
+                setViewportHeight(p.clientHeight);
+            }
+        }
+    }
+    console.log(viewportWidth, viewportHeight)
+
+    return <div ref={panelRef}>
         <SectionTitle>{generateTitle(mode)}</SectionTitle>
-        <Viewport controller={controller} location={location} mode={mode}></Viewport>
+        <Viewport 
+            width={viewportWidth} height={viewportHeight}
+            controller={controller} location={location} mode={mode}></Viewport>
     </div>
 }
 

@@ -54,10 +54,15 @@ function getBrushWireColor(actor: Actor): string {
 
 export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     const context = canvas.getContext("2d");
-    const { width, height } = canvas;
-    const deviceSize = Math.min(width, height);
+    let { width, height } = canvas;
+    let deviceSize = Math.min(width, height);
 
     function renderMap(map: UnrealMap) {
+        
+        width = canvas.width;
+        height = canvas.height;
+        deviceSize = Math.min(width, height);
+
         context.fillStyle = backgroundColor;
         context.fillRect(0, 0, width, height);
 

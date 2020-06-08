@@ -13,18 +13,21 @@ export const createController = () => {
 
     function toggleSelection(prev: Actor)
     {
+        if (prev == null) return; // nothing to toggle
         const next : Actor = {...prev, selected : !prev.selected };
         updateActor(prev, next);
     }
 
     function makeSelection(actor: Actor)
     {
+        let change = false;
         const newActors = map.value.actors.map<Actor>(a => {
             const shouldBeSelected = a === actor;
+            change = change || a.selected !== shouldBeSelected;
             return a.selected === shouldBeSelected 
                 ? a : {...a, selected:shouldBeSelected}
         });
-        updateActorList(newActors);
+        if (change) updateActorList(newActors);
     }
 
     function updateActor(prev: Actor, next: Actor)

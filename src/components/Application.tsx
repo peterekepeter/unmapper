@@ -15,7 +15,7 @@ export const Application = ({ controller = createController() }) => {
 
     return <div style={{
         display:'grid', 
-        grid: 'auto auto / auto auto', 
+        grid: '1fr 1fr 1fr / 1fr 1fr', 
         background:colors.background, 
         color:colors.foreground,
         width:'100%',

@@ -14,6 +14,8 @@ export enum ViewportMode {
 }
 
 export const Viewport = ({
+    width = 500,
+    height = 300,
     controller = createController(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }) => {
@@ -36,43 +38,48 @@ export const Viewport = ({
     let [didMouseMove, setDidMouseMove] = useState(false);
 
     function canvasRef(attachedCanvas: HTMLCanvasElement) {
-        if (attachedCanvas != null &&
-            (canvas == null || renderer == null)){
-            setCanvas(attachedCanvas);
-            setRenderer(createWireframeRenderer(attachedCanvas));
+        if (attachedCanvas != null)
+        {
+            if (canvas == null || renderer == null){
+                setCanvas(attachedCanvas);
+                setRenderer(createWireframeRenderer(attachedCanvas));
+            }
+            renderUpdate();
         }
     }
 
-    if (renderer != null)
-    {
-        const ortohoScale = 1/1024;
-        const perspectiveFov = 90;
-        renderer.setCenterTo(viewLocation);
-        switch (viewMode){
-            case ViewportMode.Perspective:
-                renderer.setPerspectiveMode(perspectiveFov); 
-                break;
-            case ViewportMode.Top:
-                renderer.setTopMode(ortohoScale); 
-                break;
-            case ViewportMode.Front:
-                renderer.setFrontMode(ortohoScale); 
-                break;
-            case ViewportMode.Side:
-                renderer.setSideMode(ortohoScale); 
-                break;
+    function renderUpdate(){
+        if (renderer != null)
+        {
+            const ortohoScale = 1/1024;
+            const perspectiveFov = 90;
+            renderer.setCenterTo(viewLocation);
+            switch (viewMode){
+                case ViewportMode.Perspective:
+                    renderer.setPerspectiveMode(perspectiveFov); 
+                    break;
+                case ViewportMode.Top:
+                    renderer.setTopMode(ortohoScale); 
+                    break;
+                case ViewportMode.Front:
+                    renderer.setFrontMode(ortohoScale); 
+                    break;
+                case ViewportMode.Side:
+                    renderer.setSideMode(ortohoScale); 
+                    break;
+            }
+            // re-render
+            console.log('canvas re-render', canvas, width, height);
+            renderer.render(map);
         }
-        // re-render
-        console.log('canvas re-render');
-        renderer.render(map);
     }
 
     const usePointerLock = false;
     const normalDragDirection = true;
 
     return <canvas 
-        width="500" 
-        height="300" 
+        width={width} 
+        height={height} 
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerMove={onPointerMove}
