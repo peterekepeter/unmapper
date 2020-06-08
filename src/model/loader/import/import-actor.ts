@@ -59,6 +59,10 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             actor.csgOperation = parseCsgOperation(parser);
             break;
 
+        case "PolyFlags":
+            actor.polyFlags = parseInteger(parser);
+            break;
+
         default:
             let value : string | object = parser.getCurrentToken();
             if (value === '('){
@@ -69,6 +73,11 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             actor.unsupportedProperties[key] = value;
             break;
         }
+}
+
+function parseInteger(parser : Parser){
+    let token = parser.getCurrentTokenAndMoveToNext();
+    return Number.parseInt(token);
 }
 
 function parseCsgOperation(parser : Parser)

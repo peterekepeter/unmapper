@@ -4,28 +4,49 @@ import { Polygon } from "../model/Polygon";
 import { IRenderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
+import { PolyFlags } from "../model/PolyFlags";
 
 const backgroundColor = '#222';
 
-const colors: { [key: string]: string } = {
-    activeBrush: "#f12",
+
+interface IBrushColors {
+    activeBrush: string
+    addBrush: string
+    semiSolidBrush: string
+    nonSolidBrush: string
+    subtractBrush: string
+    invalidBrush: string
+}
+
+const colors : IBrushColors = {
+    activeBrush: "#c12",
     addBrush: "#16c",
+    semiSolidBrush: "#a89",
+    nonSolidBrush: "#191",
     subtractBrush: "#c92",
     invalidBrush: "#444",
 }
 
-const selectedColors: { [key: string]: string } = {
+const selectedColors : IBrushColors = {
     activeBrush: "#f24",
     addBrush: "#6af",
+    semiSolidBrush: "#fbe",
+    nonSolidBrush: "#6c6",
     subtractBrush: "#fb6",
     invalidBrush: "#666",
 }
 
 function getBrushWireColor(actor: Actor): string {
-    const set = actor.selected ? selectedColors : colors;
+    const set : IBrushColors = actor.selected ? selectedColors : colors;
     switch (actor.csgOperation) {
         case CsgOperation.Active: return set.activeBrush;
-        case CsgOperation.Add: return set.addBrush;
+        case CsgOperation.Add: 
+            if (actor.polyFlags & PolyFlags.NonSolid)
+                return set.nonSolidBrush;
+            else if (actor.polyFlags & PolyFlags.SemiSolid)
+                return set.semiSolidBrush;
+            else 
+                return set.addBrush;
         case CsgOperation.Subtract: return set.subtractBrush;
         default: return set.invalidBrush;
     }
