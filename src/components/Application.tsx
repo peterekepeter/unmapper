@@ -25,17 +25,17 @@ export const Application = ({ controller = createController() }) => {
         <PropertyEditor controller={controller}/>
         <ViewportPanel 
             mode={ViewportMode.Top} 
-            map={unrealMap}/>
+            controller={controller}/>
         <ViewportPanel 
             mode={ViewportMode.Front} 
-            map={unrealMap}/>
+            controller={controller}/>
         <ViewportPanel 
             location={new Vector(0,0,-1024)}
             mode={ViewportMode.Perspective} 
-            map={unrealMap}/>
+            controller={controller}/>
         <ViewportPanel 
             mode={ViewportMode.Side} 
-            map={unrealMap}/>
+            controller={controller}/>
     </div>;
 
 }

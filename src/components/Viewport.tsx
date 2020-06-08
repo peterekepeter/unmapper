@@ -4,6 +4,7 @@ import { createWireframeRenderer } from "../render/WireframeRenderer";
 import { UnrealMap } from "../model/UnrealMap";
 import { Vector } from "../model/Vector";
 import React = require("react");
+import { createController } from "../controller";
 
 export enum ViewportMode {
     Top,
@@ -13,9 +14,11 @@ export enum ViewportMode {
 }
 
 export const Viewport = ({
-    map = new UnrealMap(),
+    controller = createController(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }) => {
+
+    const map = controller.map.value;
 
     let [canvas, setCanvas] 
         = useState<HTMLCanvasElement>(null);
@@ -30,6 +33,7 @@ export const Viewport = ({
         = useState(location);
 
     let [isMouseDown, setMouseDown] = useState(false);
+    let [didMouseMove, setDidMouseMove] = useState(false);
 
     function canvasRef(attachedCanvas: HTMLCanvasElement) {
         if (attachedCanvas != null &&
@@ -63,7 +67,8 @@ export const Viewport = ({
         renderer.render(map);
     }
 
-    const usePointerLock = true;
+    const usePointerLock = false;
+    const normalDragDirection = true;
 
     return <canvas 
         width="500" 
@@ -80,6 +85,7 @@ export const Viewport = ({
             canvas.requestPointerLock();
         }
         setMouseDown(true);
+        setDidMouseMove(false);
     }
 
     function onPointerUp(event : React.PointerEvent<HTMLCanvasElement>)
@@ -87,6 +93,16 @@ export const Viewport = ({
         canvas.releasePointerCapture(event.pointerId);
         if (usePointerLock && document.exitPointerLock){
             document.exitPointerLock();
+        }
+        if (!didMouseMove){
+            const canvasX = event.pageX - canvas.offsetLeft;
+            const canvasY = event.pageY - canvas.offsetTop;
+            const actor = renderer.findNearestActor(map, canvasX, canvasY);
+            if (event.ctrlKey){
+                controller.toggleSelection(actor);
+            } else {
+                controller.makeSelection(actor);
+            }
         }
         setMouseDown(false);
     }
@@ -96,10 +112,14 @@ export const Viewport = ({
         if (!isMouseDown){
             return;
         }
-        const dx = event.movementX;
-        const dy = event.movementY;
+        let dx = event.movementX;
+        let dy = event.movementY;
+        if (normalDragDirection){
+            dx *= -1;
+            dy *= -1;
+        }
+        setDidMouseMove(true);
         setViewLocation(updateLocation(viewLocation, viewMode, dx, dy));
-
     }
 
 }

@@ -3,15 +3,16 @@ import { UnrealMap } from '../model/UnrealMap';
 import { Vector } from '../model/Vector';
 import { ViewportMode, Viewport } from './Viewport';
 import { SectionTitle } from '../ui/SectionTitle';
+import { createController } from '../controller';
 
 export function ViewportPanel({
-    map = new UnrealMap(),
+    controller = createController(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }
 ) {
     return <div>
         <SectionTitle>{generateTitle(mode)}</SectionTitle>
-        <Viewport map={map} location={location} mode={mode}></Viewport>
+        <Viewport controller={controller} location={location} mode={mode}></Viewport>
     </div>
 }
 
