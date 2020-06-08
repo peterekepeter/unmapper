@@ -1,20 +1,37 @@
 import React = require("react");
 import { UnrealMap } from "../model/UnrealMap";
 import { HoverEffect } from "../ui/HoverEffect";
-import { UiActorClass } from "../ui/UiActorClass";
 import { UiText } from "../ui/UiText";
 import { SectionTitle } from "../ui/SectionTitle";
+import { createController } from "../controller";
+import { Actor } from "../model/Actor";
+import { themeColors } from "../theme";
+import { useSignal } from "./useSignal";
 
-export function ActorList({ map = new UnrealMap() }) {
-
+export function ActorList({ controller = createController() }) {
+    const map = controller.map.value;
+    const colors = useSignal(themeColors);
     return <div>
         <SectionTitle>Actor list</SectionTitle>
         {
         map.actors.map(actor => 
-            <HoverEffect hoverStyle={{background: 'red', cursor: 'pointer'}}>
-                <UiText>{actor.name}</UiText>
-                <UiActorClass>{actor.className}</UiActorClass>
-            </HoverEffect>
+            <div key={actor.name} style={{
+                userSelect:'none', 
+                background:actor.selected ? colors.accent : null,
+                color:actor.selected ? colors.background : null 
+                }} onClick={event => handleClick(event, actor)}>
+                <HoverEffect>
+                    <UiText>{actor.name}</UiText>
+                </HoverEffect>
+            </div>
         )
     }</div>;
+
+    function handleClick(event: React.MouseEvent<HTMLElement>, actor : Actor){
+        if (event.ctrlKey){
+            controller.toggleSelection(actor);
+        } else {
+            controller.makeSelection(actor);
+        }
+    }
 }

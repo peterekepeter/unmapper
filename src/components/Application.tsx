@@ -1,20 +1,28 @@
 import React = require("react");
 import { createController } from "../controller";
 import { useSignal } from "./useSignal";
-import { Viewport, ViewportMode } from "./Viewport";
+import { ViewportMode } from "./Viewport";
 import { ActorList } from "./ActorList";
 import { PropertyEditor } from "./PropertyEditor";
 import { Vector } from "../model/Vector";
 import { ViewportPanel } from "./ViewportPanel";
+import { themeColors } from "../theme";
 
 export const Application = ({ controller = createController() }) => {
 
     const unrealMap = useSignal(controller.map);
+    const colors = useSignal(themeColors);
 
-    return <div style={{display:'grid', grid: 'auto auto / auto auto'}}>
+    return <div style={{
+        display:'grid', 
+        grid: 'auto auto / auto auto', 
+        background:colors.background, 
+        color:colors.foreground,
+        width:'100%',
+        height:'100%'}}>
 
-        <ActorList map={unrealMap}/>
-        <PropertyEditor/>
+        <ActorList controller={controller}/>
+        <PropertyEditor controller={controller}/>
         <ViewportPanel 
             mode={ViewportMode.Top} 
             map={unrealMap}/>

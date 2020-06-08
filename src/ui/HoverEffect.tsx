@@ -1,11 +1,11 @@
 import React = require("react");
 
 export const hoverStyleDefaultCSS : React.CSSProperties = { 
-
 }
 
 export const hoverStyleCSS : React.CSSProperties = {
-    opacity: .5
+    opacity: .5,
+    cursor: 'pointer'
 }
 
 export function HoverEffect({ 

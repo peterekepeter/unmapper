@@ -5,6 +5,8 @@ import { IRenderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
 
+const backgroundColor = '#222';
+
 const colors: { [key: string]: string } = {
     activeBrush: "#f12",
     addBrush: "#16c",
@@ -12,12 +14,20 @@ const colors: { [key: string]: string } = {
     invalidBrush: "#444",
 }
 
+const selectedColors: { [key: string]: string } = {
+    activeBrush: "#f24",
+    addBrush: "#6af",
+    subtractBrush: "#fb6",
+    invalidBrush: "#666",
+}
+
 function getBrushWireColor(actor: Actor): string {
+    const set = actor.selected ? selectedColors : colors;
     switch (actor.csgOperation) {
-        case CsgOperation.Active: return colors.activeBrush;
-        case CsgOperation.Add: return colors.addBrush;
-        case CsgOperation.Subtract: return colors.subtractBrush;
-        default: return colors.invalidBrush;
+        case CsgOperation.Active: return set.activeBrush;
+        case CsgOperation.Add: return set.addBrush;
+        case CsgOperation.Subtract: return set.subtractBrush;
+        default: return set.invalidBrush;
     }
 }
 
@@ -27,7 +37,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     const deviceSize = Math.min(width, height);
 
     function renderMap(map: UnrealMap) {
-        context.fillStyle = "#000";
+        context.fillStyle = backgroundColor;
         context.fillRect(0, 0, width, height);
 
         if (map == null) {

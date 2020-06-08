@@ -11,6 +11,7 @@ export class Actor
     public group : string[] = [];
     public brushModel: BrushModel | null = null;
     public csgOperation: CsgOperation | null = null;
+    public selected : boolean = false;
     
     // additional unsupported props go here, these still need to be reencoded
     public unsupportedProperties : { [key:string] : string | object } = {};
