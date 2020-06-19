@@ -8,7 +8,7 @@
     "test": "jest",
     "build": "webpack --mode 'production'",
     "start": "concurrently -n wp,jest npm:start-dev-server npm:start-tdd",
-    "start-dev-server": "webpack-dev-server --open --contentBase ./dist",
+    "start-dev-server": "webpack-dev-server --contentBase ./dist",
     "start-tdd": "jest --watch"
   },
   "author": "",

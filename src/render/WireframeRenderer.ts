@@ -5,6 +5,7 @@ import { IRenderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
 import { PolyFlags } from "../model/PolyFlags";
+import { Color } from "../model/Color";
 
 const backgroundColor = '#222';
 
@@ -20,20 +21,27 @@ interface IBrushColors {
 
 const colors: IBrushColors = {
     activeBrush: "#c12",
-    addBrush: "#16c",
-    semiSolidBrush: "#a89",
+    addBrush: "#27c",
+    semiSolidBrush: "#6aa",
     nonSolidBrush: "#191",
-    subtractBrush: "#c92",
+    subtractBrush: "#c62",
     invalidBrush: "#444",
 }
 
+
+
 const selectedColors: IBrushColors = {
-    activeBrush: "#f24",
-    addBrush: "#6af",
-    semiSolidBrush: "#fbe",
-    nonSolidBrush: "#6c6",
-    subtractBrush: "#fb6",
-    invalidBrush: "#666",
+    activeBrush: makeSelectedColor(colors.activeBrush),
+    addBrush: makeSelectedColor(colors.addBrush),
+    semiSolidBrush: makeSelectedColor(colors.semiSolidBrush),
+    nonSolidBrush: makeSelectedColor(colors.nonSolidBrush),
+    subtractBrush: makeSelectedColor(colors.subtractBrush),
+    invalidBrush: makeSelectedColor(colors.invalidBrush),
+}
+
+function makeSelectedColor(cstr : string){
+    const colorSelected = Color.WHITE;
+    return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex();
 }
 
 function getBrushWireColor(actor: Actor): string {
