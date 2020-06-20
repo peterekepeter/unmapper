@@ -7,8 +7,8 @@ export class Actor
 {
     public name : string = "Actor0";
     public className : string = "Actor";
-    public location : Vector = Vector.zero;
-    public oldLocation : Vector = Vector.zero;
+    public location : Vector = Vector.ZERO;
+    public oldLocation : Vector = Vector.ZERO;
     public group : string[] = [];
     public brushModel: BrushModel | null = null;
     public csgOperation: CsgOperation | null = null;

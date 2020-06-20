@@ -1,3 +1,4 @@
+import { clamp } from "./ExtendedMath";
 
 export class Color {
 
@@ -49,8 +50,4 @@ export class Color {
         return Math.round(clamp(Color.C_MIN, value, Color.C_MAX));
     }
 
-}
-
-function clamp(min: number, value: number, max: number): number {
-    return Math.max(min, Math.min(value, max))
 }
