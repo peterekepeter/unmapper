@@ -28,9 +28,9 @@ export class Matrix3x3 {
 
     apply(vector: Vector): Vector {
         return new Vector(
-            this.m00 * vector.x + this.m01 * vector.y + this.m02 * vector.z,
-            this.m10 * vector.x + this.m11 * vector.y + this.m12 * vector.z,
-            this.m20 * vector.x + this.m21 * vector.y + this.m22 * vector.z
+            this.getTransformedX(vector.x, vector.y, vector.z),
+            this.getTransformedY(vector.x, vector.y, vector.z),
+            this.getTransformedZ(vector.x, vector.y, vector.z)
         );
     }
 
@@ -104,6 +104,18 @@ export class Matrix3x3 {
             c, z, 0,
             s, c, 0,
             0, 0, 1);
+    }
+
+    getTransformedX(x : number, y: number, z:number) : number {
+        return this.m00 * x + this.m01 * y + this.m02 * z;
+    }
+
+    getTransformedY(x : number, y: number, z:number) : number {
+        return this.m10 * x + this.m11 * y + this.m12 * z;
+    }
+
+    getTransformedZ(x : number, y: number, z:number) : number {
+        return this.m20 * x + this.m21 * y + this.m22 * z;
     }
 
     static multiply(a: Matrix3x3, b: Matrix3x3): Matrix3x3 {

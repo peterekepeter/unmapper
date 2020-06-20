@@ -21,6 +21,10 @@ export class Vector {
         Object.freeze(this);
     }
 
+    public addVector(v:Vector) {
+        return this.add(v.x, v.y, v.z);
+    }
+
     public add(x: number, y: number, z: number) {
         return new Vector(this.x + x, this.y + y, this.z + z);
     }

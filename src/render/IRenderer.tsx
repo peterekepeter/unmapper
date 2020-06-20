@@ -1,10 +1,11 @@
 import { UnrealMap } from "../model/UnrealMap";
 import { Vector } from "../model/Vector";
 import { Actor } from "../model/Actor";
+import { Rotation } from "../model/Rotation";
 
 export interface IRenderer {
     setCenterTo(location : Vector) : void;
-    setPerspectiveRotation(euler : Vector) : void;
+    setPerspectiveRotation(rotation : Rotation) : void;
     setPerspectiveMode(fieldOfView : number) : void;
     setTopMode(scale : number) : void;
     setFrontMode(scale : number) : void;

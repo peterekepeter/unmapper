@@ -30,7 +30,7 @@ export const Application = ({ controller = createController() }) => {
             mode={ViewportMode.Front} 
             controller={controller}/>
         <ViewportPanel 
-            location={new Vector(0,0,-1024)}
+            location={new Vector(-500,-300,300)}
             mode={ViewportMode.Perspective} 
             controller={controller}/>
         <ViewportPanel 

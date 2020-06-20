@@ -6,6 +6,8 @@ import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
 import { PolyFlags } from "../model/PolyFlags";
 import { Color } from "../model/Color";
+import { Rotation } from "../model/Rotation";
+import { Matrix3x3 } from "../model/Matrix3x3";
 
 const backgroundColor = '#222';
 
@@ -28,8 +30,6 @@ const colors: IBrushColors = {
     invalidBrush: "#444",
 }
 
-
-
 const selectedColors: IBrushColors = {
     activeBrush: makeSelectedColor(colors.activeBrush),
     addBrush: makeSelectedColor(colors.addBrush),
@@ -39,7 +39,7 @@ const selectedColors: IBrushColors = {
     invalidBrush: makeSelectedColor(colors.invalidBrush),
 }
 
-function makeSelectedColor(cstr : string){
+function makeSelectedColor(cstr: string) {
     const colorSelected = Color.WHITE;
     return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex();
 }
@@ -66,7 +66,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     let deviceSize = Math.min(width, height);
 
     function renderMap(map: UnrealMap) {
-        
+
         width = canvas.width;
         height = canvas.height;
         deviceSize = Math.min(width, height);
@@ -120,23 +120,30 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     let getTransformedX: (vector: Vector) => number;
 
     let getTransformedY: (vector: Vector) => number;
+    let perspectiveMatrix = Matrix3x3.IDENTITY;
 
     setTopMode(1 / 2400);
 
     function setPerspectiveMode(fieldOfView: number): void {
         getTransformedX = vector => {
-            let x = vector.x - tx;
-            let z = vector.z - tz;
-            return z < 0
+            const xt = vector.x - tx;
+            const yt = vector.y - ty;
+            const zt = vector.z - tz;
+            const x = perspectiveMatrix.getTransformedX(xt, yt, zt);
+            const y = perspectiveMatrix.getTransformedY(xt, yt, zt);
+            return x < 0
                 ? Number.NaN
-                : (x / z + .5) * deviceSize;
+                : (y / x) * deviceSize + width * .5;
         }
         getTransformedY = vector => {
-            let y = vector.y - ty;
-            let z = vector.z - tz;
-            return z < 0
+            let xt = vector.x - tx;
+            let yt = vector.y - ty;
+            let zt = vector.z - tz;
+            const x = perspectiveMatrix.getTransformedX(xt, yt, zt);
+            const z = perspectiveMatrix.getTransformedZ(xt, yt, zt);
+            return x < 0
                 ? Number.NaN
-                : (y / z + .5) * deviceSize;
+                : (-z / x) * deviceSize + height * .5;
         }
     }
 
@@ -146,8 +153,10 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         tz = location.z;
     }
 
-    function setPerspectiveRotation(euler: Vector): void {
-
+    function setPerspectiveRotation(rotation: Rotation): void {
+        perspectiveMatrix = Matrix3x3
+            .rotateDegreesY(-rotation.pitch)
+            .rotateDegreesZ(-rotation.yaw);
     }
 
     function setTopMode(scale: number): void {

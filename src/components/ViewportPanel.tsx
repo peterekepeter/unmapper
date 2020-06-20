@@ -24,7 +24,6 @@ export function ViewportPanel({
             }
         }
     }
-    console.log(viewportWidth, viewportHeight)
 
     return <div ref={panelRef}>
         <SectionTitle>{generateTitle(mode)}</SectionTitle>
