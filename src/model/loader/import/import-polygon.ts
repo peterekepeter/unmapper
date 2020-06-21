@@ -21,6 +21,10 @@ export function importPolygon(arg : string | Parser) : Polygon {
                 parser.acceptAndMoveToNext("=");
                 result.flags = parser.parseIntAndMoveToNext();
                 break;
+            case "Link": 
+                parser.acceptAndMoveToNext("=");
+                result.link = parser.parseIntAndMoveToNext();
+                break;
             case "Item":
                 parser.acceptAndMoveToNext("=");
                 result.item = parser.getCurrentTokenAndMoveToNext();
@@ -43,6 +47,14 @@ export function importPolygon(arg : string | Parser) : Polygon {
                 break;
             case "Vertex":
                 result.vertexes.push(importVector(parser, 0));
+                break;
+            case "Pan":
+                parser.acceptAndMoveToNext("U");
+                parser.acceptAndMoveToNext("=");
+                result.panU = parser.parseFloatAndMoveToNext();
+                parser.acceptAndMoveToNext("V");
+                parser.acceptAndMoveToNext("=");
+                result.panV = parser.parseFloatAndMoveToNext();
                 break;
             default:
                 throw "Unknown polygon property: " + key;

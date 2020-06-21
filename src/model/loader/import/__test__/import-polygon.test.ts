@@ -2,9 +2,10 @@ import { importPolygon } from "../import-polygon";
 import { Vector } from "../../../Vector";
 
 const testData = `
-Begin Polygon Item=Sheet Flags=264 Texture=bTrainH1
+Begin Polygon Item=Sheet Flags=264 Texture=bTrainH1 Link=60
     Origin   +00128.000000,+00128.000000,+00000.000000
     Normal   +00000.000000,+00000.000000,-00001.000000
+    Pan      U=335 V=-117
     TextureU -00001.000000,+00000.000000,+00000.000000
     TextureV +00000.000000,+00001.000000,+00000.000000
     Vertex   +00128.000000,+00128.000000,+00000.000000
@@ -41,4 +42,8 @@ test("can read polygon vertexes", () =>{
 
 test("can read texture", () =>{
     expect(importPolygon(testData).texture).toBe("bTrainH1");
+})
+
+test("can read link", () =>{
+    expect(importPolygon(testData).link).toBe(60);
 })

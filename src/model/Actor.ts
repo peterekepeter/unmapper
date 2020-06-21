@@ -11,7 +11,8 @@ export class Actor
     public className : string = "Actor";
     public rotation : Rotation = Rotation.IDENTITY;
     public location : Vector = Vector.ZERO;
-    public oldLocation : Vector = Vector.ZERO;
+    public oldLocation : Vector | null = null;
+    public prePivot: Vector | null = null;
     public group : string[] = [];
     public brushModel: BrushModel | null = null;
     public csgOperation: CsgOperation | null = null;
@@ -22,5 +23,5 @@ export class Actor
     public tempScale = Scale.DEFAULT_SCALE;
     
     // additional unsupported props go here, these still need to be reencoded
-    public unsupportedProperties : { [key:string] : string | object } = {};
+    public unsupportedProperties : { [key:string] : any } = {};
 }

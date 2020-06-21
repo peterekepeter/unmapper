@@ -84,11 +84,19 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     function renderActor(actor: Actor) {
-        if (actor.brushModel != null) {
+        if (actor.brushModel != null) { 
             let save_tx = tx, save_ty = ty, save_tz = tz;
-            tx -= actor.location.x;
-            ty -= actor.location.y;
-            tz -= actor.location.z;
+            if (actor.prePivot){
+                tpx = -actor.prePivot.x;
+                tpy = -actor.prePivot.y;
+                tpz = -actor.prePivot.z;
+            } else {
+                tpx = tpy = tpz = 0;
+            }
+            tx += actor.location.x;
+            ty += actor.location.y;
+            tz += actor.location.z;
+            const rot = new Rotation(-actor.rotation.pitch, -actor.rotation.yaw, -actor.rotation.roll)
             const matrix = actor.mainScale.toMatrix()
                 .multiply(actor.rotation.toMatrix())
                 .multiply(actor.postScale.toMatrix());
@@ -117,15 +125,15 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         context.stroke();
     }
 
-    let tx = 0.0;
-    let ty = 0.0;
-    let tz = 0.0;
+    let tx = 0.0, tpx = 0.0;
+    let ty = 0.0, tpy = 0.0;
+    let tz = 0.0, tpz = 0.0;
     let objectMatrix = Matrix3x3.IDENTITY;
 
     function objectTransform(vector : Vector) : Vector {
         return objectMatrix
-            .apply(vector)
-            .add(-tx,-ty,-tz);
+            .apply(vector.add(tpx, tpy, tpz))
+            .add(tx,ty,tz);
     }
 
     let viewTransformX: (vector: Vector) => number;
@@ -153,9 +161,9 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     function setCenterTo(location: Vector): void {
-        tx = location.x;
-        ty = location.y;
-        tz = location.z;
+        tx = -location.x;
+        ty = -location.y;
+        tz = -location.z;
     }
 
     function setPerspectiveRotation(rotation: Rotation): void {
@@ -195,16 +203,28 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         let bestDistance = Number.MAX_VALUE;
         for (const actor of map.actors) {
             if (actor.brushModel != null) {
+                const matrix = actor.mainScale.toMatrix()
+                    .multiply(actor.rotation.toMatrix())
+                    .multiply(actor.postScale.toMatrix());
+                objectMatrix = matrix;
+                if (actor.prePivot){
+                    tpx = -actor.prePivot.x;
+                    tpy = -actor.prePivot.y;
+                    tpz = -actor.prePivot.z;
+                } else {
+                    tpx = tpy = tpz = 0;
+                }
                 let save_tx = tx, save_ty = ty, save_tz = tz;
-                tx -= actor.location.x;
-                ty -= actor.location.y;
-                tz -= actor.location.z;
+                tx += actor.location.x;
+                ty += actor.location.y;
+                tz += actor.location.z;
                 const polygons = actor.brushModel.polygons;
                 for (const polygon of polygons) {
-                    let last = polygon.vertexes[polygon.vertexes.length - 1];
+                    let last = objectTransform(polygon.vertexes[polygon.vertexes.length - 1]);
                     let x0 = viewTransformX(last);
                     let y0 = viewTransformY(last);
-                    for (const vertex of polygon.vertexes) {
+                    for (const v of polygon.vertexes) {
+                        const vertex = objectTransform(v);
                         let x1 = viewTransformX(vertex);
                         let y1 = viewTransformY(vertex);
                         if (!isNaN(x0) && !isNaN(x1)) {
@@ -224,6 +244,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         if (bestDistance > MAX_DISTANCE) {
             bestMatch = null; // to far away
         }
+        console.log(bestMatch);
         return bestMatch;
     }
 

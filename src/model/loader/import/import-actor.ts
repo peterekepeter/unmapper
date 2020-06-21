@@ -4,7 +4,6 @@ import { Parser } from "./Parser";
 import { importSubobject } from "./import-subobject";
 import { importVector } from "./import-vector";
 import { importBrushModel } from "./import-brushmodel";
-import { CsgOperation } from "../../CsgOperation";
 import { csgOperationFromString } from "../converter/convert-csgOperation";
 import { importScale } from "./import-scale";
 import { importRotation } from "./import-rotation";
@@ -18,20 +17,31 @@ export function importActor(arg : Parser | string) : Actor {
     while (parsingProps){
         const key = parser.getCurrentToken();
         const operator = parser.getRelativeToken(+1);
+        if (operator === "("){
+            parser.acceptAndMoveToNext(key);
+            parser.acceptAndMoveToNext('(');
+            const index = parser.parseIntAndMoveToNext();
+            parser.acceptAndMoveToNext(')')
+            parser.acceptAndMoveToNext('=')
+            parseActorArrayProp(actor, key, index, parser);
+        } else 
         if (operator === "="){
             parser.acceptAndMoveToNext(key);
             parser.acceptAndMoveToNext('=');
             parseActorProp(actor, key, parser);
         } else if (key == "Begin" && operator == "Brush"){
             actor.brushModel = importBrushModel(parser);
-        } else {
+        } else if (key === "End"){
             parsingProps = false;
+        } else {
+            parser.error('unable to parse actor');
         }
     }
     parser.acceptAndMoveToNext("End");
     parser.acceptAndMoveToNext("Actor");
     return actor;
 }
+
 
 function parseActorProp(actor : Actor, key :string, parser : Parser){
     
@@ -81,6 +91,10 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             actor.rotation = importRotation(parser);
             break;
 
+        case "PrePivot":
+            actor.prePivot = importVector(parser, 0);
+            break;
+
         default:
             let value : string | object = parser.getCurrentToken();
             if (value === '('){
@@ -93,6 +107,25 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
         }
 }
 
+function parseActorArrayProp(actor : Actor, key:string, index:number, parser:Parser){
+    switch(key)
+    {
+        default:
+            let list : Array<any> = actor.unsupportedProperties[key];
+            if (list == null){
+                list = actor.unsupportedProperties[key] = [];
+            }
+            let value : string | object = parser.getCurrentToken();
+            if (value === '('){
+                value = importSubobject(parser);
+            } else {
+                parser.moveToNext();
+            }
+            list[index] = value;
+            break;
+    }
+}
+
 function parseInteger(parser : Parser){
     let token = parser.getCurrentTokenAndMoveToNext();
     return Number.parseInt(token);
@@ -100,7 +133,6 @@ function parseInteger(parser : Parser){
 
 function parseCsgOperation(parser : Parser)
 {
-    let result : CsgOperation | null = null;
     const token = parser.getCurrentToken();
     parser.moveToNext();
     return csgOperationFromString(token);

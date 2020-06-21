@@ -25,8 +25,8 @@ test('can import actor with location and old location', () => {
             OldLocation=(X=1296.000000,Y=-1392.000000,Z=-144.000000)
         End Actor
     `);
-    expect(actor.location).toEqual(new Vector(1280,-1408,-144));
-    expect(actor.oldLocation).toEqual(new Vector(1296,-1392,-144));
+    expect(actor.location).toEqual(new Vector(1280, -1408, -144));
+    expect(actor.oldLocation).toEqual(new Vector(1296, -1392, -144));
 });
 
 test('can import actor single group', () => {
@@ -91,7 +91,7 @@ test('can import brush actor', () => {
     expect(actor.brushModel.polygons).toHaveLength(1);
 })
 
-test('can import non-solid brush with scale, rotate and shear', () =>{
+test('can import non-solid brush with scale, rotate and shear', () => {
     const actor = importActor(`
         Begin Actor Class=Brush Name=Brush96
             CsgOper=CSG_Add
@@ -130,4 +130,26 @@ test('can import non-solid brush with scale, rotate and shear', () =>{
     expect(actor.rotation.pitch).toBe(45);
     expect(actor.rotation.yaw).toBe(45);
     expect(actor.rotation.roll).toBe(45);
+})
+
+test('can import actor with array props', () => {
+    const actor = importActor(`
+        Begin Actor Class=PlayerStart Name=PlayerStart11
+            bSinglePlayerStart=False
+            upstreamPaths(0)=1869
+            upstreamPaths(1)=1290
+            upstreamPaths(2)=1259
+            upstreamPaths(3)=1313
+            upstreamPaths(4)=1254
+            Paths(0)=23
+            Paths(1)=20
+            Paths(2)=22
+            Paths(3)=19
+            PrunedPaths(0)=21
+            PrunedPaths(1)=16
+            PrunedPaths(2)=18
+            PrunedPaths(3)=17
+        End Actor
+    `);
+    expect(actor.name).toBe('PlayerStart11');
 })

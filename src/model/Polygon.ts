@@ -9,5 +9,8 @@ export class Polygon
     textureU : Vector = Vector.UNIT_X;
     textureV : Vector = Vector.UNIT_Y;
     vertexes : Vector[] = [];
-    texture: string;
+    texture: string = null;
+    link: number = 0;
+    panU: number = 0;
+    panV: number = 0;
 }

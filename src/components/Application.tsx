@@ -15,14 +15,14 @@ export const Application = ({ controller = createController() }) => {
 
     return <div style={{
         display:'grid', 
-        grid: '1fr 1fr 1fr / 1fr 1fr', 
+        grid: '1fr 1fr / 1fr 1fr', 
         background:colors.background, 
         color:colors.foreground,
         width:'100%',
         height:'100%'}}>
 
-        <ActorList controller={controller}/>
-        <PropertyEditor controller={controller}/>
+        {/* <ActorList controller={controller}/>
+        <PropertyEditor controller={controller}/> */}
         <ViewportPanel 
             mode={ViewportMode.Top} 
             controller={controller}/>
