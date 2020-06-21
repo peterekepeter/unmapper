@@ -25,6 +25,10 @@ export function importPolygon(arg : string | Parser) : Polygon {
                 parser.acceptAndMoveToNext("=");
                 result.item = parser.getCurrentTokenAndMoveToNext();
                 break;
+            case "Texture":
+                parser.acceptAndMoveToNext("=");
+                result.texture = parser.getCurrentTokenAndMoveToNext();
+                break
             case "Origin":
                 result.origin = importVector(parser, 0);
                 break;

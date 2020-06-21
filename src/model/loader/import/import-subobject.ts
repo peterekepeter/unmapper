@@ -1,11 +1,15 @@
 import { Parser } from "./Parser";
 import { makeParser } from "./parser-helper";
 
-
-export function importSubobject(arg : Parser | string) : { [key:string]: string } {
+export function importSubobject(arg : Parser | string) {
     const parser = makeParser(arg);
-    const result : { [key:string]: string }= {};
     parser.acceptAndMoveToNext('(');
+    return importSubobjectBody(parser);
+}
+
+function importSubobjectBody(parser : Parser)
+{
+    const result : any = {};
     let isSubobject = true;
     while (isSubobject){
         const key = parser.getCurrentTokenAndMoveToNext();
@@ -18,8 +22,12 @@ export function importSubobject(arg : Parser | string) : { [key:string]: string 
             if (value === ")"){
                 throw new Error("Expecting object property value");
             }
-            result[key] = value;
-            
+            if (value === "("){
+                result[key] = importSubobjectBody(parser);
+            } else {
+                result[key] = value;
+            }
+
             // skip commas
             if (parser.getCurrentToken() === ','){
                 parser.moveToNext();

@@ -2,7 +2,7 @@ import { importPolygon } from "../import-polygon";
 import { Vector } from "../../../Vector";
 
 const testData = `
-Begin Polygon Item=Sheet Flags=264
+Begin Polygon Item=Sheet Flags=264 Texture=bTrainH1
     Origin   +00128.000000,+00128.000000,+00000.000000
     Normal   +00000.000000,+00000.000000,-00001.000000
     TextureU -00001.000000,+00000.000000,+00000.000000
@@ -12,7 +12,6 @@ Begin Polygon Item=Sheet Flags=264
     Vertex   -00128.000000,-00128.000000,+00000.000000
     Vertex   -00128.000000,+00128.000000,+00000.000000
 End Polygon`;
-
 
 test("can read polyon item", () =>{
     expect(importPolygon(testData).item).toBe("Sheet");
@@ -38,4 +37,8 @@ test("can read polygon vertexes", () =>{
         new Vector(-128, -128, 0),
         new Vector(-128, +128, 0)
     ]);
+})
+
+test("can read texture", () =>{
+    expect(importPolygon(testData).texture).toBe("bTrainH1");
 })

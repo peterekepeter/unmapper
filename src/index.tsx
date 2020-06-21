@@ -3,11 +3,11 @@ import * as ReactDOM from "react-dom";
 
 import { Application } from "./components/Application";
 import { createController } from "./controller";
-import { dummyAppData } from "./dummyAppData";
+import { dummyData2 } from "./dummyAppData";
 
 function main() {
     let controller = createController();
-    controller.loadFromString(dummyAppData);
+    controller.loadFromString(dummyData2);
     console.log(controller.map.value);
     initializeReact(document.body, controller);
 }
