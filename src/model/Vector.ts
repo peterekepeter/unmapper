@@ -5,6 +5,7 @@ export class Vector {
     public z: number;
 
     public static ZERO: Vector = new Vector(0, 0, 0);
+    public static ONES: Vector = new Vector(1, 1, 1);
 
     public static FORWARD: Vector = new Vector(1, 0, 0);
     public static RIGHT: Vector = new Vector(0, 1, 0);

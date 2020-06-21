@@ -1,4 +1,4 @@
-import { CsgOperation } from "../CsgOperation";
+import { CsgOperation } from "../../CsgOperation";
 
 const stringCsgPairs : { [key:string] : CsgOperation }= {
     'CSG_Active': CsgOperation.Active,

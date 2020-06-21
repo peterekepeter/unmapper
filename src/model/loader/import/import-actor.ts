@@ -5,7 +5,9 @@ import { importSubobject } from "./import-subobject";
 import { importVector } from "./import-vector";
 import { importBrushModel } from "./import-brushmodel";
 import { CsgOperation } from "../../CsgOperation";
-import { csgOperationFromString } from "../csgOperationStringConversion";
+import { csgOperationFromString } from "../converter/convert-csgOperation";
+import { importScale } from "./import-scale";
+import { importRotation } from "./import-rotation";
 
 export function importActor(arg : Parser | string) : Actor {
     const parser = makeParser(arg);
@@ -61,6 +63,22 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
 
         case "PolyFlags":
             actor.polyFlags = parseInteger(parser);
+            break;
+
+        case "MainScale": 
+            actor.mainScale = importScale(parser);
+            break;
+        
+        case "PostScale": 
+            actor.postScale = importScale(parser);
+            break;
+            
+        case "TempScale": 
+            actor.tempScale = importScale(parser);
+            break;
+
+        case "Rotation":
+            actor.rotation = importRotation(parser);
             break;
 
         default:

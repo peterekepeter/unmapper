@@ -43,23 +43,28 @@ export class Matrix3x3 {
     }
 
     uniformScale(s: number) {
-        return this.multiply(Matrix3x3.uniformScale(s));
+        return s === 1 ? this :
+            this.multiply(Matrix3x3.uniformScale(s));
     }
 
     scale(sx: number, sy: number, sz: number) {
-        return this.multiply(Matrix3x3.scale(sx, sy, sz));
+        return sx === 1 && sy === 1 && sz === 1 ? this :
+            this.multiply(Matrix3x3.scale(sx, sy, sz));
     }
 
     rotateDegreesX(degrees: number) {
-        return this.multiply(Matrix3x3.rotateDegreesX(degrees));
+        return degrees === 0 ? this
+            : this.multiply(Matrix3x3.rotateDegreesX(degrees));
     }
 
     rotateDegreesY(degrees: number) {
-        return this.multiply(Matrix3x3.rotateDegreesY(degrees));
+        return degrees === 0 ? this
+            : this.multiply(Matrix3x3.rotateDegreesY(degrees));
     }
 
     rotateDegreesZ(degrees: number) {
-        return this.multiply(Matrix3x3.rotateDegreesZ(degrees));
+        return degrees === 0 ? this
+            : this.multiply(Matrix3x3.rotateDegreesZ(degrees));
     }
 
     static uniformScale(s: number) {
@@ -106,15 +111,15 @@ export class Matrix3x3 {
             0, 0, 1);
     }
 
-    getTransformedX(x : number, y: number, z:number) : number {
+    getTransformedX(x: number, y: number, z: number): number {
         return this.m00 * x + this.m01 * y + this.m02 * z;
     }
 
-    getTransformedY(x : number, y: number, z:number) : number {
+    getTransformedY(x: number, y: number, z: number): number {
         return this.m10 * x + this.m11 * y + this.m12 * z;
     }
 
-    getTransformedZ(x : number, y: number, z:number) : number {
+    getTransformedZ(x: number, y: number, z: number): number {
         return this.m20 * x + this.m21 * y + this.m22 * z;
     }
 

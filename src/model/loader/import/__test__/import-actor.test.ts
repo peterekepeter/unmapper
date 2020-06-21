@@ -2,6 +2,7 @@ import { importActor } from "../import-actor";
 import { Actor } from "../../../Actor";
 import { Vector } from "../../../Vector";
 import { CsgOperation } from "../../../CsgOperation";
+import { SheerAxis } from "../../../SheerAxis";
 
 
 test('can import empty actor', () => {
@@ -88,4 +89,45 @@ test('can import brush actor', () => {
     expect(actor.unsupportedProperties.bSelected).toBe("True");
     expect(actor.brushModel).not.toBeNull();
     expect(actor.brushModel.polygons).toHaveLength(1);
+})
+
+test('can import non-solid brush with scale, rotate and shear', () =>{
+    const actor = importActor(`
+        Begin Actor Class=Brush Name=Brush96
+            CsgOper=CSG_Add
+            MainScale=(Scale=(X=2.000000),SheerAxis=SHEER_ZX)
+            PostScale=(Scale=(Y=2.000000),SheerRate=1.000000,SheerAxis=SHEER_ZY)
+            PolyFlags=8
+            Level=LevelInfo'MyLevel.LevelInfo1'
+            Tag=Brush
+            Region=(Zone=LevelInfo'MyLevel.LevelInfo1',iLeaf=-1)
+            Location=(X=144.000000,Y=-16.000000,Z=-112.000000)
+            Rotation=(Pitch=8192,Yaw=8192,Roll=8192)
+            bSelected=True
+            Begin Brush Name=Model97
+            Begin PolyList
+                Begin Polygon Item=Sheet Texture=rPanlbas Flags=264
+                    Origin   +00128.000000,+00128.000000,+00000.000000
+                    Normal   +00000.000000,+00000.000000,-00001.000000
+                    TextureU -00001.000000,+00000.000000,+00000.000000
+                    TextureV +00000.000000,+00001.000000,+00000.000000
+                    Vertex   +00128.000000,+00128.000000,+00000.000000
+                    Vertex   +00128.000000,-00128.000000,+00000.000000
+                    Vertex   -00128.000000,-00128.000000,+00000.000000
+                    Vertex   -00128.000000,+00128.000000,+00000.000000
+                End Polygon
+            End PolyList
+            End Brush
+            Brush=Model'MyLevel.Model97'
+            Name=Brush96
+        End Actor
+    `);
+    expect(actor.polyFlags).toBe(8);
+    expect(actor.mainScale.scale.x).toBe(2);
+    expect(actor.postScale.scale.y).toBe(2);
+    expect(actor.postScale.sheerRate).toBe(1);
+    expect(actor.postScale.sheerAxis).toBe(SheerAxis.SheerZY);
+    expect(actor.rotation.pitch).toBe(45);
+    expect(actor.rotation.yaw).toBe(45);
+    expect(actor.rotation.roll).toBe(45);
 })

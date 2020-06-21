@@ -89,26 +89,30 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             tx -= actor.location.x;
             ty -= actor.location.y;
             tz -= actor.location.z;
+            const matrix = actor.mainScale.toMatrix()
+                .multiply(actor.rotation.toMatrix())
+                .multiply(actor.postScale.toMatrix());
+            objectMatrix = matrix;
             const polygons = actor.brushModel.polygons;
             context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.0;
             for (const polygon of polygons) {
-                renderPolygon(polygon, actor.location);
+                renderPolygon(polygon);
             }
             tx = save_tx, ty = save_ty, tz = save_tz;
         }
     }
 
-    function renderPolygon(polygon: Polygon, location: Vector) {
+    function renderPolygon(polygon: Polygon) {
         const last = polygon.vertexes[polygon.vertexes.length - 1];
         context.beginPath();
-        const lastPosition = last;
-        context.moveTo(getTransformedX(lastPosition), getTransformedY(lastPosition));
+        const lastPosition = objectTransform(last);
+        context.moveTo(viewTransformX(lastPosition), viewTransformY(lastPosition));
         for (const vertex of polygon.vertexes) {
-            const position = vertex;
+            const position = objectTransform(vertex);
             context.lineTo(
-                getTransformedX(position),
-                getTransformedY(position));
+                viewTransformX(position),
+                viewTransformY(position));
         }
         context.stroke();
     }
@@ -116,31 +120,32 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     let tx = 0.0;
     let ty = 0.0;
     let tz = 0.0;
+    let objectMatrix = Matrix3x3.IDENTITY;
 
-    let getTransformedX: (vector: Vector) => number;
+    function objectTransform(vector : Vector) : Vector {
+        return objectMatrix
+            .apply(vector)
+            .add(-tx,-ty,-tz);
+    }
 
-    let getTransformedY: (vector: Vector) => number;
+    let viewTransformX: (vector: Vector) => number;
+
+    let viewTransformY: (vector: Vector) => number;
     let perspectiveMatrix = Matrix3x3.IDENTITY;
 
     setTopMode(1 / 2400);
 
     function setPerspectiveMode(fieldOfView: number): void {
-        getTransformedX = vector => {
-            const xt = vector.x - tx;
-            const yt = vector.y - ty;
-            const zt = vector.z - tz;
-            const x = perspectiveMatrix.getTransformedX(xt, yt, zt);
-            const y = perspectiveMatrix.getTransformedY(xt, yt, zt);
+        viewTransformX = v => {
+            const x = perspectiveMatrix.getTransformedX(v.x, v.y, v.z);
+            const y = perspectiveMatrix.getTransformedY(v.x, v.y, v.z);
             return x < 0
                 ? Number.NaN
                 : (y / x) * deviceSize + width * .5;
         }
-        getTransformedY = vector => {
-            let xt = vector.x - tx;
-            let yt = vector.y - ty;
-            let zt = vector.z - tz;
-            const x = perspectiveMatrix.getTransformedX(xt, yt, zt);
-            const z = perspectiveMatrix.getTransformedZ(xt, yt, zt);
+        viewTransformY = v => {
+            const x = perspectiveMatrix.getTransformedX(v.x, v.y, v.z);
+            const z = perspectiveMatrix.getTransformedZ(v.x, v.y, v.z);
             return x < 0
                 ? Number.NaN
                 : (-z / x) * deviceSize + height * .5;
@@ -160,24 +165,24 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     function setTopMode(scale: number): void {
-        getTransformedX = vector =>
-            (vector.x - tx) * deviceSize * scale + width / 2;
-        getTransformedY = vector =>
-            (vector.y - ty) * deviceSize * scale + height / 2;
+        viewTransformX = vector =>
+            vector.x * deviceSize * scale + width / 2;
+        viewTransformY = vector =>
+            vector.y * deviceSize * scale + height / 2;
     }
 
     function setFrontMode(scale: number): void {
-        getTransformedX = vector =>
-            (vector.x - tx) * deviceSize * scale + width / 2;
-        getTransformedY = vector =>
-            (vector.z - tz) * -1 * deviceSize * scale + height / 2;
+        viewTransformX = vector =>
+            vector.x * deviceSize * scale + width / 2;
+        viewTransformY = vector =>
+            vector.z * -1 * deviceSize * scale + height / 2;
     }
 
     function setSideMode(scale: number): void {
-        getTransformedX = vector =>
-            (vector.y - ty) * deviceSize * scale + width / 2;
-        getTransformedY = vector =>
-            (vector.z - tz) * -1 * deviceSize * scale + height / 2;
+        viewTransformX = vector =>
+            vector.y * deviceSize * scale + width / 2;
+        viewTransformY = vector =>
+            vector.z * -1 * deviceSize * scale + height / 2;
     }
 
     function findNearestActor(
@@ -197,11 +202,11 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 const polygons = actor.brushModel.polygons;
                 for (const polygon of polygons) {
                     let last = polygon.vertexes[polygon.vertexes.length - 1];
-                    let x0 = getTransformedX(last);
-                    let y0 = getTransformedY(last);
+                    let x0 = viewTransformX(last);
+                    let y0 = viewTransformY(last);
                     for (const vertex of polygon.vertexes) {
-                        let x1 = getTransformedX(vertex);
-                        let y1 = getTransformedY(vertex);
+                        let x1 = viewTransformX(vertex);
+                        let y1 = viewTransformY(vertex);
                         if (!isNaN(x0) && !isNaN(x1)) {
                             let distance = distanceToLineSegment(canvasX, canvasY, x0, y0, x1, y1);
                             if (distance < bestDistance) {
