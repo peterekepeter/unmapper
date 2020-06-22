@@ -4,7 +4,7 @@ import { Parser } from "./Parser";
 import { importSubobject } from "./import-subobject";
 import { importVector } from "./import-vector";
 import { importBrushModel } from "./import-brushmodel";
-import { csgOperationFromString } from "../converter/convert-csgOperation";
+import { csgOperationFromString } from "../converter/convert-CsgOperation";
 import { importScale } from "./import-scale";
 import { importRotation } from "./import-rotation";
 
