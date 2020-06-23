@@ -1,11 +1,9 @@
 import { Vector } from "../../Vector";
-import { exportPaddedFloat } from "./export-number";
+import { Exporter } from "./Exporter";
 
-
-
-export function exportVector(vector : Vector) : string {
-    const x = exportPaddedFloat(vector.x);
-    const y = exportPaddedFloat(vector.y);
-    const z = exportPaddedFloat(vector.z);
-    return `${x},${y},${z}`;
+export function exportVector(exporter: Exporter, vector : Vector) {
+    exporter
+        .writePaddedFloat(vector.x).write(',')
+        .writePaddedFloat(vector.y).write(',')
+        .writePaddedFloat(vector.z);
 }

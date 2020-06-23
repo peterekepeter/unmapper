@@ -1,23 +1,23 @@
-import { fmod, UNREAL_FULL_TURN, DEGREES_FULL_TURN } from "../../ExtendedMath";
+import { UNREAL_FULL_TURN, DEGREES_FULL_TURN } from "../../ExtendedMath";
 
-export function exportAngleDegrees(angleDegrees: number) {
-    return exportInt(angleDegrees
+export function formatAngle(angleDegrees: number) {
+    return formatInt(angleDegrees
         * UNREAL_FULL_TURN / DEGREES_FULL_TURN)
 }
 
-export function exportInt(x: number): string {
+export function formatInt(x: number): string {
     return Math.round(x).toString();
 }
 
-export function exportFloat(x: number): string {
-    return exportGenericNumeric(x, false, 0, 6, 1e-6);
+export function formatFloat(x: number): string {
+    return formatNumeric(x, false, 0, 6, 1e-6);
 }
 
-export function exportPaddedFloat(x: number): string {
-    return exportGenericNumeric(x, true, 5, 6, 1e-6);
+export function formatPaddedFloat(x: number): string {
+    return formatNumeric(x, true, 5, 6, 1e-6);
 }
 
-export function exportGenericNumeric(
+function formatNumeric(
     x: number,
     alwaysShowSign: boolean,
     padLeft: number,
