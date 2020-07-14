@@ -56,3 +56,15 @@ test('can do structured writing', () => {
         'end test\n'
     );
 });
+
+test('can write string value', () => {
+    const exporter = new Exporter();
+    exporter.write("Name=").writeString("John");
+    expect(exporter.toString()).toBe('Name=John');
+})
+
+test('can write string value with space in it', () => {
+    const exporter = new Exporter();
+    exporter.write("Name=").writeString("John Smith");
+    expect(exporter.toString()).toBe('Name="John Smith"');
+})

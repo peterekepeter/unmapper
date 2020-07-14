@@ -63,6 +63,12 @@ export class Exporter {
         return this;
     }
 
+    writeString(str: string): Exporter{
+        return str.indexOf(' ') !== -1
+            ? this.write('"').write(str).write('"')
+            : this.write(str);
+    }
+
     private _buffer: string[] = [];
     private _length = 0;
     private _indentationLevel = 0;

@@ -7,7 +7,7 @@ import { Rotation } from "./Rotation";
 
 export class Actor
 {
-    public name : string = "Actor0";
+    public name : string = Actor.DEFAULT_ACTOR_NAME;
     public className : string = "Actor";
     public rotation : Rotation = Rotation.IDENTITY;
     public location : Vector = Vector.ZERO;
@@ -21,6 +21,8 @@ export class Actor
     public mainScale = Scale.DEFAULT_SCALE;
     public postScale = Scale.DEFAULT_SCALE;
     public tempScale = Scale.DEFAULT_SCALE;
+
+    public static DEFAULT_ACTOR_NAME = "Actor0";
     
     // additional unsupported props go here, these still need to be reencoded
     public unsupportedProperties : { [key:string] : any } = {};
