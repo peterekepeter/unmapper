@@ -3,6 +3,9 @@ import { exportSubobject } from "./export-subobject";
 
 export function exportKeyValueNewline(exporter : Exporter, key: string, value : any, defaultValue? :any)
 {
+    if (value === defaultValue){
+        return;
+    }
     exportKeyValue(exporter, key, value, defaultValue);
     exporter.newline();
 }

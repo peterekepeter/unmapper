@@ -2,6 +2,8 @@ import { Exporter } from "./Exporter";
 import { Actor } from "../../Actor";
 import { exportKeyValueNewline } from "./export-keyvalue";
 import { exportNamedObjectVector } from "./export-vector";
+import { csgOperationToString } from "../converter/convert-CsgOperation";
+import { exportScaleNewline } from "./export-scale";
 
 
 export function exportActor(exporter : Exporter, actor : Actor)
@@ -23,6 +25,10 @@ export function exportActor(exporter : Exporter, actor : Actor)
 function exportSupportedProps(exporter : Exporter, actor: Actor){
     exportNamedObjectVector(exporter, "Location", actor.location);
     exportNamedObjectVector(exporter, "OldLocation", actor.oldLocation);
+    exportKeyValueNewline(exporter, "CsgOper", csgOperationToString(actor.csgOperation));
+    exportScaleNewline(exporter, "MainScale", actor.mainScale);
+    exportScaleNewline(exporter, "PostScale", actor.postScale);
+    exportScaleNewline(exporter, "TempScale", actor.tempScale);
 }
 
 function exportUnsupporterProps(exporter : Exporter, props : any)

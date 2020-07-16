@@ -35,4 +35,14 @@ export class Scale {
         return Matrix3x3.scale(this.scale.x, this.scale.y, this.scale.z);
     }
 
+    equals(other : Scale) : boolean {
+        return this.sheerAxis === other.sheerAxis 
+            && this.sheerRate === other.sheerRate
+            && this.scale.equals(other.scale);
+    }
+
+    isDefault() : boolean {
+        return this.equals(Scale.DEFAULT_SCALE);
+    }
+
 }
