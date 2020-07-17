@@ -26,7 +26,13 @@ export function exportScale(
     }
     exporter.write(name).write('=(');
     let separator = '';
+    if (!scale.scale.equals(Vector.ONES)) {
+        exporter.write(separator);
+        exportNamedObjectVector(exporter, "Scale", scale.scale);
+        separator = ',';
+    }
     if (scale.sheerAxis !== Scale.DEFAULT_SCALE.sheerAxis) {
+        exporter.write(separator);
         exportKeyValue(exporter, "SheerAxis", sheerAxisToString(scale.sheerAxis));
         separator = ',';
     }
@@ -34,11 +40,6 @@ export function exportScale(
     if (Scale.DEFAULT_SCALE.sheerRate !== rate) {
         exporter.write(separator);
         exporter.writeFloat(rate);
-        separator = ',';
-    }
-    if (!scale.scale.equals(Vector.ONES)) {
-        exporter.write(separator);
-        exportNamedObjectVector(exporter, "Scale", scale.scale);
         separator = ',';
     }
     exporter.write(')');

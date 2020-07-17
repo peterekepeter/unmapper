@@ -42,6 +42,15 @@ End Actor
 End Map
 `);
 
+testExporter('brush scaling', 
+`Begin Map
+Begin Actor Class=Brush Name=Brush73
+    MainScale=(Scale=(X=8.000000,Y=8.000000,Z=4.000000),SheerAxis=SHEER_ZX)
+    PostScale=(SheerAxis=SHEER_ZX)
+End Actor
+End Map
+`)
+
 function testExporter(name : string, input : string){
     test(name, () => {
         const loaded = loadMapFromString(input);

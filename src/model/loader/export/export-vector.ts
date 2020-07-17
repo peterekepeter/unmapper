@@ -8,6 +8,14 @@ export function exportVector(exporter: Exporter, vector : Vector) {
         .writePaddedFloat(vector.z);
 }
 
+export function exportNamedObjectVectorNewline(exporter : Exporter, name : string, vector: Vector){
+    if (vector == null || vector.equals(Vector.ZERO)){
+        return;
+    }
+    exportNamedObjectVector(exporter, name, vector);
+    exporter.newline();
+}
+
 export function exportNamedObjectVector(exporter : Exporter, name : string, vector: Vector){
     if (vector == null || vector.equals(Vector.ZERO)){
         return;
@@ -25,5 +33,5 @@ export function exportNamedObjectVector(exporter : Exporter, name : string, vect
     if (vector.z !== 0){
         exporter.write(separator).write("Z=").writeFloat(vector.z);
     }
-    exporter.write(")").newline();
+    exporter.write(")");
 }
