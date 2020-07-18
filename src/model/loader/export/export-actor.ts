@@ -1,9 +1,10 @@
 import { Exporter } from "./Exporter";
 import { Actor } from "../../Actor";
 import { exportKeyValueNewline } from "./export-keyvalue";
-import { exportNamedObjectVector, exportNamedObjectVectorNewline } from "./export-vector";
+import { exportNamedObjectVectorNewline } from "./export-vector";
 import { csgOperationToString } from "../converter/convert-CsgOperation";
 import { exportScaleNewline } from "./export-scale";
+import { exportBrushModel } from "./export-brushmodel";
 
 
 export function exportActor(exporter : Exporter, actor : Actor)
@@ -29,6 +30,7 @@ function exportSupportedProps(exporter : Exporter, actor: Actor){
     exportScaleNewline(exporter, "MainScale", actor.mainScale);
     exportScaleNewline(exporter, "PostScale", actor.postScale);
     exportScaleNewline(exporter, "TempScale", actor.tempScale);
+    exportBrushModel(exporter, actor.brushModel);
 }
 
 function exportUnsupporterProps(exporter : Exporter, props : any)

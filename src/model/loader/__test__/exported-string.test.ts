@@ -51,6 +51,47 @@ End Actor
 End Map
 `)
 
+testExporter("brush polygon minimal props", `Begin Map
+Begin Actor Class=Brush Name=Brush1
+    Begin Brush Name=Model2
+       Begin PolyList
+          Begin Polygon Item=Sheet Flags=264
+             Origin   +00128.000000,+00128.000000,+00000.000000
+             Normal   +00000.000000,+00000.000000,-00001.000000
+             TextureU -00001.000000,+00000.000000,+00000.000000
+             TextureV +00000.000000,+00001.000000,+00000.000000
+             Vertex   +00128.000000,+00128.000000,+00000.000000
+             Vertex   +00128.000000,-00128.000000,+00000.000000
+             Vertex   -00128.000000,-00128.000000,+00000.000000
+             Vertex   -00128.000000,+00128.000000,+00000.000000
+          End Polygon
+       End PolyList
+    End Brush
+End Actor
+End Map
+`);
+
+testExporter("brush polygon all props", `Begin Map
+Begin Actor Class=Brush Name=Brush1
+    Begin Brush Name=Model2
+       Begin PolyList
+          Begin Polygon Item=Sheet Flags=264 Texture=bTrainH1 Link=60
+             Origin   +00128.000000,+00128.000000,+00000.000000
+             Normal   +00000.000000,+00000.000000,-00001.000000
+             Pan      U=335 V=-117
+             TextureU -00001.000000,+00000.000000,+00000.000000
+             TextureV +00000.000000,+00001.000000,+00000.000000
+             Vertex   +00128.000000,+00128.000000,+00000.000000
+             Vertex   +00128.000000,-00128.000000,+00000.000000
+             Vertex   -00128.000000,-00128.000000,+00000.000000
+             Vertex   -00128.000000,+00128.000000,+00000.000000
+          End Polygon
+       End PolyList
+    End Brush
+End Actor
+End Map
+`)
+
 function testExporter(name : string, input : string){
     test(name, () => {
         const loaded = loadMapFromString(input);
