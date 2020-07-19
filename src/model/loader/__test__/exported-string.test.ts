@@ -92,6 +92,13 @@ End Actor
 End Map
 `)
 
+testExporter("actor groups", `Begin Map
+Begin Actor Class=Light Name=Light0
+    Group=None,Group1,Group2
+End Actor
+End Map
+`)
+
 function testExporter(name : string, input : string){
     test(name, () => {
         const loaded = loadMapFromString(input);

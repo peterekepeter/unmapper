@@ -47,10 +47,43 @@ End Actor
 End Map
 `);
 
+testReImport("brush with scale rotate and shear", `Begin Map
+    Begin Actor Class=Brush Name=Brush96
+       CsgOper=CSG_Add
+       MainScale=(Scale=(X=2.000000),SheerAxis=SHEER_ZX)
+       PostScale=(Scale=(Y=2.000000),SheerRate=1.000000,SheerAxis=SHEER_ZY)
+       PolyFlags=8
+       Level=LevelInfo'MyLevel.LevelInfo1'
+       Tag=Brush
+       Region=(Zone=LevelInfo'MyLevel.LevelInfo1',iLeaf=-1)
+       Location=(X=144.000000,Y=-16.000000,Z=-112.000000)
+       Rotation=(Pitch=8192,Yaw=8192,Roll=8192)
+       bSelected=True
+       Begin Brush Name=Model97
+       Begin PolyList
+           Begin Polygon Item=Sheet Texture=rPanlbas Flags=264
+               Origin   +00128.000000,+00128.000000,+00000.000000
+               Normal   +00000.000000,+00000.000000,-00001.000000
+               TextureU -00001.000000,+00000.000000,+00000.000000
+               TextureV +00000.000000,+00001.000000,+00000.000000
+               Vertex   +00128.000000,+00128.000000,+00000.000000
+               Vertex   +00128.000000,-00128.000000,+00000.000000
+               Vertex   -00128.000000,-00128.000000,+00000.000000
+               Vertex   -00128.000000,+00128.000000,+00000.000000
+           End Polygon
+       End PolyList
+       End Brush
+       Brush=Model'MyLevel.Model97'
+       Name=Brush96
+    End Actor
+End Map
+`);
+
 function testReImport(name : string, input : string){
     test(name, () => {
         const loaded = loadMapFromString(input);
         const reExported = storeMapToString(loaded);
+        console.log(reExported);
         const reLoaded = loadMapFromString(reExported);
         expect(reLoaded).toEqual(loaded);
     })

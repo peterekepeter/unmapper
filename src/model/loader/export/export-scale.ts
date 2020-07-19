@@ -39,6 +39,7 @@ export function exportScale(
     const rate = scale.sheerRate;
     if (Scale.DEFAULT_SCALE.sheerRate !== rate) {
         exporter.write(separator);
+        exporter.write('SheerRate=');
         exporter.writeFloat(rate);
         separator = ',';
     }
