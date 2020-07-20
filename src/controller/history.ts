@@ -1,9 +1,16 @@
 import { UnrealMap } from "../model/UnrealMap";
-import { ISignal } from "reactive-signals";
+import { ISignal, createSignal } from "reactive-signals";
+import { ICommand } from "./ICommand";
 
 
+interface IHistory
+{
+    push : ICommand;
+    forward : ICommand;
+    back : ICommand
+}
 
-function history(map : ISignal<UnrealMap>){
+function history(map : ISignal<UnrealMap>) : IHistory {
     
     var past : UnrealMap[] = [];
     var future : UnrealMap[] = [];
@@ -40,10 +47,19 @@ function history(map : ISignal<UnrealMap>){
         return future.length > 0;
     }
 
+    const canPushSignal = createSignal(true);
+    const canBackSignal = createSignal(false);
+    const canForwardSignal = createSignal(false);
+
+    function updateSignals(){
+        canBackSignal.value = canBack();
+        canForwardSignal.value = canForward();
+    }
+
     return {
-        push, 
-        back,
-        forward
+        push: { execute : push, canExecute: canPushSignal },
+        back:  { execute : back, canExecute: canBackSignal }, 
+        forward: { execute : forward, canExecute: canForwardSignal } 
     }
 
 }
