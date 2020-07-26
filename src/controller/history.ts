@@ -10,7 +10,7 @@ interface IHistory
     back : ICommand
 }
 
-function history(map : ISignal<UnrealMap>) : IHistory {
+export function createHistory(map : ISignal<UnrealMap>) : IHistory {
     
     var past : UnrealMap[] = [];
     var future : UnrealMap[] = [];
@@ -21,6 +21,7 @@ function history(map : ISignal<UnrealMap>) : IHistory {
         if (future.length > 0){
             future = [];
         }
+        updateSignals();
     }
 
     function canPush(){
@@ -31,6 +32,7 @@ function history(map : ISignal<UnrealMap>) : IHistory {
     {
         future.push(map.value);
         map.value = past.pop();
+        updateSignals();
     }
 
     function canBack(){
@@ -41,6 +43,7 @@ function history(map : ISignal<UnrealMap>) : IHistory {
     {
         past.push(map.value);
         map.value = future.pop();
+        updateSignals();
     }
 
     function canForward(){

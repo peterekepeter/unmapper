@@ -4,9 +4,15 @@ import * as ReactDOM from "react-dom";
 import { Application } from "./components/Application";
 import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
+import * as keyboard from './controller/keyboard';
+import { createSignal } from "reactive-signals";
 
 function main() {
     let controller = createController();
+    keyboard.addEventListener(window);
+    keyboard.bindShortcut('Delete', { execute: controller.deleteSelected, canExecute: createSignal(true) })
+    keyboard.bindShortcut('z', controller.undo);
+    keyboard.bindShortcut('y', controller.redo);
     controller.loadFromString(dummyData2);
     console.log(controller.map.value);
     initializeReact(document.body, controller);

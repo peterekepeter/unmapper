@@ -2,10 +2,12 @@ import { createSignal } from 'reactive-signals';
 import { UnrealMap } from '../model/UnrealMap';
 import { loadMapFromString } from '../model/loader';
 import { Actor } from '../model/Actor';
+import { createHistory } from './history';
 
 export const createController = () => {
 
     var map = createSignal(new UnrealMap());
+    var history = createHistory(map);
 
     function loadFromString(str:string){
         map.value = loadMapFromString(str);
@@ -30,6 +32,15 @@ export const createController = () => {
         if (change) updateActorList(newActors);
     }
 
+    function deleteSelected(){
+        const newActors = map.value.actors.filter(a => !a.selected);
+        if (newActors.length !== map.value.actors.length){
+            history.push.execute();
+            console.log('pushing history', history.back.canExecute.value);
+            updateActorList(newActors);
+        }
+    }
+
     function updateActor(prev: Actor, next: Actor)
     {
         const newActors = map.value.actors.map(a => a === prev ? next : a);
@@ -46,6 +57,9 @@ export const createController = () => {
         map,
         loadFromString,
         toggleSelection,
-        makeSelection
+        makeSelection,
+        deleteSelected,
+        undo: history.back,
+        redo: history.forward
     }
 }

@@ -54,7 +54,7 @@ export const Viewport = ({
 
     function renderUpdate() {
         if (renderer != null) {
-            const ortohoScale = 1 / 1024;
+            const ortohoScale = 1 / 4096 / 2;
             const perspectiveFov = 90;
             renderer.setCenterTo(viewLocation);
             switch (viewMode) {
