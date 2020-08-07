@@ -36,7 +36,6 @@ export const createController = () => {
         const newActors = map.value.actors.filter(a => !a.selected);
         if (newActors.length !== map.value.actors.length){
             history.push.execute();
-            console.log('pushing history', history.back.canExecute.value);
             updateActorList(newActors);
         }
     }

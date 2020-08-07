@@ -2,19 +2,38 @@ import { ICommand } from "./ICommand"
 
 const bindings : { [key:string] : ICommand } = {};
 
-export function bindShortcut(key: string, command : ICommand)
+/** accepts shorctus like "ctrl + alt + shift + f" */
+export function bindShortcut(shortcut: string, command : ICommand)
 {
-    bindings[key] = command;
+    bindings[shortcut.toLowerCase()] = command;
 }
 
 const listener = (event : KeyboardEvent) => {
-    const command = bindings[event.key];
+
+    const shortcut = shortcutFromEvent(event);
+    
+    const command = bindings[shortcut];
     if (!command){
         return;
     }
     if (command.canExecute.value){
         command.execute();
     }
+}
+
+function shortcutFromEvent(event : KeyboardEvent){
+    let result = [];
+    if (event.ctrlKey){ 
+        result.push('ctrl');
+    }
+    if (event.altKey){ 
+        result.push('alt');
+    }
+    if (event.shiftKey){ 
+        result.push('shift');
+    }
+    result.push(event.key);
+    return result.join(' + ').toLowerCase();
 }
 
 

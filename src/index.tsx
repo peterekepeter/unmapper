@@ -6,15 +6,26 @@ import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { createSignal } from "reactive-signals";
+import { ICommand } from "./controller/ICommand";
 
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
     keyboard.bindShortcut('Delete', { execute: controller.deleteSelected, canExecute: createSignal(true) })
-    keyboard.bindShortcut('z', controller.undo);
-    keyboard.bindShortcut('y', controller.redo);
+
+    const shortcutBindings : { [key:string] : ICommand } = {
+        'ctrl + z' : controller.undo,
+        'ctrl + y' : controller.redo,
+        'ctrl + shift + z' : controller.redo,
+        'ctrl + shift + y' : controller.undo,
+    }
+    
+    for (const key in shortcutBindings){
+        keyboard.bindShortcut(key, shortcutBindings[key]);
+    }
+
     controller.loadFromString(dummyData2);
-    console.log(controller.map.value);
+    setWindowTitle("Unmapper");
     initializeReact(document.body, controller);
 }
 
@@ -54,6 +65,10 @@ function applyFillParentStyle(element: HTMLElement) {
     for (const key in fillParentStyle) {
         element.style[key] = fillParentStyle[key];
     }
+}
+
+function setWindowTitle(str:string){
+    document.querySelector('head>title').textContent = str;
 }
 
 main();
