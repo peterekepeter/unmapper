@@ -21,48 +21,35 @@ export function createHistory(map : ISignal<UnrealMap>) : IHistory {
         if (future.length > 0){
             future = [];
         }
-        updateSignals();
-    }
-
-    function canPush(){
-        return true;
+        updateBoth();
     }
 
     function back()
     {
         future.push(map.value);
         map.value = past.pop();
-        updateSignals();
-    }
-
-    function canBack(){
-        return past.length > 0;
+        updateBoth();
     }
 
     function forward()
     {
         past.push(map.value);
         map.value = future.pop();
-        updateSignals();
+        updateBoth();
     }
 
-    function canForward(){
-        return future.length > 0;
-    }
+    back.canExecute = createSignal(false);
+    forward.canExecute = createSignal(false);
 
-    const canPushSignal = createSignal(true);
-    const canBackSignal = createSignal(false);
-    const canForwardSignal = createSignal(false);
-
-    function updateSignals(){
-        canBackSignal.value = canBack();
-        canForwardSignal.value = canForward();
+    function updateBoth(){
+        back.canExecute.value = past.length > 0;
+        forward.canExecute.value = future.length > 0;
     }
 
     return {
-        push: { execute : push, canExecute: canPushSignal },
-        back:  { execute : back, canExecute: canBackSignal }, 
-        forward: { execute : forward, canExecute: canForwardSignal } 
+        push,
+        back,
+        forward
     }
 
 }

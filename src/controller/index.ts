@@ -35,7 +35,7 @@ export const createController = () => {
     function deleteSelected(){
         const newActors = map.value.actors.filter(a => !a.selected);
         if (newActors.length !== map.value.actors.length){
-            history.push.execute();
+            history.push();
             updateActorList(newActors);
         }
     }

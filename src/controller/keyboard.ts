@@ -16,8 +16,8 @@ const listener = (event : KeyboardEvent) => {
     if (!command){
         return;
     }
-    if (command.canExecute.value){
-        command.execute();
+    if (command.canExecute === undefined || command.canExecute.value){
+        command();
     }
 }
 

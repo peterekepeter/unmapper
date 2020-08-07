@@ -11,7 +11,7 @@ import { ICommand } from "./controller/ICommand";
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
-    keyboard.bindShortcut('Delete', { execute: controller.deleteSelected, canExecute: createSignal(true) })
+    keyboard.bindShortcut('Delete', controller.deleteSelected)
 
     const shortcutBindings : { [key:string] : ICommand } = {
         'ctrl + z' : controller.undo,
