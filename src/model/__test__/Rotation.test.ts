@@ -24,24 +24,29 @@ describe('Rotation', () => {
         expect(r.equals(Rotation.IDENTITY)).toBe(true);
     })
 
-    test('can apply to vector', () => {
+    test('90 deg pitch rotation to forward produces up vector', () => {
         const r = new Rotation(Rotation.QUARTER_TURN);
         const v = r.apply(Vector.FORWARD);
         expect(v).toEqual(Vector.UP);
     });
 
-    test('can apply to vector 2', () => {
+    test('90 deg yaw rotation to forward produces right vector', () => {
         const r = new Rotation(0, Rotation.QUARTER_TURN, 0);
         const v = r.apply(Vector.FORWARD);
         expect(v).toEqual(Vector.RIGHT);
     });
 
-    test('can apply to vector 3', () => {
+    test('90 deg roll rotation to forward produces no change', () => {
         const r = new Rotation(0, 0, Rotation.QUARTER_TURN);
         const v1 = r.apply(Vector.FORWARD);
         expect(v1).toEqual(Vector.FORWARD);
-        const v2 = r.apply(Vector.RIGHT);
-        expect(v2).toEqual(Vector.UP);
     });
+
+    test('90 deg roll rotation to right produces down vector', () => {
+        const r = new Rotation(0, 0, Rotation.QUARTER_TURN);
+        const v2 = r.apply(Vector.RIGHT);
+        expect(v2).toEqual(new Vector(0,0,-1));
+    });
+
 
 });

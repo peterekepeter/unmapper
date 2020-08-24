@@ -32,7 +32,7 @@ export class Rotation {
 
     public toMatrix() : Matrix3x3 {
         return Matrix3x3.IDENTITY
-            .rotateDegreesX(this.roll)
+            .rotateDegreesX(-this.roll)
             .rotateDegreesY(this.pitch)
             .rotateDegreesZ(this.yaw);
     }
