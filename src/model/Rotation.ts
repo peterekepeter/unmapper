@@ -32,9 +32,9 @@ export class Rotation {
 
     public toMatrix() : Matrix3x3 {
         return Matrix3x3.IDENTITY
-            .rotateDegreesX(-this.roll)
+            .rotateDegreesZ(this.yaw)
             .rotateDegreesY(this.pitch)
-            .rotateDegreesZ(this.yaw);
+            .rotateDegreesX(-this.roll);
     }
 
     public apply(vector: Vector): Vector {
