@@ -97,9 +97,9 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             ty += actor.location.y;
             tz += actor.location.z;
             const rot = new Rotation(-actor.rotation.pitch, -actor.rotation.yaw, -actor.rotation.roll)
-            const matrix = actor.mainScale.toMatrix()
+            const matrix = actor.postScale.toMatrix()
                 .multiply(actor.rotation.toMatrix())
-                .multiply(actor.postScale.toMatrix());
+                .multiply(actor.mainScale.toMatrix());
             objectMatrix = matrix;
             const polygons = actor.brushModel.polygons;
             context.strokeStyle = getBrushWireColor(actor);
