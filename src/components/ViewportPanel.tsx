@@ -14,22 +14,34 @@ export function ViewportPanel({
     let [viewportWidth, setViewportWidth] = React.useState(10);
     let [viewportHeight, setViewportHeight] = React.useState(10);
 
-    function panelRef(p : HTMLDivElement){
-        if (p!= null){
-            if (viewportWidth === 10){
-                setViewportWidth(p.clientWidth);
+    function viewportContainer(p : HTMLDivElement){
+        if (p != null){
+            const width = Math.floor(p.clientWidth);
+            const height = Math.floor(p.clientHeight);
+            if (viewportWidth !== width){
+                setViewportWidth(width);
             }
-            if (viewportHeight === 10){
-                setViewportHeight(p.clientHeight);
+            if (viewportHeight !== height){
+                setViewportHeight(height);
             }
         }
     }
 
-    return <div ref={panelRef}>
+    return <div style={{
+        display: 'grid',
+        gridTemplate: 'auto 1fr / 1fr'
+    }}>
         <SectionTitle>{generateTitle(mode)}</SectionTitle>
-        <Viewport 
-            width={viewportWidth} height={viewportHeight}
-            controller={controller} location={location} mode={mode}></Viewport>
+        <div ref={viewportContainer} style={{
+            display: 'grid',
+            overflow: 'hidden',
+            background: '#222',
+            placeContent: 'center'
+        }}>
+            <Viewport 
+                width={viewportWidth} height={viewportHeight}
+                controller={controller} location={location} mode={mode}></Viewport>
+        </div>
     </div>
 }
 

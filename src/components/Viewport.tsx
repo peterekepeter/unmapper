@@ -54,7 +54,7 @@ export const Viewport = ({
 
     function renderUpdate() {
         if (renderer != null) {
-            const ortohoScale = 1 / 4096 / 2;
+            const ortohoScale = 1 / 4096 /2;
             const perspectiveFov = 90;
             renderer.setCenterTo(viewLocation);
             switch (viewMode) {
@@ -87,7 +87,11 @@ export const Viewport = ({
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerMove={onPointerMove}
-        ref={canvas => canvasRef(canvas)} />;
+        ref={canvas => canvasRef(canvas)}
+        style={{
+            maxWidth: '100%',
+            maxHeight: '100%'
+        }} />;
 
     function onContextMenu(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
         event.stopPropagation();
