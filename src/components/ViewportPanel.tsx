@@ -11,6 +11,7 @@ export function ViewportPanel({
     mode = ViewportMode.Top }
 ) {
 
+    let [viewMode, setViewMode] = React.useState(mode);
     let [viewportWidth, setViewportWidth] = React.useState(10);
     let [viewportHeight, setViewportHeight] = React.useState(10);
 
@@ -27,11 +28,26 @@ export function ViewportPanel({
         }
     }
 
+    const buttonStyle = {
+        border: '1px solid #333',
+        borderTopColor: '#555',
+        background: '#333',
+        color: '#aaa',
+        boxShadow: '0px 1px 1px #000',
+        borderRadius: '2px'
+    };
+
     return <div style={{
         display: 'grid',
         gridTemplate: 'auto 1fr / 1fr'
     }}>
-        <SectionTitle>{generateTitle(mode)}</SectionTitle>
+        <SectionTitle>
+            <div style={{ maxWidth:'100px', flexGrow:.2 }} >{generateTitle(viewMode)}</div>
+            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Top)}>Top</button>
+            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Front)}>Front</button>
+            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Side)}>Side</button>
+            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Perspective)}>Perspective</button>
+        </SectionTitle>
         <div ref={viewportContainer} style={{
             display: 'grid',
             overflow: 'hidden',
@@ -40,7 +56,7 @@ export function ViewportPanel({
         }}>
             <Viewport 
                 width={viewportWidth} height={viewportHeight}
-                controller={controller} location={location} mode={mode}></Viewport>
+                controller={controller} location={location} mode={viewMode}></Viewport>
         </div>
     </div>
 }

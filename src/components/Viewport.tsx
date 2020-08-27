@@ -15,6 +15,8 @@ export enum ViewportMode {
     Perspective
 }
 
+const levelPerDouble = 8;
+
 export const Viewport = ({
     width = 500,
     height = 300,
@@ -30,8 +32,9 @@ export const Viewport = ({
     let [renderer, setRenderer]
         = useState<IRenderer>(null);
 
-    let [viewMode, setViewMode]
-        = useState(mode);
+    let [zoomLevel, setZoomLevel] = useState(-12 * levelPerDouble);
+
+    const viewMode = mode;
 
     let [viewLocation, setViewLocation]
         = useState(location);
@@ -54,8 +57,8 @@ export const Viewport = ({
 
     function renderUpdate() {
         if (renderer != null) {
-            const ortohoScale = 1 / 4096 /2;
             const perspectiveFov = 90;
+            const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
             renderer.setCenterTo(viewLocation);
             switch (viewMode) {
                 case ViewportMode.Perspective:
@@ -83,6 +86,7 @@ export const Viewport = ({
     return <canvas
         width={width}
         height={height}
+        onWheel={onWheel}
         onContextMenu={onContextMenu}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
@@ -125,6 +129,15 @@ export const Viewport = ({
         setMouseDown(false);
     }
 
+    function onWheel(event: React.WheelEvent){
+        if (event.ctrlKey){
+            setZoomLevel(zoomLevel - (event.deltaX + event.deltaY + event.deltaZ));
+            event.preventDefault();
+            return false;
+        } 
+        console.log(event, event.deltaMode, event.deltaX, event.deltaY, event.deltaZ);
+    }
+
     function onPointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
 
 
@@ -137,9 +150,12 @@ export const Viewport = ({
             dx *= -1;
             dy *= -1;
         }
+        const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
+        const deviceSize = Math.min(width, height);
+        const scale = ortohoScale * deviceSize;
         setDidMouseMove(true);
         const [nextRotation, nextLocation] =
-            nextViewState(viewLocation, rotation, viewMode, dx, dy, event.buttons);
+            nextViewState(viewLocation, rotation, viewMode, dx, dy, event.buttons, deviceSize, ortohoScale);
         setViewLocation(nextLocation);
         setRotation(nextRotation);
     }
@@ -152,7 +168,9 @@ function nextViewState(
     viewmode: ViewportMode,
     moveX: number,
     moveY: number,
-    pointerButtons: number)
+    pointerButtons: number,
+    deviceSize: number,
+    ortohoScale: number)
     : [Rotation, Vector] {
     let nextRotation = rotation;
     let nextLocation = location;
@@ -161,14 +179,23 @@ function nextViewState(
     const rightPress = pointerButtons === 2;
     const bothPress = pointerButtons === 3;
 
+    const scale = deviceSize * ortohoScale;
+    const scaledX = moveX / scale;
+    const scaledY = moveY / scale;
+    const normX = moveX / deviceSize;
+    const normY = moveY / deviceSize;
+
+    const perspectiveRotateSpeed = 90;
+    const perspectiveMoveSpeed = 1024;
+
     switch (viewmode) {
         case ViewportMode.Perspective:
             if (leftPress) {
                 const dir = rotation.toMatrix().apply(Vector.FORWARD);
-                nextLocation = location.add(dir.x * moveY, dir.y * moveY, 0);
-                nextRotation = rotation.add(0, -moveX / 10, 0);
+                nextLocation = location.add(dir.x * normY * perspectiveMoveSpeed, dir.y * normY * perspectiveMoveSpeed, 0);
+                nextRotation = rotation.add(0, -normX * perspectiveRotateSpeed, 0);
             } else if (rightPress) {
-                nextRotation = rotation.add(moveY / 10, -moveX / 10, 0);
+                nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0);
             } else if (bothPress) {
                 const matrix = Matrix3x3
                     .rotateDegreesZ(rotation.yaw)
@@ -176,19 +203,19 @@ function nextViewState(
                 const forward = matrix.apply(Vector.UP);
                 const right = matrix.apply(Vector.RIGHT);
                 nextLocation = location
-                    .addVector(forward.scale(moveY))
-                    .addVector(right.scale(-moveX));
+                    .addVector(forward.scale(normY))
+                    .addVector(right.scale(-normX));
             }
 
             break;
         case ViewportMode.Top:
-            nextLocation = location.add(moveX, moveY, 0);
+            nextLocation = location.add(scaledX, scaledY, 0);
             break;
         case ViewportMode.Front:
-            nextLocation = location.add(moveX, 0, -moveY);
+            nextLocation = location.add(scaledX, 0, -scaledY);
             break;
         case ViewportMode.Side:
-            nextLocation = location.add(0, moveX, -moveY);
+            nextLocation = location.add(0, scaledX, -scaledY);
             break;
     }
     return [nextRotation, nextLocation];

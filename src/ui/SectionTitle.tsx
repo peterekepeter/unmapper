@@ -3,7 +3,8 @@ import { font } from "./typography";
 
 const uiSectionTitleStyle: React.CSSProperties = {
     ...font,
-    margin: '1em',
+    margin: '.5em',
+    display: 'flex',
     textTransform: 'uppercase',
     fontWeight: "normal",
     fontSize: '14px'

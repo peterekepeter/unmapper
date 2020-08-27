@@ -83,7 +83,6 @@ function testReImport(name : string, input : string){
     test(name, () => {
         const loaded = loadMapFromString(input);
         const reExported = storeMapToString(loaded);
-        console.log(reExported);
         const reLoaded = loadMapFromString(reExported);
         expect(reLoaded).toEqual(loaded);
     })
