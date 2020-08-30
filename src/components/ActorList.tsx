@@ -11,21 +11,24 @@ import { useSignal } from "./useSignal";
 export function ActorList({ controller = createController() }) {
     const map = controller.map.value;
     const colors = useSignal(themeColors);
-    return <div>
-        <SectionTitle>Actor list</SectionTitle>
+    return <div style={{overflow:"hidden", display:'grid'}}>
+        <SectionTitle>Actors</SectionTitle>
+        <div style={{overflow:'auto'}}>
         {
-        map.actors.map(actor => 
-            <div key={actor.name} style={{
-                userSelect:'none', 
-                background:actor.selected ? colors.accent : null,
-                color:actor.selected ? colors.background : null 
-                }} onClick={event => handleClick(event, actor)}>
-                <HoverEffect>
-                    <UiText>{actor.name}</UiText>
-                </HoverEffect>
-            </div>
-        )
-    }</div>;
+            map.actors.map(actor => 
+                <div key={actor.name} style={{
+                    userSelect:'none', 
+                    background:actor.selected ? colors.accent : null,
+                    color:actor.selected ? colors.background : null 
+                    }} onClick={event => handleClick(event, actor)}>
+                    <HoverEffect>
+                        <UiText>{actor.name}</UiText>
+                    </HoverEffect>
+                </div>
+            )
+        }
+        </div>
+    </div>;
 
     function handleClick(event: React.MouseEvent<HTMLElement>, actor : Actor){
         if (event.ctrlKey){

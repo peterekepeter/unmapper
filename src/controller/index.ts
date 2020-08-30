@@ -22,14 +22,11 @@ export const createController = () => {
 
     function makeSelection(actor: Actor)
     {
-        let change = false;
-        const newActors = map.value.actors.map<Actor>(a => {
-            const shouldBeSelected = a === actor;
-            change = change || a.selected !== shouldBeSelected;
-            return a.selected === shouldBeSelected 
-                ? a : {...a, selected:shouldBeSelected}
-        });
-        if (change) updateActorList(newActors);
+        selectActors(a => a === actor);
+    }
+
+    function selectAll(){
+        selectActors((_) => true);
     }
 
     function deleteSelected(){
@@ -40,6 +37,17 @@ export const createController = () => {
         }
     }
 
+    function selectActors(filter: (actor : Actor) => boolean)
+    {
+        let change = false;
+        const newActors = map.value.actors.map<Actor>(a => {
+            const shouldBeSelected = filter(a);
+            change = change || a.selected !== shouldBeSelected;
+            return a.selected === shouldBeSelected 
+                ? a : {...a, selected:shouldBeSelected}
+        });
+        if (change) updateActorList(newActors);
+    }
     function updateActor(prev: Actor, next: Actor)
     {
         const newActors = map.value.actors.map(a => a === prev ? next : a);
@@ -58,6 +66,7 @@ export const createController = () => {
         toggleSelection,
         makeSelection,
         deleteSelected,
+        selectAll,
         undo: history.back,
         redo: history.forward
     }

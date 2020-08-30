@@ -18,6 +18,7 @@ function main() {
         'ctrl + y' : controller.redo,
         'ctrl + shift + z' : controller.redo,
         'ctrl + shift + y' : controller.undo,
+        'ctrl + a' : controller.selectAll,
     }
     
     for (const key in shortcutBindings){

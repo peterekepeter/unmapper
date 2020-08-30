@@ -17,7 +17,9 @@ const listener = (event : KeyboardEvent) => {
         return;
     }
     if (command.canExecute === undefined || command.canExecute.value){
+        event.preventDefault();
         command();
+        return false;
     }
 }
 
@@ -38,9 +40,9 @@ function shortcutFromEvent(event : KeyboardEvent){
 
 
 export function addEventListener(window : Window){
-    window.addEventListener('keyup', listener);
+    window.addEventListener('keydown', listener);
 }
 
 export function removeEventListener(window : Window){
-    window.removeEventListener('keyup', listener);
+    window.removeEventListener('keydown', listener);
 }

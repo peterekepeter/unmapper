@@ -4,6 +4,7 @@ import { Vector } from '../model/Vector';
 import { ViewportMode, Viewport } from './Viewport';
 import { SectionTitle } from '../ui/SectionTitle';
 import { createController } from '../controller';
+import { UiButton } from '../ui/UiButton';
 
 export function ViewportPanel({
     controller = createController(),
@@ -28,14 +29,6 @@ export function ViewportPanel({
         }
     }
 
-    const buttonStyle = {
-        border: '1px solid #333',
-        borderTopColor: '#555',
-        background: '#333',
-        color: '#aaa',
-        boxShadow: '0px 1px 1px #000',
-        borderRadius: '2px'
-    };
 
     return <div style={{
         display: 'grid',
@@ -43,10 +36,10 @@ export function ViewportPanel({
     }}>
         <SectionTitle>
             <div style={{ maxWidth:'100px', flexGrow:.2 }} >{generateTitle(viewMode)}</div>
-            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Top)}>Top</button>
-            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Front)}>Front</button>
-            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Side)}>Side</button>
-            <button style={buttonStyle} onClick={()=> setViewMode(ViewportMode.Perspective)}>Perspective</button>
+            <UiButton onClick={()=> setViewMode(ViewportMode.Top)}>Top</UiButton>
+            <UiButton onClick={()=> setViewMode(ViewportMode.Front)}>Front</UiButton>
+            <UiButton onClick={()=> setViewMode(ViewportMode.Side)}>Side</UiButton>
+            <UiButton onClick={()=> setViewMode(ViewportMode.Perspective)}>Perspective</UiButton>
         </SectionTitle>
         <div ref={viewportContainer} style={{
             display: 'grid',

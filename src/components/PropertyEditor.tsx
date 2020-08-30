@@ -4,6 +4,9 @@ import { createController } from "../controller";
 import { Actor } from "../model/Actor";
 import { UiText } from "../ui/UiText";
 import { PolyFlags } from "../model/PolyFlags";
+import { KnownClasses } from "../model/KnownClasses";
+import { UiButton } from "../ui/UiButton";
+import { Vector } from "../model/Vector";
 
 export function PropertyEditor({ controller = createController() }) {
     const selection = controller.map.value.actors.filter(a => a.selected);
@@ -15,12 +18,56 @@ export function PropertyEditor({ controller = createController() }) {
 
     return <div>
         <SectionTitle>Properties <span>{titleDetail}</span></SectionTitle>
-        <StringProp selection={selection} name="Name" getter={a => a.name} />
-        <StringProp selection={selection} name="Class" getter={a => a.className} />
-        <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
+        <div style={propertyEditorStyle}>
+            <StringProp selection={selection} name="Name" getter={a => a.name} />
+            <StringProp selection={selection} name="Class" getter={a => a.className} />
+            <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
+            <VectorProp selection={selection} name="Location" getter={a => a.location}/>
+            <VectorProp selection={selection} name="OldLocation" getter={a => a.oldLocation}/>
+            <VectorProp selection={selection} name="PrePivot" getter={a => a.prePivot}/>
+        </div>
     </div>;
 }
 
+const propertyEditorStyle = {
+    display: 'grid',
+    grid: "auto / 1fr 2fr"
+}
+
+
+function VectorProp({
+    selection = new Array<Actor>(),
+    name = '',
+    getter = (a:Actor) => a.location
+}) {
+    let aggregate : Vector;
+    let aggregateCount = 0;
+    for (const actor of selection){
+        const value = getter(actor);
+        if (value === null){
+            continue;
+        }
+        if (aggregateCount === 0){
+            aggregate = value;
+        } else {
+            aggregate = aggregate.addVector(value);
+        }
+        aggregateCount ++;
+    }
+    if (!aggregate){
+        return <></>
+    }
+    if (aggregateCount > 1){
+        aggregate = aggregate.scale(1/aggregateCount);
+    }
+    const str = aggregateCount === 1 
+        ? `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z`
+        : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
+    return <>
+        <UiText>{name}</UiText>
+        <UiText>{str}</UiText>
+    </>
+}
 
 function StringProp({
     selection = new Array<Actor>(),
@@ -42,10 +89,10 @@ function StringProp({
             different = true;
         }
     }
-    return <div>
+    return <>
         <UiText>{name}</UiText>
         <UiText>{aggregate}</UiText>
-    </div>
+    </>
 }
 
 function PolyFlagsProp({
@@ -53,12 +100,16 @@ function PolyFlagsProp({
     name = '',
     getter = (a: Actor) => a.polyFlags
 }) {
-    
+
     let aggregate: PolyFlags = PolyFlags.None;
     let empty = true; 
     let different = false;
+    let hasBrush = false;
     for (const actor of selection) {
         const value = getter(actor);
+        if (actor.className === KnownClasses.Brush){
+            hasBrush = true;
+        }
         if (empty) {
             aggregate = value;
             empty = false;
@@ -68,12 +119,15 @@ function PolyFlagsProp({
             different = true;
         }
     }
+    if (!hasBrush){
+        return <></>; // this prop is N/A
+    }
     let text = different ? '... different values'
         : polyFlagsToText(aggregate);
-    return <div>
+    return <>
         <UiText>{name}</UiText>
         <UiText>{text}</UiText>
-    </div>
+    </>
 }
 
 function polyFlagsToText(flags : PolyFlags){
