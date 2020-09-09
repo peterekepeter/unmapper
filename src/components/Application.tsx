@@ -7,10 +7,17 @@ import { ViewportPanel } from "./ViewportPanel";
 import { themeColors } from "../theme";
 import { ActorList } from "./ActorList";
 import { PropertyEditor } from "./PropertyEditor";
+import { CommandPalette } from "./CommandPalette";
 
 export const Application = ({ controller = createController() }) => {
+    return <>
+        <MainGrid controller={controller}/>
+        <CommandPalette controller={controller}/>
+    </>
+}
 
-    const unrealMap = useSignal(controller.map);
+export const MainGrid = ({ controller = createController() }) => {
+
     const colors = useSignal(themeColors);
     const [resizeCount, setResizeCount] = React.useState(0);
 
@@ -60,5 +67,4 @@ export const Application = ({ controller = createController() }) => {
             mode={ViewportMode.Side} 
             controller={controller}/>
     </div>;
-
 }

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { UnrealMap } from '../model/UnrealMap';
 import { Vector } from '../model/Vector';
 import { ViewportMode, Viewport } from './Viewport';
 import { SectionTitle } from '../ui/SectionTitle';

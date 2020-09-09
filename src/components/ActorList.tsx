@@ -1,5 +1,4 @@
 import React = require("react");
-import { UnrealMap } from "../model/UnrealMap";
 import { HoverEffect } from "../ui/HoverEffect";
 import { UiText } from "../ui/UiText";
 import { SectionTitle } from "../ui/SectionTitle";
@@ -9,11 +8,13 @@ import { themeColors } from "../theme";
 import { useSignal } from "./useSignal";
 
 export function ActorList({ controller = createController() }) {
-    const map = controller.map.value;
+
+    const map = useSignal(controller.map);
     const colors = useSignal(themeColors);
+
     return <div style={{overflow:"hidden", display:'grid'}}>
-        <SectionTitle>Actors</SectionTitle>
-        <div style={{overflow:'auto'}}>
+        <SectionTitle>Objects</SectionTitle>
+        <div style={{overflow:'auto', scrollbarColor: 'dark'}}>
         {
             map.actors.map(actor => 
                 <div key={actor.name} style={{

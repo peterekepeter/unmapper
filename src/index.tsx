@@ -5,13 +5,33 @@ import { Application } from "./components/Application";
 import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
-import { createSignal } from "reactive-signals";
 import { ICommand } from "./controller/ICommand";
+import { registerCommands } from "./controller/commands";
 
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
-    keyboard.bindShortcut('Delete', controller.deleteSelected)
+    
+    registerCommands([{
+        description: "Undo Previous Edit",
+        implementation: controller.undo,
+        shortcut: 'ctrl + z'
+    },
+    {
+        description: "Redo Edit",
+        implementation: controller.redo,
+        shortcut: 'ctrl + y'
+    },
+    {
+        description: "Select All Objects",
+        implementation: controller.selectAll,
+        shortcut: 'ctrl + a'
+    },
+    {
+        description: "Delete Selected Objects",
+        implementation: controller.deleteSelected,
+        shortcut: 'delete'
+    }])
 
     const shortcutBindings : { [key:string] : ICommand } = {
         'ctrl + z' : controller.undo,
@@ -19,6 +39,8 @@ function main() {
         'ctrl + shift + z' : controller.redo,
         'ctrl + shift + y' : controller.undo,
         'ctrl + a' : controller.selectAll,
+        'delete' : controller.deleteSelected,
+        'f1' : controller.showAllCommands
     }
     
     for (const key in shortcutBindings){
@@ -26,7 +48,7 @@ function main() {
     }
 
     controller.loadFromString(dummyData2);
-    setWindowTitle("Unmapper");
+    setWindowTitle("Work in progress experimental stuff");
     initializeReact(document.body, controller);
 }
 

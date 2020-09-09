@@ -8,6 +8,7 @@ export const createController = () => {
 
     var map = createSignal(new UnrealMap());
     var history = createHistory(map);
+    var commandsShownState = createSignal(false);
 
     function loadFromString(str:string){
         map.value = loadMapFromString(str);
@@ -60,13 +61,19 @@ export const createController = () => {
         map.value = nextMap;
     }
 
+    function showAllCommands(){
+        commandsShownState.value = true;
+    }
+
     return {
         map,
+        commandsShownState,
         loadFromString,
         toggleSelection,
         makeSelection,
         deleteSelected,
         selectAll,
+        showAllCommands,
         undo: history.back,
         redo: history.forward
     }

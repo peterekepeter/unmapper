@@ -7,13 +7,17 @@ import { PolyFlags } from "../model/PolyFlags";
 import { KnownClasses } from "../model/KnownClasses";
 import { UiButton } from "../ui/UiButton";
 import { Vector } from "../model/Vector";
+import { useSignal } from "./useSignal";
 
 export function PropertyEditor({ controller = createController() }) {
-    const selection = controller.map.value.actors.filter(a => a.selected);
+
+    const map = useSignal(controller.map);
+    
+    const selection = map.actors.filter(a => a.selected);
     const titleDetail = selection.length == 0
         ? '(no selection)'
         : selection.length > 1
-            ? `(${selection.length} selected actors)`
+            ? `(${selection.length} selected)`
             : null;
 
     return <div>
@@ -21,6 +25,7 @@ export function PropertyEditor({ controller = createController() }) {
         <div style={propertyEditorStyle}>
             <StringProp selection={selection} name="Name" getter={a => a.name} />
             <StringProp selection={selection} name="Class" getter={a => a.className} />
+            <StringProp selection={selection} name="Model" getter={a => a.brushModel?.name} />
             <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
             <VectorProp selection={selection} name="Location" getter={a => a.location}/>
             <VectorProp selection={selection} name="OldLocation" getter={a => a.oldLocation}/>

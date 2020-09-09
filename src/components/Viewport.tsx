@@ -7,6 +7,7 @@ import React = require("react");
 import { createController } from "../controller";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
+import { useSignal } from "./useSignal";
 
 export enum ViewportMode {
     Top,
@@ -24,7 +25,7 @@ export const Viewport = ({
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }) => {
 
-    const map = controller.map.value;
+    const map = useSignal(controller.map);
 
     let [canvas, setCanvas]
         = useState<HTMLCanvasElement>(null);
@@ -197,14 +198,15 @@ function nextViewState(
             } else if (rightPress) {
                 nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0);
             } else if (bothPress) {
+                console.log('both');
                 const matrix = Matrix3x3
                     .rotateDegreesZ(rotation.yaw)
                     .rotateDegreesY(rotation.pitch);
                 const forward = matrix.apply(Vector.UP);
                 const right = matrix.apply(Vector.RIGHT);
                 nextLocation = location
-                    .addVector(forward.scale(normY))
-                    .addVector(right.scale(-normX));
+                    .addVector(Vector.UP.scale(normY * perspectiveMoveSpeed))
+                    .addVector(right.scale(-normX * perspectiveMoveSpeed));
             }
 
             break;
