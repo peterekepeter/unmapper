@@ -47,3 +47,26 @@ test("can read texture", () =>{
 test("can read link", () =>{
     expect(importPolygon(testData).link).toBe(60);
 })
+
+describe('polygon with V pan but no U pan', () =>{
+    const testDataVPanOnly = `
+        Begin Polygon Item=Sheet Flags=264 Texture=bTrainH1 Link=60
+            Origin   +00128.000000,+00128.000000,+00000.000000
+            Normal   +00000.000000,+00000.000000,-00001.000000
+            Pan      V=-117
+            TextureU -00001.000000,+00000.000000,+00000.000000
+            TextureV +00000.000000,+00001.000000,+00000.000000
+            Vertex   +00128.000000,+00128.000000,+00000.000000
+            Vertex   +00128.000000,-00128.000000,+00000.000000
+            Vertex   -00128.000000,-00128.000000,+00000.000000
+            Vertex   -00128.000000,+00128.000000,+00000.000000
+        End Polygon`;
+    
+    test("can read panV", () =>{
+        expect(importPolygon(testDataVPanOnly).panV).toBe(-117);
+    })
+
+    test("panU defaults to 0", () =>{
+        expect(importPolygon(testDataVPanOnly).panU).toBe(0);
+    })
+})

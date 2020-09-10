@@ -7,6 +7,7 @@ import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
 import { registerCommands } from "./controller/commands";
+import { initializeClipboardIntegration } from "./controller/clipboard";
 
 function main() {
     let controller = createController();
@@ -42,6 +43,8 @@ function main() {
         'delete' : controller.deleteSelected,
         'f1' : controller.showAllCommands
     }
+
+    initializeClipboardIntegration(window.document, controller);
     
     for (const key in shortcutBindings){
         keyboard.bindShortcut(key, shortcutBindings[key]);

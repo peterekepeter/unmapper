@@ -75,7 +75,7 @@ export function tokenize(input: string): string[] {
 }
 
 function isWhitespaceChar(s: string) {
-    return s === ' ' || s === '\n' || s === '\t';
+    return s === ' ' || s === '\r' || s === '\n' || s === '\t';
 }
 
 function isOperator(s: string) {

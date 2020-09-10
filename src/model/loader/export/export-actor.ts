@@ -18,8 +18,8 @@ export function exportActor(exporter : Exporter, actor : Actor)
     }
     exporter.increaseIndent();
     exporter.newline();
-    exportUnsupporterProps(exporter, actor.unsupportedProperties);
     exportSupportedProps(exporter, actor);
+    exportUnsupporterProps(exporter, actor.unsupportedProperties);
     exporter.decraseIndent();
     exporter.write("End Actor");
     exporter.newline();

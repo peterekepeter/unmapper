@@ -1,6 +1,5 @@
 import { Exporter } from "./Exporter";
 import { Rotation } from "../../Rotation";
-import { DEGREES_FULL_TURN, UNREAL_FULL_TURN } from "../../ExtendedMath";
 import { degreesToUnrealAngle } from "../converter/convert-angles";
 
 export function exportRotationNewline(exporter : Exporter, name = "Rotation", rotation : Rotation){
@@ -27,5 +26,5 @@ export function exportRotationNewline(exporter : Exporter, name = "Rotation", ro
         exporter.writeInt(degreesToUnrealAngle(rotation.roll));
         separator = ',';
     }
-    exporter.write(')');
+    exporter.write(')').newline();
 }

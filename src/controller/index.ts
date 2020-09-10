@@ -1,6 +1,6 @@
 import { createSignal } from 'reactive-signals';
 import { UnrealMap } from '../model/UnrealMap';
-import { loadMapFromString } from '../model/loader';
+import { loadMapFromString, storeMapToString } from '../model/loader';
 import { Actor } from '../model/Actor';
 import { createHistory } from './history';
 
@@ -65,6 +65,21 @@ export const createController = () => {
         commandsShownState.value = true;
     }
 
+    function importFromString(str : string){
+        const newData = loadMapFromString(str);
+        updateActorList([
+            ...map.value.actors,
+            ...newData.actors
+        ])
+    }
+
+    function exportSelectionToString() : string {
+        const actors = map.value.actors.filter(a => a.selected);
+        const mapToExport = new UnrealMap();
+        mapToExport.actors = actors;
+        return storeMapToString(mapToExport);
+    }
+
     return {
         map,
         commandsShownState,
@@ -75,6 +90,8 @@ export const createController = () => {
         selectAll,
         showAllCommands,
         undo: history.back,
-        redo: history.forward
+        redo: history.forward,
+        importFromString,
+        exportSelectionToString,
     }
 }

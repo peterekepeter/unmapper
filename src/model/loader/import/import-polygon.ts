@@ -49,13 +49,21 @@ export function importPolygon(arg : string | Parser) : Polygon {
                 result.vertexes.push(importVector(parser, 0));
                 break;
             case "Pan":
-                parser.acceptAndMoveToNext("U");
-                parser.acceptAndMoveToNext("=");
-                result.panU = parser.parseFloatAndMoveToNext();
-                parser.acceptAndMoveToNext("V");
-                parser.acceptAndMoveToNext("=");
-                result.panV = parser.parseFloatAndMoveToNext();
-                break;
+                for (let i=0; i<2; i++){ //excepting a U and a V (2 props)
+                    const token = parser.getCurrentToken();
+                    if (token === "U"){
+                        parser.moveToNext();
+                        parser.acceptAndMoveToNext("=");
+                        result.panU = parser.parseFloatAndMoveToNext();
+                    } 
+                    else if (token === "V") {
+                        parser.moveToNext();
+                        parser.acceptAndMoveToNext("=");
+                        result.panV = parser.parseFloatAndMoveToNext();
+                    }
+                    else break; // for
+                }
+                break; // switch
             default:
                 throw "Unknown polygon property: " + key;
         }
@@ -64,3 +72,4 @@ export function importPolygon(arg : string | Parser) : Polygon {
     parser.acceptAndMoveToNext("Polygon");
     return result;
 }
+

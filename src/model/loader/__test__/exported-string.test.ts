@@ -29,13 +29,20 @@ End Actor
 End Map
 `);
 
-testExporter('map just a light', 
+testExporter('map just a light (unsupported props)', 
 `Begin Map
 Begin Actor Class=Light Name=Light0
     bDynamicLight=True
     Level=LevelInfo'MyLevel.LevelInfo0'
     Tag=Light
     Region=(Zone=LevelInfo'MyLevel.LevelInfo0',iLeaf=-1)
+End Actor
+End Map
+`);
+
+testExporter('map just a light (supported props)', 
+`Begin Map
+Begin Actor Class=Light Name=Light0
     Location=(X=96.000000,Y=-96.000000,Z=16.000000)
     OldLocation=(X=96.000000,Y=-96.000000,Z=16.000000)
 End Actor
