@@ -3,12 +3,17 @@ import { UnrealMap } from '../model/UnrealMap';
 import { loadMapFromString, storeMapToString } from '../model/loader';
 import { Actor } from '../model/Actor';
 import { createHistory } from './history';
+import { Vector } from '../model/Vector';
+import { triangulate } from '../model/algorithms/triangluate';
 
 export const createController = () => {
 
     var map = createSignal(new UnrealMap());
     var history = createHistory(map);
     var commandsShownState = createSignal(false);
+
+    //@ts-ignore
+    map.event(map => window.map = map)
 
     function loadFromString(str:string){
         map.value = loadMapFromString(str);
@@ -80,6 +85,37 @@ export const createController = () => {
         return storeMapToString(mapToExport);
     }
 
+    function undoCopyMove() {
+        updateActorList(map.value.actors.map(a => {
+            if (a.selected){
+                return {
+                    ...a, location: a.location.add(-32,-32,-32)
+                }
+            }   
+            else {
+                return a;
+            }
+        }))
+    }
+
+    function triangulateMeshPolygons(){
+        history.push();
+        updateActorList(map.value.actors.map(a => {
+            if (a.selected && a.brushModel){
+                const newPoly = triangulate(a.brushModel.polygons);
+                if (newPoly === a.brushModel.polygons){
+                    return a;
+                }
+                return {
+                    ...a, brushModel: { ...a.brushModel, polygons: newPoly }
+                }
+            }   
+            else {
+                return a;
+            }
+        }))
+    }
+
     return {
         map,
         commandsShownState,
@@ -87,6 +123,8 @@ export const createController = () => {
         toggleSelection,
         makeSelection,
         deleteSelected,
+        triangulateMeshPolygons,
+        undoCopyMove,
         selectAll,
         showAllCommands,
         undo: history.back,

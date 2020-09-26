@@ -125,6 +125,9 @@ const CommandItem = ({command, selected, onClick} : {command:ICommandInfo, selec
 }
 
 const Shortcut = ({str}:{str: string}) => {
+    if (!str){
+        return <></>;
+    }
     return <>{str.split(/\s+/).map(token => token === '+' 
         ? (<span style={shortcutKeySeparatorStyle}>{token}</span>)
         : (<span style={shortcutKeyStyle}>{token}</span>))}</>;

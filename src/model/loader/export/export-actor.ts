@@ -29,6 +29,7 @@ function exportSupportedProps(exporter : Exporter, actor: Actor){
     exportGroupNewline(exporter, actor.group);
     exportNamedObjectVectorNewline(exporter, "Location", actor.location);
     exportNamedObjectVectorNewline(exporter, "OldLocation", actor.oldLocation);
+    exportNamedObjectVectorNewline(exporter, "PrePivot", actor.prePivot);
     exportKeyValueNewline(exporter, "CsgOper", csgOperationToString(actor.csgOperation));
     exportKeyValueNewline(exporter, "PolyFlags", actor.polyFlags.toString(), "0");
     exportScaleNewline(exporter, "MainScale", actor.mainScale);

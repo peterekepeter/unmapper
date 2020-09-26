@@ -32,6 +32,14 @@ function main() {
         description: "Delete Selected Objects",
         implementation: controller.deleteSelected,
         shortcut: 'delete'
+    },
+    {
+        description: "Triangulate Mesh Polygons",
+        implementation: controller.triangulateMeshPolygons,
+    },
+    {
+        description: "Undo Copy Move",
+        implementation: controller.undoCopyMove
     }])
 
     const shortcutBindings : { [key:string] : ICommand } = {
