@@ -1,11 +1,11 @@
-import { Polygon } from "../../Polygon";
+import { BrushPolygonData } from "../../BrushPolygonData";
 import { makeParser } from "./parser-helper";
 import { Parser } from "./Parser";
 import { importVector } from "./import-vector";
 
-export function importPolygon(arg : string | Parser) : Polygon {
+export function importPolygon(arg : string | Parser) : BrushPolygonData {
     const parser = makeParser(arg);
-    const result = new Polygon();
+    const result = new BrushPolygonData();
 
     parser.acceptAndMoveToNext("Begin");
     parser.acceptAndMoveToNext("Polygon");

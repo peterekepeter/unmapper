@@ -1,8 +1,9 @@
 import { Exporter } from "./Exporter";
 import { BrushModel } from "../../BrushModel";
-import { Polygon } from "../../Polygon";
+import { BrushPolygonData } from "../../BrushPolygonData";
 import { exportVector } from "./export-vector";
 import { Vector } from "../../Vector";
+import { brushToPolygonData } from "../../brush-convert";
 
 
 export function exportBrushModel(exporter: Exporter, brush: BrushModel){
@@ -10,11 +11,11 @@ export function exportBrushModel(exporter: Exporter, brush: BrushModel){
         return;
     }
     exporter.write("Begin Brush Name=").writeString(brush.name).newline().increaseIndent();
-    exportPolyList(exporter, brush.polygons);
+    exportPolyList(exporter, brushToPolygonData(brush));
     exporter.decraseIndent().write("End Brush").newline();
 }
 
-function exportPolyList(exporter: Exporter, polygons: Polygon[]){
+function exportPolyList(exporter: Exporter, polygons: BrushPolygonData[]){
     exporter.write("Begin PolyList").increaseIndent().newline();
     for (const polygon of polygons){
         exportPolygon(exporter, polygon);
@@ -22,7 +23,7 @@ function exportPolyList(exporter: Exporter, polygons: Polygon[]){
     exporter.decraseIndent().write("End PolyList").newline();
 }
 
-function exportPolygon(exporter: Exporter, polygon: Polygon){
+function exportPolygon(exporter: Exporter, polygon: BrushPolygonData){
     exporter.write("Begin Polygon");
     if (polygon.item != null && polygon.item.length > 0){
         exporter.write(" Item=").writeString(polygon.item);
@@ -41,7 +42,7 @@ function exportPolygon(exporter: Exporter, polygon: Polygon){
     exporter.decraseIndent().write("End Polygon").newline();
 }
 
-function exportPolyData(exporter: Exporter, polygon: Polygon){
+function exportPolyData(exporter: Exporter, polygon: BrushPolygonData){
     exportPolyVector(exporter, "Origin   ", polygon.origin);
     exportPolyVector(exporter, "Normal   ", polygon.normal);
     exportPolygonPan(exporter, "Pan      ", polygon.panU, polygon.panV);

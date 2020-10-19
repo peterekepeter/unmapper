@@ -1,6 +1,6 @@
 import { Vector } from "./Vector";
 
-export class Polygon
+export class BrushPolygonData
 {
     item : string = ''; 
     flags : number = 0;

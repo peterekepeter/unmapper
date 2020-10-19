@@ -1,6 +1,6 @@
 import { UnrealMap } from "../model/UnrealMap";
 import { Actor } from "../model/Actor";
-import { Polygon } from "../model/Polygon";
+import { BrushPolygonData } from "../model/BrushPolygonData";
 import { IRenderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
@@ -8,6 +8,9 @@ import { PolyFlags } from "../model/PolyFlags";
 import { Color } from "../model/Color";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
+import { BrushModel } from "../model/BrushModel";
+import { BrushVertex } from "../model/BrushVertex";
+import { BrushEdge } from "../model/BrushEdge";
 
 const backgroundColor = '#222';
 
@@ -104,23 +107,18 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             const polygons = actor.brushModel.polygons;
             context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.0;
-            for (const polygon of polygons) {
-                renderPolygon(polygon);
-            }
+            renderWireframeEdges(actor.brushModel);
             tx = save_tx, ty = save_ty, tz = save_tz;
         }
     }
 
-    function renderPolygon(polygon: Polygon) {
-        const last = polygon.vertexes[polygon.vertexes.length - 1];
+    function renderWireframeEdges(brush: BrushModel) {
         context.beginPath();
-        const lastPosition = objectTransform(last);
-        context.moveTo(viewTransformX(lastPosition), viewTransformY(lastPosition));
-        for (const vertex of polygon.vertexes) {
-            const position = objectTransform(vertex);
-            context.lineTo(
-                viewTransformX(position),
-                viewTransformY(position));
+        for (const edge of brush.edges) {
+            const vertexA = objectTransform(brush.vertexes[edge.vertexIndexA].position);
+            const vertexB = objectTransform(brush.vertexes[edge.vertexIndexB].position);
+            context.moveTo(viewTransformX(vertexA), viewTransformY(vertexA));
+            context.lineTo(viewTransformX(vertexB), viewTransformY(vertexB));
         }
         context.stroke();
     }
@@ -201,7 +199,8 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         const MAX_DISTANCE = 8;
         let bestMatch: Actor = null;
         let bestDistance = Number.MAX_VALUE;
-        for (const actor of map.actors) {
+        for (let actorIndex=map.actors.length-1; actorIndex >= 0; actorIndex--) {
+            const actor = map.actors[actorIndex]; // reverse iterate to find topmost actor
             if (actor.brushModel != null) {
                 const matrix = actor.mainScale.toMatrix()
                     .multiply(actor.rotation.toMatrix())
@@ -218,24 +217,19 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 tx += actor.location.x;
                 ty += actor.location.y;
                 tz += actor.location.z;
-                const polygons = actor.brushModel.polygons;
-                for (const polygon of polygons) {
-                    let last = objectTransform(polygon.vertexes[polygon.vertexes.length - 1]);
+                for (const edge of actor.brushModel.edges) {
+                    let last = objectTransform(actor.brushModel.vertexes[edge.vertexIndexA].position);
                     let x0 = viewTransformX(last);
                     let y0 = viewTransformY(last);
-                    for (const v of polygon.vertexes) {
-                        const vertex = objectTransform(v);
-                        let x1 = viewTransformX(vertex);
-                        let y1 = viewTransformY(vertex);
-                        if (!isNaN(x0) && !isNaN(x1)) {
-                            let distance = distanceToLineSegment(canvasX, canvasY, x0, y0, x1, y1);
-                            if (distance < bestDistance) {
-                                bestMatch = actor;
-                                bestDistance = distance;
-                            }
+                    const vertex = objectTransform(actor.brushModel.vertexes[edge.vertexIndexB].position);
+                    let x1 = viewTransformX(vertex);
+                    let y1 = viewTransformY(vertex);
+                    if (!isNaN(x0) && !isNaN(x1)) {
+                        let distance = distanceToLineSegment(canvasX, canvasY, x0, y0, x1, y1);
+                        if (distance < bestDistance) {
+                            bestMatch = actor;
+                            bestDistance = distance;
                         }
-                        x0 = x1;
-                        y0 = y1;
                     }
                 }
                 tx = save_tx, ty = save_ty, tz = save_tz;

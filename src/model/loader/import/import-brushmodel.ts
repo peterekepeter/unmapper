@@ -1,13 +1,14 @@
-
-import { Polygon } from "../../Polygon";
 import { makeParser } from "./parser-helper";
 import { Parser } from "./Parser";
 import { BrushModel } from "../../BrushModel";
 import { importPolygon } from "./import-polygon";
+import { BrushPolygonData } from "../../BrushPolygonData";
+import { brushToPolygonData, polygonDataToBrush } from "../../brush-convert";
 
 export function importBrushModel(arg : string | Parser) : BrushModel {
     const parser = makeParser(arg);
-    const brushModel = new BrushModel();
+    let brushName = null;
+    let brush : BrushModel = null;
 
     parser.acceptAndMoveToNext("Begin");
     parser.acceptAndMoveToNext("Brush");
@@ -21,10 +22,10 @@ export function importBrushModel(arg : string | Parser) : BrushModel {
             case "Name": 
                 parser.moveToNext();
                 parser.acceptAndMoveToNext("=");
-                brushModel.name = parser.getCurrentTokenAndMoveToNext();
+                brushName = parser.getCurrentTokenAndMoveToNext();
                 break;
             case "Begin":
-                brushModel.polygons = parsePolygons(parser);
+                brush = polygonDataToBrush(parsePolygons(parser));
                 break;
             default:
                 throw "Unknown brush model property: " + key;
@@ -32,11 +33,17 @@ export function importBrushModel(arg : string | Parser) : BrushModel {
     }
     parser.acceptAndMoveToNext("End");
     parser.acceptAndMoveToNext("Brush");
-    return brushModel;
+    if (!brush) {
+        brush = new BrushModel();
+    }
+    if (brushName) {
+        brush.name = brushName;
+    }
+    return brush;
 }
 
-function parsePolygons(parser : Parser) : Polygon[] {
-    const result : Polygon[] = [];
+function parsePolygons(parser : Parser) : BrushPolygonData[] {
+    const result : BrushPolygonData[] = [];
     parser.acceptAndMoveToNext("Begin");
     parser.acceptAndMoveToNext("PolyList");
 

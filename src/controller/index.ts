@@ -4,7 +4,10 @@ import { loadMapFromString, storeMapToString } from '../model/loader';
 import { Actor } from '../model/Actor';
 import { createHistory } from './history';
 import { Vector } from '../model/Vector';
-import { triangulate } from '../model/algorithms/triangluate';
+import { triangulateBrush } from '../model/algorithms/triangluate';
+import { shuffle, shuffleBrushPolygons } from '../model/algorithms/shuffle';
+import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
+import { BrushModel } from '../model/BrushModel';
 
 export const createController = () => {
 
@@ -98,22 +101,34 @@ export const createController = () => {
         }))
     }
 
-    function triangulateMeshPolygons(){
+    function updateSelectedBrushes(op: (brush: BrushModel) => BrushModel){
         history.push();
         updateActorList(map.value.actors.map(a => {
             if (a.selected && a.brushModel){
-                const newPoly = triangulate(a.brushModel.polygons);
-                if (newPoly === a.brushModel.polygons){
+                const newBrush = op(a.brushModel);
+                if (newBrush === a.brushModel){
                     return a;
                 }
                 return {
-                    ...a, brushModel: { ...a.brushModel, polygons: newPoly }
+                    ...a, brushModel: newBrush
                 }
             }   
             else {
                 return a;
             }
         }))
+    }
+
+    function triangulateMeshPolygons(){
+        updateSelectedBrushes(triangulateBrush);
+    }
+
+    function shuffleMeshPolygons(){
+        updateSelectedBrushes(shuffleBrushPolygons);
+    }
+
+    function alignMeshVertexesToGrid(){
+        updateSelectedBrushes(brush => alignBrushModelToGrid(brush, new Vector(32,32,32)));
     }
 
     return {
@@ -124,6 +139,8 @@ export const createController = () => {
         makeSelection,
         deleteSelected,
         triangulateMeshPolygons,
+        shuffleMeshPolygons,
+        alignMeshVertexesToGrid,
         undoCopyMove,
         selectAll,
         showAllCommands,

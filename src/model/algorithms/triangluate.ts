@@ -1,31 +1,38 @@
-import { Polygon } from "../Polygon";
+import { BrushModel } from "../BrushModel";
+import { BrushPolygon } from "../BrushPolygon";
 
 
-export function triangulate(polygons: Polygon[]) : Polygon[]
+export function triangulateBrush(brush: BrushModel) : BrushModel
 {
+    const polygons = brush.polygons;
     if (polygons.length == 0){
         // trivial case, empty list
-        return polygons;
+        return brush;
     }
     if (polygons.findIndex(p => p.vertexes.length != 3) === -1){
         // trivial case, already triangulated
-        return polygons;
+        return brush;
     }
-    const result = [];
+    const result : BrushPolygon[] = [];
     for (const poly of polygons){
-        if (poly.vertexes.length < 4){
+        if (poly.vertexes.length <= 3){
             // this poly is already triangulated
             result.push(poly);
         }
-        const vertexA = poly.vertexes[0];
-        for (let i=2; i<poly.vertexes.length; i++){
-            // triangulate !
-            const triangle : Polygon = {...poly};
-            const vertexB = poly.vertexes[i-1];
-            const vertexC = poly.vertexes[i];
-            triangle.vertexes = [vertexA, vertexB, vertexC];
-            result.push(triangle);
+        else {
+            const vertexA = poly.vertexes[0];
+            for (let i=2; i<poly.vertexes.length; i++){
+                // triangulate !
+                const triangle = poly.shallowCopy();
+                const vertexB = poly.vertexes[i-1];
+                const vertexC = poly.vertexes[i];
+                triangle.vertexes = [vertexA, vertexB, vertexC];
+                result.push(triangle);
+            }
         }
     }
-    return result;
+    const triangulated = brush.shallowCopy();
+    triangulated.polygons = result;
+    triangulated.buildAllPolygonEdges();
+    return triangulated;
 }

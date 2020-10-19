@@ -1,35 +1,43 @@
-import { Polygon } from "../../Polygon";
+import { brushToPolygonData, polygonDataToBrush } from "../../brush-convert";
+import { BrushModel } from "../../BrushModel";
+import { BrushPolygonData } from "../../BrushPolygonData";
 import { Vector } from "../../Vector";
-import { triangulate } from "../triangluate";
+import { triangulateBrush } from "../triangluate";
 
 
-test('empty returns empty', () => expect(triangulate([])).toEqual([]));
+const op = (data : BrushPolygonData[]) => brushToPolygonData(triangulateBrush(polygonDataToBrush(data)));
+
+test('empty returns empty', () => expect(op([])).toEqual([]));
 
 describe('triangulate a single triangle', () => {
-    let initial : Polygon[] = [];
-    const poly = new Polygon();
+    let initial : BrushPolygonData[] = [];
+    const poly = new BrushPolygonData();
     poly.vertexes.push(new Vector(-1, -1, 0));
     poly.vertexes.push(new Vector(+1, -1, 0));
     poly.vertexes.push(new Vector(+1, +1, 0));
     initial.push(poly);
-    const triangulated = triangulate(initial);
+    const triangulated = op(initial);
 
-    test('returns the same triangle', () => expect(triangulated[0]).toEqual(initial[0]));
+    test('returns the same triangle', () => expect((triangulated)[0]).toEqual(initial[0]));
 })
 
 describe('triangulate a single quad', () =>{
-    let initial : Polygon[] = [];
-    let triangulated : Polygon[] = null;
+    let initial : BrushPolygonData[] = [];
+    let triangulated : BrushPolygonData[] = null;
+    let triangulatedBrush : BrushModel;
 
     beforeAll(() => {
-        const poly = new Polygon();
+        const poly = new BrushPolygonData();
         poly.vertexes.push(new Vector( 0,  0, 0));
         poly.vertexes.push(new Vector(+1,  0, 0));
         poly.vertexes.push(new Vector(+1, +1, 0));
         poly.vertexes.push(new Vector( 0, +1, 0));
         initial.push(poly);
-        triangulated = triangulate(initial);
+        triangulatedBrush = triangulateBrush(polygonDataToBrush(initial));
+        triangulated = op(initial);
     })
+
+    test('triangulated quad has 5 edges', () => expect(triangulatedBrush.edges).toHaveLength(5));
 
     test('does not return null', () => expect(triangulated).not.toBeNull());
 

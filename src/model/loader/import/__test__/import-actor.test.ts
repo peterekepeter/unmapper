@@ -1,5 +1,4 @@
 import { importActor } from "../import-actor";
-import { Actor } from "../../../Actor";
 import { Vector } from "../../../Vector";
 import { CsgOperation } from "../../../CsgOperation";
 import { SheerAxis } from "../../../SheerAxis";

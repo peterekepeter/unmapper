@@ -34,6 +34,14 @@ function main() {
         shortcut: 'delete'
     },
     {
+        description: "Align Mesh Vertexes to 32x Grid",
+        implementation: controller.alignMeshVertexesToGrid,
+    },
+    {
+        description: "Shuffle Mesh Polygons",
+        implementation: controller.shuffleMeshPolygons,
+    },
+    {
         description: "Triangulate Mesh Polygons",
         implementation: controller.triangulateMeshPolygons,
     },

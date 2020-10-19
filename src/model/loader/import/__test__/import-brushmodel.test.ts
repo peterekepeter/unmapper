@@ -101,3 +101,20 @@ const cubeData = `
        End PolyList
     End Brush
 `;
+
+describe('cube import brushmodel', () => {
+   const cube = importBrushModel(cubeData);
+   
+   test('cube has 6 polygons', () => 
+      expect(cube.polygons).toHaveLength(6)
+   );
+
+   test('cube has 8 vertexes', () => 
+      expect(cube.vertexes).toHaveLength(8)
+   );
+
+   test('cube has 12 edges', () => 
+      expect(cube.edges).toHaveLength(12)
+   );
+
+})
