@@ -26,4 +26,10 @@ export class Actor
     
     // additional unsupported props go here, these still need to be reencoded
     public unsupportedProperties : { [key:string] : any } = {};
+
+    shallowCopy(){
+        const copy = new Actor();
+        Object.assign(copy, this);
+        return copy;
+    }
 }

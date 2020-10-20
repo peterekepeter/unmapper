@@ -11,6 +11,7 @@ import { BrushModel } from '../model/BrushModel';
 
 export const createController = () => {
 
+    var vertexMode = createSignal(false);
     var map = createSignal(new UnrealMap());
     var history = createHistory(map);
     var commandsShownState = createSignal(false);
@@ -25,7 +26,8 @@ export const createController = () => {
     function toggleSelection(prev: Actor)
     {
         if (prev == null) return; // nothing to toggle
-        const next : Actor = {...prev, selected : !prev.selected };
+        const next = prev.shallowCopy(); 
+        next.selected = !prev.selected;
         updateActor(prev, next);
     }
 
@@ -52,8 +54,13 @@ export const createController = () => {
         const newActors = map.value.actors.map<Actor>(a => {
             const shouldBeSelected = filter(a);
             change = change || a.selected !== shouldBeSelected;
-            return a.selected === shouldBeSelected 
-                ? a : {...a, selected:shouldBeSelected}
+            if (a.selected === shouldBeSelected){
+                return a;
+            } else {
+                const next = a.shallowCopy();
+                next.selected = shouldBeSelected;
+                return next;
+            }
         });
         if (change) updateActorList(newActors);
     }
@@ -91,9 +98,9 @@ export const createController = () => {
     function undoCopyMove() {
         updateActorList(map.value.actors.map(a => {
             if (a.selected){
-                return {
-                    ...a, location: a.location.add(-32,-32,-32)
-                }
+                const copy = a.shallowCopy();
+                a.location = a.location.add(-32,-32,-32);
+                return a;
             }   
             else {
                 return a;
@@ -101,42 +108,118 @@ export const createController = () => {
         }))
     }
 
-    function updateSelectedBrushes(op: (brush: BrushModel) => BrushModel){
-        history.push();
+    function modifyBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel) {
         updateActorList(map.value.actors.map(a => {
-            if (a.selected && a.brushModel){
-                const newBrush = op(a.brushModel);
+            if (a.brushModel){
+                const newBrush = op(a.brushModel, a);
+                if (newBrush == null){
+                    throw new Error('op should not return null');
+                }
                 if (newBrush === a.brushModel){
                     return a;
                 }
-                return {
-                    ...a, brushModel: newBrush
-                }
+                const copy = a.shallowCopy();
+                copy.brushModel = newBrush;
+                return copy;
             }   
             else {
                 return a;
             }
         }))
+
+    }
+
+    function modifySelectedBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel){
+        modifyBrushes((brush, actor) => {
+            if (actor.selected){
+                return op(brush, actor);
+            } else {
+                return brush;
+            }
+        })
     }
 
     function triangulateMeshPolygons(){
-        updateSelectedBrushes(triangulateBrush);
+        history.push();
+        modifySelectedBrushes(triangulateBrush);
     }
 
     function shuffleMeshPolygons(){
-        updateSelectedBrushes(shuffleBrushPolygons);
+        history.push();
+        modifySelectedBrushes(shuffleBrushPolygons);
     }
 
     function alignMeshVertexesToGrid(){
-        updateSelectedBrushes(brush => alignBrushModelToGrid(brush, new Vector(32,32,32)));
+        history.push();
+        modifySelectedBrushes(brush => alignBrushModelToGrid(brush, new Vector(32,32,32)));
+    }
+
+    function toggleVertexMode(){
+        vertexMode.value = !vertexMode.value;
+    }
+
+    function selectToggleVertex(target : Actor, vertexIndex : number)
+    {
+        modifyBrushes((brush, actor) => {
+            if (actor !== target || !target.selected){
+                if (target.brushModel.vertexes.findIndex(v => v.selected) !== -1){
+                    const newBrush = target.brushModel.shallowCopy();
+                    newBrush.vertexes = brush.vertexes.map((vertex) => {
+                        if (vertex.selected){
+                            const newVertex = vertex.shallowCopy();
+                            newVertex.selected = false;
+                            return newVertex;
+                        } else {
+                            return vertex
+                        }
+                    })
+                }
+                return brush;
+            }
+            const newBrush = target.brushModel.shallowCopy();
+            newBrush.vertexes = brush.vertexes.map((vertex, index) => {
+                if (index === vertexIndex){
+                    const newVertex = vertex.shallowCopy();
+                    newVertex.selected = !vertex.selected;
+                    return newVertex;
+                } else {
+                    return vertex;
+                }
+            })
+            return newBrush;
+        })
+    }
+
+    function selectVertex(target : Actor, vertexIndex : number){
+        modifyBrushes((brush, actor) => {
+            if (target === actor && brush.vertexes[vertexIndex].selected
+              ||target !== actor && brush.vertexes.findIndex(v => v.selected) === -1) {
+                return brush;
+            }
+            const newBrush = actor.brushModel.shallowCopy();
+            newBrush.vertexes = brush.vertexes.map((vertex, index) => {
+                const shouldBeSelected = target === actor && index === vertexIndex;
+                if (shouldBeSelected !== vertex.selected){
+                    const newVertex = vertex.shallowCopy();
+                    newVertex.selected = shouldBeSelected;
+                    return newVertex;
+                } else {
+                    return vertex;
+                }
+            });
+            return newBrush;
+        })
     }
 
     return {
         map,
+        vertexMode,
         commandsShownState,
         loadFromString,
         toggleSelection,
         makeSelection,
+        selectToggleVertex,
+        selectVertex,
         deleteSelected,
         triangulateMeshPolygons,
         shuffleMeshPolygons,
@@ -148,5 +231,6 @@ export const createController = () => {
         redo: history.forward,
         importFromString,
         exportSelectionToString,
+        toggleVertexMode,
     }
 }

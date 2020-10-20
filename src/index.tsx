@@ -29,7 +29,7 @@ function main() {
         shortcut: 'ctrl + a'
     },
     {
-        description: "Delete Selected Objects",
+        description: "Delete Selection",
         implementation: controller.deleteSelected,
         shortcut: 'delete'
     },
@@ -48,6 +48,10 @@ function main() {
     {
         description: "Undo Copy Move",
         implementation: controller.undoCopyMove
+    },
+    {
+        description: "Toggle Vertex Mode",
+        implementation: controller.toggleVertexMode
     }])
 
     const shortcutBindings : { [key:string] : ICommand } = {

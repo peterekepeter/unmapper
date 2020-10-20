@@ -26,6 +26,7 @@ export const Viewport = ({
     mode = ViewportMode.Top }) => {
 
     const map = useSignal(controller.map);
+    const vertexMode = useSignal(controller.vertexMode);
 
     let [canvas, setCanvas]
         = useState<HTMLCanvasElement>(null);
@@ -60,6 +61,7 @@ export const Viewport = ({
         if (renderer != null) {
             const perspectiveFov = 90;
             const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
+            renderer.setShowVertexes(vertexMode);
             renderer.setCenterTo(viewLocation);
             switch (viewMode) {
                 case ViewportMode.Perspective:
@@ -120,11 +122,20 @@ export const Viewport = ({
         if (!didMouseMove) {
             const canvasX = event.pageX - canvas.offsetLeft;
             const canvasY = event.pageY - canvas.offsetTop;
-            const actor = renderer.findNearestActor(map, canvasX, canvasY);
-            if (event.ctrlKey) {
-                controller.toggleSelection(actor);
+            if (vertexMode){
+                const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY);
+                if (event.ctrlKey){
+                    controller.selectToggleVertex(actor, vertexIndex);
+                } else {
+                    controller.selectVertex(actor, vertexIndex);
+                }
             } else {
-                controller.makeSelection(actor);
+                const actor = renderer.findNearestActor(map, canvasX, canvasY);
+                if (event.ctrlKey) {
+                    controller.toggleSelection(actor);
+                } else {
+                    controller.makeSelection(actor);
+                }
             }
         }
         setMouseDown(false);

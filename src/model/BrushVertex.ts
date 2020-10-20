@@ -4,7 +4,7 @@ import { Vector } from "./Vector";
 export class BrushVertex
 {
     position : Vector
-    selected : boolean
+    selected : boolean = false;
 
     constructor(position : Vector){
         this.position = position;
