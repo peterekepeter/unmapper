@@ -321,7 +321,8 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             tx += actor.location.x;
             ty += actor.location.y;
             tz += actor.location.z;
-            for (let vertexIndex = 0; vertexIndex < actor.brushModel.vertexes.length; vertexIndex++) {
+            const vertexes = actor.brushModel.vertexes;
+            for (let vertexIndex = vertexes.length-1; vertexIndex >= 0; vertexIndex--) {
                 const vertex = actor.brushModel.vertexes[vertexIndex];
                 let p0 = objectTransform(vertex.position);
                 let x0 = viewTransformX(p0);

@@ -15,4 +15,10 @@ export class BrushEdge
         return this.vertexIndexA === edgeVertexA && this.vertexIndexB === edgeVertexB 
             || this.vertexIndexA === edgeVertexB && this.vertexIndexB === edgeVertexA; 
     }
+
+    shallowCopy() {
+        const copy = new BrushEdge();
+        Object.assign(copy, this);
+        return copy;
+    }
 }
