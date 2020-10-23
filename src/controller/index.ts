@@ -42,7 +42,7 @@ export const createController = () => {
     }
 
     function deleteSelected(){
-        if (vertexMode)
+        if (vertexMode.value === true)
         {
             history.push();
             modifySelectedBrushes(barush => {
@@ -216,7 +216,7 @@ export const createController = () => {
     }
 
     function createPolygonFromSelectedVertexes(){
-        if (!vertexMode){
+        if (!vertexMode.value === true){
             return;
         }
         history.push();
@@ -383,7 +383,24 @@ export const createController = () => {
 
     function alignMeshVertexesToGrid(){
         history.push();
-        modifySelectedBrushes(brush => alignBrushModelToGrid(brush, new Vector(32,32,32)));
+        const grid = new Vector(32,32,32);
+        modifySelectedBrushes(brush => {
+            if (vertexMode.value === true){
+                const next = brush.shallowCopy();
+                next.vertexes = next.vertexes.map(currentVertex => {
+                    if (currentVertex.selected){
+                        const nextVertex = currentVertex.shallowCopy();
+                        nextVertex.position = alignToGrid(nextVertex.position, grid);
+                        return nextVertex;
+                    } else {
+                        return currentVertex;
+                    }
+                })
+                return next;
+            } else {
+                return alignBrushModelToGrid(brush, grid)
+            }
+        });
     }
 
     function toggleVertexMode(){
