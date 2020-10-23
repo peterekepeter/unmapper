@@ -5,8 +5,8 @@ import { Vector } from "./Vector";
 export class BrushPolygon
 {
     median: Vector = null;
-    vertexes: number[];
-    edges: number[];
+    vertexes: number[] = [];
+    edges: number[] = [];
     item : string = ''; 
     flags : number = 0;
     origin : Vector = Vector.ZERO;

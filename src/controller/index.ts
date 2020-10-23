@@ -8,6 +8,7 @@ import { triangulateBrush } from '../model/algorithms/triangluate';
 import { shuffle, shuffleBrushPolygons } from '../model/algorithms/shuffle';
 import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
 import { BrushModel } from '../model/BrushModel';
+import { BrushPolygon } from '../model/BrushPolygon';
 
 export const createController = () => {
 
@@ -163,7 +164,7 @@ export const createController = () => {
                     let needUpdatePolys = false;
                     for (const edgePoly of currentEdge.polygons){
                         for (const toDeleteIndex of polygonsToDelete){
-                            if (toDeleteIndex < edgePoly){
+                            if (toDeleteIndex <= edgePoly){
                                 needUpdatePolys = true;
                                 break;
                             }
@@ -189,7 +190,9 @@ export const createController = () => {
                         }
                     }
                     if (needUpdatePolys) {
-                        edge.polygons = edge.polygons.map((p) => {
+                        edge.polygons = edge.polygons
+                            .filter(p => polygonsToDelete.indexOf(p) === -1)
+                            .map((p) => {
                             let newIndex = p;
                             for (const toDeleteIndex of polygonsToDelete){
                                 if (toDeleteIndex < p){
@@ -210,6 +213,34 @@ export const createController = () => {
                 updateActorList(newActors);
             }
         }
+    }
+
+    function createPolygonFromSelectedVertexes(){
+        if (!vertexMode){
+            return;
+        }
+        history.push();
+        modifySelectedBrushes(oldBrush => {
+            const selected = [];
+            for (let i=0; i<oldBrush.vertexes.length; i++){
+                const vertex = oldBrush.vertexes[i];
+                if (vertex.selected){
+                    selected.push(i);
+                }
+            }
+            if (selected.length < 3){
+                return oldBrush;
+            }
+            const nextBrush = oldBrush.shallowCopy();
+            const newPoly = new BrushPolygon();
+            const pid = nextBrush.polygons.length;
+            nextBrush.polygons = [...oldBrush.polygons, newPoly];
+            newPoly.vertexes = selected;
+            nextBrush.calculatePolygonMedian(pid);
+            newPoly.origin = newPoly.median;
+            nextBrush.buildAllPolygonEdges();
+            return nextBrush;
+        });
     }
 
     function selectActors(filter: (actor : Actor) => boolean)
@@ -291,6 +322,43 @@ export const createController = () => {
             }
         }))
 
+    }
+
+    function flipPolygonNormal(){
+        modifySelectedBrushes(oldBrush => {
+            const selected = [];
+            for (let i=0; i<oldBrush.vertexes.length; i++){
+                const vertex = oldBrush.vertexes[i];
+                if (vertex.selected){
+                    selected.push(i);
+                }
+            }
+            if (selected.length < 3){
+                return oldBrush;
+            }
+            const nextBrush = oldBrush.shallowCopy();
+            let polyListCopied = false;
+            for (let i=0; i<nextBrush.polygons.length; i++){
+                const poly = nextBrush.polygons[i];
+                let polySelected = true;
+                for (const polyVertexIndex of poly.vertexes){
+                    if (selected.indexOf(polyVertexIndex) === -1){
+                        polySelected = false;
+                        break;
+                    }
+                }
+                if (polySelected){
+                    if (polyListCopied){
+                        nextBrush.polygons = nextBrush.polygons.slice();
+                    }
+                    const newPoly = poly.shallowCopy();
+                    nextBrush.polygons[i] = newPoly;
+                    newPoly.vertexes = newPoly.vertexes.slice().reverse();
+                    newPoly.normal = Vector.ZERO.subtract(newPoly.normal.x, newPoly.normal.y, newPoly.normal.z);
+                }
+            }
+            return nextBrush;
+        })    
     }
 
     function modifySelectedBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel){
@@ -385,6 +453,8 @@ export const createController = () => {
         selectToggleVertex,
         selectVertex,
         deleteSelected,
+        createPolygonFromSelectedVertexes,
+        flipPolygonNormal,
         triangulateMeshPolygons,
         shuffleMeshPolygons,
         alignMeshVertexesToGrid,

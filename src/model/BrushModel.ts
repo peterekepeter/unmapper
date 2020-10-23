@@ -105,6 +105,10 @@ export class BrushModel
         }
     }
 
+    calculatePolygonNormal(pid: number){
+        
+    }
+
     private _removeAllPolygonEdges(){
         for (const edge of this.edges){
             if (edge.polygons.length != 0){

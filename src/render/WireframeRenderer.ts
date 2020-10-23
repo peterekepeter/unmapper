@@ -45,6 +45,16 @@ const selectedColors: IBrushColors = {
     invalidBrush: makeSelectedColor(colors.invalidBrush),
 }
 
+function getColorBasedOnPolyCount(count : number){
+    switch(count){
+        case 0: return "#666";
+        case 1: return "#8c4";
+        case 2: return "#c12";
+        default: 
+            case 2: return "#c19";
+    }
+}
+
 function makeSelectedColor(cstr: string) {
     const colorSelected = Color.WHITE;
     return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex();
@@ -112,9 +122,9 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 .multiply(actor.mainScale.toMatrix());
             objectMatrix = matrix;
             const polygons = actor.brushModel.polygons;
-            context.strokeStyle = actor.selected && showVertexes ? vertexColor : getBrushWireColor(actor);
+            context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.5;
-            renderWireframeEdges(actor.brushModel);
+            renderWireframeEdges(actor.brushModel, actor.selected && showVertexes);
             if (showVertexes && actor.selected){
                 renderVertexes(actor.brushModel);
             }
@@ -138,8 +148,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         }
     }
 
-    function renderWireframeEdges(brush: BrushModel) {
-        context.beginPath();
+    function renderWireframeEdges(brush: BrushModel, colorBasedOnPolyCount: boolean) {
         for (const edge of brush.edges) {
             const vertexA = objectTransform(brush.vertexes[edge.vertexIndexA].position);
             const vertexB = objectTransform(brush.vertexes[edge.vertexIndexB].position);
@@ -148,11 +157,18 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             const x1 = viewTransformX(vertexB), y1 = viewTransformY(vertexB);
             const invalid0 = isNaN(x0) || isNaN(y0);
             const invalid1 = isNaN(x1) || isNaN(y1);
+
+            if (colorBasedOnPolyCount)
+            {
+                context.strokeStyle = getColorBasedOnPolyCount(edge.polygons.length);
+            }
             
             if (!invalid0 && !invalid1)
             {
+                context.beginPath();
                 context.moveTo(x0,y0);
                 context.lineTo(x1,y1);
+                context.stroke();
             }
             else if(!invalid0 && invalid1 || invalid0 && !invalid1)
             {
@@ -163,12 +179,13 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 if (vi != null){
                     const x0 = viewTransformX(v0), y0 = viewTransformY(v0);
                     const x1 = viewTransformX(vi), y1 = viewTransformY(vi);
+                    context.beginPath();
                     context.moveTo(x0,y0);
                     context.lineTo(x1,y1);
+                    context.stroke();
                 }
             }
         }
-        context.stroke();
     }
 
     let tx = 0.0, tpx = 0.0;

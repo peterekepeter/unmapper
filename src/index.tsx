@@ -52,6 +52,14 @@ function main() {
     {
         description: "Toggle Vertex Mode",
         implementation: controller.toggleVertexMode
+    },
+    {
+        description: "Create polygon from selected vertexes",
+        implementation: controller.createPolygonFromSelectedVertexes
+    },
+    {
+        description: "Flip polygon (normal, winding, facing)",
+        implementation: controller.flipPolygonNormal
     }])
 
     const shortcutBindings : { [key:string] : ICommand } = {
