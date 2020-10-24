@@ -13,6 +13,12 @@ export const CommandPalette = ({ controller = createController() }) => {
     const shown = useSignal(controller.commandsShownState);
     const [value, setValue] = React.useState('');
     const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const [isMouseOver, xxx] = React.useState(false);
+
+    function setIsMouseOver(state:boolean){
+        console.log('mouseover', state);
+        xxx(state);
+    }
 
     if (!shown){
         return <></>;
@@ -32,7 +38,9 @@ export const CommandPalette = ({ controller = createController() }) => {
         margin: '1rem',
         boxShadow: '0px 2px 4px #0008, 0px 8px 32px #0008',
         borderRadius: '2px'
-    }}>
+    }}
+    onMouseEnter={()=>setIsMouseOver(true)}
+    onMouseLeave={()=>setIsMouseOver(false)}>
         <div style={{margin:'2px'}}> 
             <UiText>&gt;</UiText><input 
                 spellCheck="false" 
@@ -47,13 +55,15 @@ export const CommandPalette = ({ controller = createController() }) => {
                     ...font,
                     fontSize: '14px',
                 }} 
-                onBlur={cancel} 
+                onBlur={handleBlur}
                 onKeyDown={keydown}/>
         </div>
         {matching.map(
             (cmd, index) => <CommandItem 
+                key={cmd.description}
                 command={cmd} 
                 selected={index===selectedIndex}
+                onMouseEnter={()=>setSelectedIndex(index)}
                 onClick={()=>{setSelectedIndex(index);submit()}}/>)}
     </div>
 
@@ -97,6 +107,12 @@ export const CommandPalette = ({ controller = createController() }) => {
         setSelectedIndex(0);
         controller.commandsShownState.value = false;
     }
+
+    function handleBlur(){
+        if (!isMouseOver){
+            hide();
+        }
+    }
 }
 
 function getMatchingCommands(str : string){
@@ -105,7 +121,7 @@ function getMatchingCommands(str : string){
             .indexOf(str.toLocaleLowerCase()) >= 0);
 }
 
-const CommandItem = ({command, selected, onClick} : {command:ICommandInfo, selected:boolean, onClick:()=>void}) => {
+const CommandItem = ({command, selected, onClick, onMouseEnter} : {command:ICommandInfo, selected:boolean, onClick:()=>void, onMouseEnter:()=>void}) => {
     const background = selected 
         ? themeColors.value.accent + '2'
         : 'none'
@@ -117,7 +133,8 @@ const CommandItem = ({command, selected, onClick} : {command:ICommandInfo, selec
             display:'flex', 
             cursor:'pointer'
         }} 
-        onClick={onClick}>
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}>
         <UiText>{command.description}</UiText>
         <div style={{flexGrow:1}}></div>
         <Shortcut str={command.shortcut}/>
@@ -128,9 +145,9 @@ const Shortcut = ({str}:{str: string}) => {
     if (!str){
         return <></>;
     }
-    return <>{str.split(/\s+/).map(token => token === '+' 
-        ? (<span style={shortcutKeySeparatorStyle}>{token}</span>)
-        : (<span style={shortcutKeyStyle}>{token}</span>))}</>;
+    return <>{str.split(/\s+/).map((token,index) => token === '+' 
+        ? (<span key={token + index} style={shortcutKeySeparatorStyle}>{token}</span>)
+        : (<span key={token} style={shortcutKeyStyle}>{token}</span>))}</>;
 }
 
 const shortcutKeySeparatorStyle = {
