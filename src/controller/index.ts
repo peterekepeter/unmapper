@@ -381,9 +381,9 @@ export const createController = () => {
         modifySelectedBrushes(shuffleBrushPolygons);
     }
 
-    function alignMeshVertexesToGrid(){
+    function alignMeshVertexesToGrid(size: number){
         history.push();
-        const grid = new Vector(32,32,32);
+        const grid = new Vector(size, size, size);
         modifySelectedBrushes(brush => {
             if (vertexMode.value === true){
                 const next = brush.shallowCopy();

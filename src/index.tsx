@@ -34,8 +34,16 @@ function main() {
         shortcut: 'delete'
     },
     {
-        description: "Align Mesh Vertexes to 32x Grid",
-        implementation: controller.alignMeshVertexesToGrid,
+        description: "Align Mesh Vertexes to 32x32x32 Grid",
+        implementation: () => controller.alignMeshVertexesToGrid(32),
+    },
+    {
+        description: "Align Mesh Vertexes to 16x16x16 Grid",
+        implementation: () => controller.alignMeshVertexesToGrid(16),
+    },
+    {
+        description: "Align Mesh Vertexes to 8x8x8 Grid",
+        implementation: () => controller.alignMeshVertexesToGrid(8),
     },
     {
         description: "Shuffle Mesh Polygons",
