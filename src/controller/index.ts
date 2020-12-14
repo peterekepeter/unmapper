@@ -10,6 +10,7 @@ import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToG
 import { BrushModel } from '../model/BrushModel';
 import { BrushPolygon } from '../model/BrushPolygon';
 import { deleteBrushData } from '../model/algorithms/deleteBrushData';
+import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 
 export const createController = () => {
 
@@ -84,6 +85,16 @@ export const createController = () => {
             newPoly.origin = newPoly.median;
             nextBrush.buildAllPolygonEdges();
             return nextBrush;
+        });
+    }
+
+    function extrudeSelectedPolygons(){
+        if (!vertexMode.value){
+            return;
+        }
+        history.push();
+        modifySelectedBrushes(oldBrush => {
+            return extrudeBrushFaces(oldBrush, oldBrush.getSelectedPolygonIndices() , 32.0)
         });
     }
 
@@ -315,6 +326,7 @@ export const createController = () => {
         selectVertex,
         deleteSelected,
         createPolygonFromSelectedVertexes,
+        extrudeSelectedPolygons,
         flipPolygonNormal,
         triangulateMeshPolygons,
         shuffleMeshPolygons,

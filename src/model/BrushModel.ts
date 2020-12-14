@@ -119,6 +119,25 @@ export class BrushModel
         return result;
     }
 
+    getSelectedPolygonIndices(): number[] {
+        const result = [];
+        for (let i=0; i<this.polygons.length; i++){
+            const polygon = this.polygons[i];
+            let selected = true;
+            for (let j=0; j<polygon.vertexes.length; j++){
+                const vertex = this.vertexes[polygon.vertexes[j]];
+                if (!vertex.selected){
+                    selected = false;
+                    break;
+                }
+            }
+            if (selected){
+                result.push(i);
+            }
+        }
+        return result;
+    }
+
     private _removeAllPolygonEdges(){
         for (const edge of this.edges){
             if (edge.polygons.length != 0){

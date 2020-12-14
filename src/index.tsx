@@ -66,6 +66,10 @@ function main() {
         implementation: controller.createPolygonFromSelectedVertexes
     },
     {
+        description: "Extrude selected polygons by 32 units",
+        implementation: controller.extrudeSelectedPolygons
+    },
+    {
         description: "Flip polygon (normal, winding, facing)",
         implementation: controller.flipPolygonNormal
     }])
