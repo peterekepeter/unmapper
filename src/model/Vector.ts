@@ -22,7 +22,7 @@ export class Vector {
         Object.freeze(this);
     }
 
-    public addVector(v:Vector) {
+    public addVector(v: Vector) {
         return this.add(v.x, v.y, v.z);
     }
 
@@ -38,8 +38,8 @@ export class Vector {
         return new Vector(this.x * s, this.y * s, this.z * s);
     }
 
-    public static fromArray(array: number[]): Vector {
-        return new Vector(array[0], array[1], array[2]);
+    public static fromArray(array: number[], index = 0): Vector {
+        return new Vector(array[index + 0], array[index + 1], array[index + 2]);
     }
 
     public equals(vector: Vector): boolean {
