@@ -23,8 +23,9 @@ export class BrushModel
     }
 
     /** returns new vertex index */
-    addVertex(position: Vector): number {
+    addVertex(position: Vector, selected: boolean = false): number {
         const newVertex = new BrushVertex(position);
+        newVertex.selected = selected;
         const index = this.vertexes.length;
         this.vertexes.push(newVertex);
         return index;

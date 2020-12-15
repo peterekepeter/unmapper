@@ -55,9 +55,7 @@ function executeDeleteOp(
     // remove objects
     const brush = input.shallowCopy();
     brush.polygons = brush.polygons.filter((p,i) => polygonsToDelete.indexOf(i) === -1);
-    console.log(brush.edges);
     brush.edges = brush.edges.filter((p,i) => edgesToDelete.indexOf(i) === -1);
-    console.log(brush.edges);
     brush.vertexes = brush.vertexes.filter((p,i) => vertexesToDelete.indexOf(i) === -1);
     // update indexes of polys
     for (let i=0; i<brush.polygons.length; i++){
