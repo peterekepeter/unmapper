@@ -6,8 +6,8 @@ export function extrudeBrushFaces(brush: BrushModel, facesIndices: number[], dis
         return brush;
     }
     const new_brush = brush.shallowCopy();
-    new_brush.vertexes = new_brush.vertexes.slice();
-    new_brush.polygons = new_brush.polygons.slice();
+    new_brush.vertexes = [...new_brush.vertexes];
+    new_brush.polygons = [...new_brush.polygons];
     for (const faceIndex of facesIndices){
         extrudeFaceDistance(new_brush, faceIndex, distance);
     }

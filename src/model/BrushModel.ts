@@ -44,6 +44,22 @@ export class BrushModel
         return this.edges.findIndex(e => e.hasVertexes(edgeVertexA, edgeVertexB));
     }
 
+    findPolygonsContaining(query: { vertexes: number[], min_vertex_match: number }) : BrushPolygon[]{
+        const result : BrushPolygon[] = [];
+        for (const poly of this.polygons){
+            let vertex_match_count = 0;
+            for (const vertex of poly.vertexes){
+                if (query.vertexes.indexOf(vertex) !== -1){
+                    vertex_match_count++;
+                }
+            }
+            if (vertex_match_count >= query.min_vertex_match){
+                result.push(poly);
+            }
+        }
+        return result;
+    }
+
     addEdge(edgeVertexA: number, edgeVertexB: number)
     {
         const newEdge = new BrushEdge();
@@ -54,7 +70,7 @@ export class BrushModel
         return index;
     }
 
-    findEdgeIndexOrAddEdge(edgeVertexA: number, edgeVertexB: number) {
+    findEdgeIndexOrAddEdge(edgeVertexA: number, edgeVertexB: number) : number {
         const index = this.findEdgeIndex(edgeVertexA, edgeVertexB);
         if (index < 0){
             return this.addEdge(edgeVertexA, edgeVertexB);
