@@ -11,6 +11,7 @@ import { BrushModel } from '../model/BrushModel';
 import { BrushPolygon } from '../model/BrushPolygon';
 import { deleteBrushData } from '../model/algorithms/deleteBrushData';
 import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
+import { createBrushPolygon } from '../model/algorithms/createBrushPolygon';
 
 export const createController = () => {
 
@@ -65,26 +66,12 @@ export const createController = () => {
             return;
         }
         history.push();
-        modifySelectedBrushes(oldBrush => {
-            const selected = [];
-            for (let i=0; i<oldBrush.vertexes.length; i++){
-                const vertex = oldBrush.vertexes[i];
-                if (vertex.selected){
-                    selected.push(i);
-                }
+        modifySelectedBrushes(brush => {
+            if (!vertexMode.value){
+                return;
             }
-            if (selected.length < 3){
-                return oldBrush;
-            }
-            const nextBrush = oldBrush.shallowCopy();
-            const newPoly = new BrushPolygon();
-            const pid = nextBrush.polygons.length;
-            nextBrush.polygons = [...oldBrush.polygons, newPoly];
-            newPoly.vertexes = selected;
-            nextBrush.calculatePolygonMedian(pid);
-            newPoly.origin = newPoly.median;
-            nextBrush.buildAllPolygonEdges();
-            return nextBrush;
+            const selected = brush.getSelectedVertexIndices();
+            return createBrushPolygon(brush, selected);
         });
     }
 

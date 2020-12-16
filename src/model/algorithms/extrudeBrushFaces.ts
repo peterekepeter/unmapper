@@ -1,28 +1,29 @@
 import { BrushModel } from "../BrushModel";
 import { Vector } from "../Vector";
+import { createBrushPolygons } from "./createBrushPolygon";
 
 export function extrudeBrushFaces(brush: BrushModel, facesIndices: number[], distance: number) : BrushModel {
     if (facesIndices.length == 0 || distance === 0) {
         return brush;
     }
-    const new_brush = brush.shallowCopy();
+    let new_brush = brush.shallowCopy();
     new_brush.vertexes = [...new_brush.vertexes];
     new_brush.polygons = [...new_brush.polygons];
     for (const faceIndex of facesIndices){
-        extrudeFaceDistance(new_brush, faceIndex, distance);
+        new_brush = extrudeFaceDistance(new_brush, faceIndex, distance);
     }
     new_brush.buildAllPolygonEdges()
     return new_brush;
 }
 
-function extrudeFaceDistance(mutable_brush: BrushModel, face_index: number, extrude_distance: number) : void {
+function extrudeFaceDistance(mutable_brush: BrushModel, face_index: number, extrude_distance: number) : BrushModel {
     const targetFace = mutable_brush.polygons[face_index];
     const normal = targetFace.normal;
     const extrude_vector = normal.scale(extrude_distance);
-    extrudeFaceVector(mutable_brush, face_index, extrude_vector);
+    return extrudeFaceVector(mutable_brush, face_index, extrude_vector);
 }
 
-function extrudeFaceVector(mutable_brush: BrushModel, face_index: number, extrude_vector: Vector) : void {
+function extrudeFaceVector(mutable_brush: BrushModel, face_index: number, extrude_vector: Vector) : BrushModel {
     const targetFace = mutable_brush.polygons[face_index];
     const replacementFace = targetFace.shallowCopy();
     replacementFace.vertexes = [];
@@ -43,4 +44,23 @@ function extrudeFaceVector(mutable_brush: BrushModel, face_index: number, extrud
             mutable_brush.vertexes[vertexIndex] = new_vertex;
         }
     }
+    return bridgeEdgeLoops(mutable_brush, targetFace.vertexes, replacementFace.vertexes);
+}
+
+function bridgeEdgeLoops(brush: BrushModel, first_loop_vertexes : number[], second_loop_vertexes: number[]) : BrushModel {
+    if (first_loop_vertexes.length !== second_loop_vertexes.length){
+        throw new Error('edge loops not compatible');
+    }
+    let polygons_to_create :number[][] = [];
+    let last_index = first_loop_vertexes.length-1;
+    for (let current_index=0 ;current_index<first_loop_vertexes.length; current_index++){
+        polygons_to_create.push([
+            first_loop_vertexes[current_index],
+            second_loop_vertexes[current_index],
+            second_loop_vertexes[last_index],
+            first_loop_vertexes[last_index]
+        ]);
+        last_index= current_index;
+    }
+    return createBrushPolygons(brush, polygons_to_create);
 }

@@ -1,19 +1,27 @@
+import { BrushEdge } from "../BrushEdge";
 import { BrushModel } from "../BrushModel";
 import { BrushPolygon } from "../BrushPolygon";
 import { BrushVertex } from "../BrushVertex";
+import { calculate_polygon_median } from "./calculate_polygon_median";
+import { calculate_polygon_normal } from "./calculate_polygon_normal";
 
+export function createBrushPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushModel {
+    return createBrushPolygons(brush, [selected_vertexes]);
+}
 
-export function createBrushPolygon(oldBrush: BrushModel, selected_vertexes: number[]){
-    if (selected_vertexes.length < 3){
-        return oldBrush; // need at least 3 vertexes to form a new polygon
-    }
+export function createBrushPolygons(brush: BrushModel, polygons_to_create: number[][]) : BrushModel {
 
-    const nextBrush = oldBrush.shallowCopy();
-    const newPoly = new BrushPolygon();
+    const nextBrush = brush.shallowCopy();
+    nextBrush.polygons = [...nextBrush.polygons];
     
+    const newPolygons = polygons_to_create.map(vertex_list => createPolygon(brush, vertex_list));
+    nextBrush.polygons = [...nextBrush.polygons, ...newPolygons];
+    return nextBrush;
+}
 
+function createPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushPolygon {
     // get neighbours to determine winding order
-    const neighbours = nextBrush.findPolygonsContaining({ min_vertex_match: 2, vertexes: selected_vertexes });
+    const neighbours = brush.findPolygonsContaining({ min_vertex_match: 2, vertexes: selected_vertexes });
     const neighbour_edges = __extract_edges(neighbours, selected_vertexes);
 
 
@@ -25,7 +33,7 @@ export function createBrushPolygon(oldBrush: BrushModel, selected_vertexes: numb
     for (let i=0; i<try_count; i++){
         // retry loop for creating poly
         try {
-            new_vertex_index_list = create_polygon_vertex_index_list(nextBrush.vertexes, neighbour_edges, selected_vertexes);
+            new_vertex_index_list = create_polygon_vertex_index_list(brush.vertexes, neighbour_edges, selected_vertexes);
             break;
         }
         catch (error){
@@ -38,14 +46,15 @@ export function createBrushPolygon(oldBrush: BrushModel, selected_vertexes: numb
         throw index_list_error || new Error("failed to create polygon");
     }
     
+    const polygon = new BrushPolygon();
 
-    const pid = nextBrush.polygons.length;
-    nextBrush.polygons = [...oldBrush.polygons, newPoly];
-    newPoly.vertexes = new_vertex_index_list;
-    nextBrush.calculatePolygonMedian(pid);
-    newPoly.origin = newPoly.median;
-    nextBrush.buildAllPolygonEdges();
-    return nextBrush;
+    //const pid = nextBrush.polygons.length;
+    //nextBrush.polygons.push(newPoly);
+    polygon.vertexes = new_vertex_index_list;
+    polygon.median = calculate_polygon_median(brush.vertexes, polygon);
+    polygon.origin = polygon.median;
+    polygon.normal = calculate_polygon_normal(brush.vertexes, polygon);
+    return polygon;
 }
 
 export function __extract_edges(polygons: BrushPolygon[], indexes: number[]): number[][]{
