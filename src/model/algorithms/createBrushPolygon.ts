@@ -16,9 +16,32 @@ export function createBrushPolygon(oldBrush: BrushModel, selected_vertexes: numb
     const neighbours = nextBrush.findPolygonsContaining({ min_vertex_match: 2, vertexes: selected_vertexes });
     const neighbour_edges = __extract_edges(neighbours, selected_vertexes);
 
+
+    let new_vertex_index_list : number[];
+    let index_list_error;
+    let try_count = Math.min(selected_vertexes.length, 10);
+    const rotating_selection = [...selected_vertexes];
+
+    for (let i=0; i<try_count; i++){
+        // retry loop for creating poly
+        try {
+            new_vertex_index_list = create_polygon_vertex_index_list(nextBrush.vertexes, neighbour_edges, selected_vertexes);
+            break;
+        }
+        catch (error){
+            index_list_error = error;
+            rotating_selection.unshift(rotating_selection.pop());
+        }
+    }
+
+    if (!new_vertex_index_list){
+        throw index_list_error || new Error("failed to create polygon");
+    }
+    
+
     const pid = nextBrush.polygons.length;
     nextBrush.polygons = [...oldBrush.polygons, newPoly];
-    newPoly.vertexes = create_polygon_vertex_index_list(nextBrush.vertexes, neighbour_edges, selected_vertexes);
+    newPoly.vertexes = new_vertex_index_list;
     nextBrush.calculatePolygonMedian(pid);
     newPoly.origin = newPoly.median;
     nextBrush.buildAllPolygonEdges();
@@ -47,33 +70,39 @@ function create_polygon_vertex_index_list(
     // all selected vertexes must be part of the new list
     const vertexes_to_add = [...selected_vertexes];
     const result : number[] = [vertexes_to_add.pop()];
-    console.log('start', selected_vertexes, 'from', result);
+    //console.log('start', selected_vertexes, 'from', result);
 
     while(vertexes_to_add.length > 0){
         // if only one vertex left, add it!
         if (vertexes_to_add.length == 1){
             result.push(vertexes_to_add.pop());
-            console.log('added last', result);
+            //console.log('added last', result);
             continue; // ok, added vertex
         }
         const last_vertex = result[result.length-1];
+        let added = false;
+        //console.log('last_vertex', last_vertex)
         // see if we can find an edge which terminates in last_vertex
         for (const n_edge of neighbour_edges){
             if (n_edge[1] === last_vertex){
                 const next_vertex = n_edge[0];
                 vertexes_to_add.splice(vertexes_to_add.indexOf(next_vertex),1);
                 result.push(next_vertex);
-                console.log(`added edge ${n_edge[1]}->${n_edge[0]}`, result);
-                continue; // ok, added vertex
+                //console.log(`added edge ${n_edge[1]}->${n_edge[0]}`, result);
+                added = true;
+                break; // ok, added vertex
             }
+        }
+        if (added){
+            continue;
         }
 
         // no edge constraint for next vertex, find closest vertex of remaining ones
         const sorted_by_distance = vertexes_to_add
             .map(i => ({vertex_index: i, distance: vertexes[last_vertex].position.distanceTo(vertexes[i].position)}))
-            .sort((a,b) => b.distance - a.distance);
+            .sort((a,b) => a.distance - b.distance);
 
-        console.log(sorted_by_distance);
+        //console.log('distance to',last_vertex, "\n", sorted_by_distance);
 
         let next_vertex = -1;
         let next_invalid = true;
@@ -96,7 +125,7 @@ function create_polygon_vertex_index_list(
         {
             vertexes_to_add.splice(vertexes_to_add.indexOf(next_vertex), 1);
             result.push(next_vertex);
-            console.log(`added nearest ${next_vertex}`, result);
+            //console.log(`added nearest ${next_vertex}`, result);
             continue;
         }
         throw new Error('unable to construct polygon');

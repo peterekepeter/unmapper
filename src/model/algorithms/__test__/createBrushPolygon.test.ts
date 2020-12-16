@@ -48,7 +48,9 @@ BRUSH.buildAllPolygonEdges();
 describe("create_brush_polygon", () => {
 
   [
-    [4,5,8,7], [4,7,5,8], [5,7,8,4]
+    [4,5,8,7], 
+    [4,7,5,8],
+    [5,7,8,4]
   ].forEach((selection) => test(`selection ${JSON.stringify(selection)} creates correct polygon`, () => {
     const result = createBrushPolygon(BRUSH, selection);
     const result_poly = result.polygons.find(p => p.vertexes.indexOf(8) !== -1);
