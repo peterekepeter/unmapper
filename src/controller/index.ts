@@ -12,6 +12,7 @@ import { BrushPolygon } from '../model/BrushPolygon';
 import { deleteBrushData } from '../model/algorithms/deleteBrushData';
 import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 import { createBrushPolygon } from '../model/algorithms/createBrushPolygon';
+import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
 
 export const createController = () => {
 
@@ -203,6 +204,11 @@ export const createController = () => {
         })    
     }
 
+    function uv_triplanar_map_selected(){
+        history.push();
+        modifySelectedBrushes(brush => uv_triplanar_map(brush));
+    }
+
     function modifySelectedBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel){
         modifyBrushes((brush, actor) => {
             if (actor.selected){
@@ -318,6 +324,7 @@ export const createController = () => {
         triangulateMeshPolygons,
         shuffleMeshPolygons,
         alignMeshVertexesToGrid,
+        uv_triplanar_map_selected,
         undoCopyMove,
         selectAll,
         showAllCommands,

@@ -67,11 +67,16 @@ function main() {
     },
     {
         description: "Extrude selected polygons by 32 units",
-        implementation: controller.extrudeSelectedPolygons
+        implementation: controller.extrudeSelectedPolygons,
+        shortcut: 'e'
     },
     {
         description: "Flip polygon (normal, winding, facing)",
         implementation: controller.flipPolygonNormal
+    },
+    {
+       description: 'UV: triplanar map brush polygons',
+       implementation: controller.uv_triplanar_map_selected
     }])
 
     const shortcutBindings : { [key:string] : ICommand } = {
