@@ -13,6 +13,7 @@ import { deleteBrushData } from '../model/algorithms/deleteBrushData';
 import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 import { createBrushPolygon } from '../model/algorithms/createBrushPolygon';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
+import { BrushVertex } from '../model/BrushVertex';
 
 export const createController = () => {
 
@@ -42,7 +43,29 @@ export const createController = () => {
     }
 
     function selectAll(){
-        selectActors((_) => true);
+        if (vertexMode.value === true)
+        {
+            modifySelectedBrushes(old_brush => {
+                if (old_brush.vertexes.find(v => !v.selected) == null){
+                    return old_brush; // all vertexes already selected
+                }
+                const new_brush = old_brush.shallowCopy();
+                new_brush.vertexes = new_brush.vertexes.map((v):BrushVertex => {
+                    if (v.selected){
+                        return v;
+                    } else {
+                        const new_vertex = v.shallowCopy();
+                        new_vertex.selected = true;
+                        return new_vertex;
+                    }
+                })
+                return new_brush;
+            })
+        } 
+        else 
+        {
+            selectActors((_) => true);
+        }
     }
 
     function deleteSelected(){
