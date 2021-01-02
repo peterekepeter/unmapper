@@ -11,7 +11,7 @@ import { useSignal } from "./useSignal";
 
 export function PropertyEditor({ controller = createController() }) {
 
-    const map = useSignal(controller.map);
+    const map = useSignal(controller.state_signal).map;
     
     const selection = map.actors.filter(a => a.selected);
     const titleDetail = selection.length == 0

@@ -18,8 +18,7 @@ export const Viewport = ({
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }) => {
 
-    const map = useSignal(controller.map);
-    const vertexMode = useSignal(controller.vertexMode);
+    const { map, vertex_mode } = useSignal(controller.state_signal);
 
     let [canvas, setCanvas]
         = useState<HTMLCanvasElement>(null);
@@ -54,7 +53,7 @@ export const Viewport = ({
         if (renderer != null) {
             const perspectiveFov = 90;
             const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
-            renderer.setShowVertexes(vertexMode);
+            renderer.setShowVertexes(vertex_mode);
             renderer.setCenterTo(viewLocation);
             switch (viewMode) {
                 case ViewportMode.Perspective:
@@ -115,7 +114,7 @@ export const Viewport = ({
         if (!didMouseMove) {
             const canvasX = event.pageX - canvas.offsetLeft;
             const canvasY = event.pageY - canvas.offsetTop;
-            if (vertexMode){
+            if (vertex_mode){
                 const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY);
                 if (event.ctrlKey){
                     controller.selectToggleVertex(actor, vertexIndex);

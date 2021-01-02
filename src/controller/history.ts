@@ -1,19 +1,21 @@
 import { UnrealMap } from "../model/UnrealMap";
 import { ISignal, createSignal } from "reactive-signals";
-import { ICommand } from "./ICommand";
+import { EditorState } from "../model/EditorState";
 
 
-interface IHistory
+interface IHistory<T>
 {
-    push : ICommand;
-    forward : ICommand;
-    back : ICommand
+    push : () => void;
+    forward : () => void;
+    back : () => void;
+    get_next_state: () => T;
+    get_previous_state: () => T;
 }
 
-export function createHistory(map : ISignal<UnrealMap>) : IHistory {
+export function create_history<T>(map : ISignal<T>) : IHistory<T> {
     
-    var past : UnrealMap[] = [];
-    var future : UnrealMap[] = [];
+    var past : T[] = [];
+    var future : T[] = [];
 
     function push()
     {
@@ -26,6 +28,9 @@ export function createHistory(map : ISignal<UnrealMap>) : IHistory {
 
     function back()
     {
+        if (past.length <= 0){
+            throw new Error('no past');
+        }
         future.push(map.value);
         map.value = past.pop();
         updateBoth();
@@ -33,6 +38,9 @@ export function createHistory(map : ISignal<UnrealMap>) : IHistory {
 
     function forward()
     {
+        if (future.length <= 0){
+            throw new Error('no future');
+        }
         past.push(map.value);
         map.value = future.pop();
         updateBoth();
@@ -46,10 +54,20 @@ export function createHistory(map : ISignal<UnrealMap>) : IHistory {
         forward.canExecute.value = future.length > 0;
     }
 
+    function get_next_state(){
+        return future.length > 0 ? future[future.length - 1] : null;
+    }
+
+    function get_previous_state(){
+        return past.length > 0 ? past[past.length - 1] : null;
+    }
+
     return {
         push,
         back,
-        forward
+        forward,
+        get_next_state,
+        get_previous_state,
     }
 
 }

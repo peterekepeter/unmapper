@@ -11,7 +11,9 @@ export interface ICommandInfoV2
 {
     description?: string,
     implementation?: ICommandV2,
-    shortcut?: string
+    shortcut?: string,
+    /** old commands don't return new state */
+    legacy_handling?: boolean
 }
 
 export interface ICommandRegistry
@@ -42,7 +44,8 @@ export function create_command_registry() : ICommandRegistry {
                 await info.implementation();
                 return state;
             },
-            shortcut: info.shortcut
+            shortcut: info.shortcut,
+            legacy_handling: true,
         });
     }
     

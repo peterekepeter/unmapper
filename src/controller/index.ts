@@ -2,7 +2,7 @@ import { createSignal } from 'reactive-signals';
 import { UnrealMap } from '../model/UnrealMap';
 import { loadMapFromString, storeMapToString } from '../model/loader';
 import { Actor } from '../model/Actor';
-import { createHistory } from './history';
+import { create_history } from './history';
 import { Vector } from '../model/Vector';
 import { triangulateBrush } from '../model/algorithms/triangluate';
 import { shuffleBrushPolygons } from '../model/algorithms/shuffle';
@@ -18,28 +18,26 @@ import { change_actors_list, change_map, select_actors, select_actors_list } fro
 
 export const createController = () => {
 
-    const state = createSignal<EditorState>(create_initial_state());
+    const state_signal = createSignal<EditorState>(create_initial_state());
     const command_registry = create_command_registry();
-    var vertexMode = createSignal(false);
-    var map = createSignal(new UnrealMap());
-    var history = createHistory(map);
+    var history = create_history(state_signal);
     var commandsShownState = createSignal(false);
 
-    state.event(s => map.value = s.map);
-    //@ts-ignore
-    map.event(m => window.map = m)
-
     async function execute_command(command_info: ICommandInfoV2){
-        const next_state = await command_info.implementation(state.value);
-        if (state.value === next_state){
+        const next_state = await command_info.implementation(state_signal.value);
+        if (command_info.legacy_handling){
+            // legacy commands update state_signal & history directly
+            return;
+        }
+        if (state_signal.value === next_state){
             // no change
             return;
         }
-        if (state.value.map !== next_state.map){
+        if (state_signal.value.map !== next_state.map){
             // map state change triggers history push
             history.push();
         }
-        state.value = next_state;
+        state_signal.value = next_state;
     }
 
     function create_initial_state() : EditorState{
@@ -55,7 +53,7 @@ export const createController = () => {
     }
 
     function loadFromString(str:string){
-        state.value = change_map(state.value, () => loadMapFromString(str));
+        state_signal.value = change_map(state_signal.value, () => loadMapFromString(str));
     }
 
     function toggleSelection(prev: Actor)
@@ -68,11 +66,11 @@ export const createController = () => {
 
     function makeSelection(actor: Actor)
     {
-        updateActorList(select_actors_list(map.value.actors, a => a === actor));
+        updateActorList(select_actors_list(state_signal.value.map.actors, a => a === actor));
     }
 
     function deleteSelected(){
-        if (vertexMode.value === true)
+        if (state_signal.value.vertex_mode === true)
         {
             history.push();
             modifySelectedBrushes(b => deleteBrushData(b, { 
@@ -80,8 +78,8 @@ export const createController = () => {
             }));
         }
         else {
-            const newActors = map.value.actors.filter(a => !a.selected);
-            if (newActors.length !== map.value.actors.length){
+            const newActors = state_signal.value.map.actors.filter(a => !a.selected);
+            if (newActors.length !== state_signal.value.map.actors.length){
                 history.push();
                 updateActorList(newActors);
             }
@@ -89,12 +87,12 @@ export const createController = () => {
     }
 
     function createPolygonFromSelectedVertexes(){
-        if (!vertexMode.value === true){
+        if (!state_signal.value.vertex_mode === true){
             return;
         }
         history.push();
         modifySelectedBrushes(brush => {
-            if (!vertexMode.value){
+            if (!state_signal.value.vertex_mode){
                 return;
             }
             const selected = brush.getSelectedVertexIndices();
@@ -103,7 +101,7 @@ export const createController = () => {
     }
 
     function extrudeSelectedPolygons(){
-        if (!vertexMode.value){
+        if (!state_signal.value.vertex_mode){
             return;
         }
         history.push();
@@ -114,12 +112,12 @@ export const createController = () => {
 
     function updateActor(prev: Actor, next: Actor)
     {
-        const newActors = map.value.actors.map(a => a === prev ? next : a);
+        const newActors = state_signal.value.map.actors.map(a => a === prev ? next : a);
         updateActorList(newActors);
     }
 
     function updateActorList(actors : Actor[]){
-        state.value = change_actors_list(state.value, () => actors);
+        state_signal.value = change_actors_list(state_signal.value, () => actors);
     }
 
     function showAllCommands(){
@@ -129,20 +127,20 @@ export const createController = () => {
     function importFromString(str : string){
         const newData = loadMapFromString(str);
         updateActorList([
-            ...map.value.actors,
+            ...state_signal.value.map.actors,
             ...newData.actors
         ])
     }
 
     function exportSelectionToString() : string {
-        const actors = map.value.actors.filter(a => a.selected);
+        const actors = state_signal.value.map.actors.filter(a => a.selected);
         const mapToExport = new UnrealMap();
         mapToExport.actors = actors;
         return storeMapToString(mapToExport);
     }
 
     function undoCopyMove() {
-        updateActorList(map.value.actors.map(a => {
+        updateActorList(state_signal.value.map.actors.map(a => {
             if (a.selected){
                 const copy = a.shallowCopy();
                 a.location = a.location.add(-32,-32,-32);
@@ -155,7 +153,7 @@ export const createController = () => {
     }
 
     function modifyBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel) {
-        updateActorList(map.value.actors.map(a => {
+        updateActorList(state_signal.value.map.actors.map(a => {
             if (a.brushModel){
                 const newBrush = op(a.brushModel, a);
                 if (newBrush == null){
@@ -241,7 +239,7 @@ export const createController = () => {
         history.push();
         const grid = new Vector(size, size, size);
         modifySelectedBrushes(brush => {
-            if (vertexMode.value === true){
+            if (state_signal.value.vertex_mode === true){
                 const next = brush.shallowCopy();
                 next.vertexes = next.vertexes.map(currentVertex => {
                     if (currentVertex.selected){
@@ -260,7 +258,9 @@ export const createController = () => {
     }
 
     function toggleVertexMode(){
-        vertexMode.value = !vertexMode.value;
+        const next_state = { ...state_signal.value };
+        next_state.vertex_mode = !state_signal.value.vertex_mode;
+        state_signal.value = next_state;
     }
 
     function selectToggleVertex(target : Actor, vertexIndex : number)
@@ -319,8 +319,7 @@ export const createController = () => {
     return {
         execute: execute_command,
         commands: command_registry,
-        map,
-        vertexMode,
+        state_signal,
         commandsShownState,
         loadFromString,
         toggleSelection,

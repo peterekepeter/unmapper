@@ -9,7 +9,7 @@ import { useSignal } from "./useSignal";
 
 export function ActorList({ controller = createController() }) {
 
-    const map = useSignal(controller.map);
+    const map = useSignal(controller.state_signal).map;
     const colors = useSignal(themeColors);
 
     return <div style={{overflow:"hidden", display:'grid'}}>
