@@ -3,7 +3,6 @@ import { Vector } from "../Vector";
 
 export function uv_triplanar_map(input_brush : BrushModel) : BrushModel {
     const new_brush = input_brush.shallowCopy();
-    debugger;
     new_brush.polygons = new_brush.polygons.map(input_poly => {
         const new_poly = input_poly.shallowCopy();
         new_poly.origin = Vector.ZERO;

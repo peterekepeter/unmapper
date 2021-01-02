@@ -1,7 +1,7 @@
 import React = require("react");
 import { createController } from "../controller";
 import { useSignal } from "./useSignal";
-import { ViewportMode } from "./Viewport";
+import { ViewportMode } from "../model/ViewportMode";
 import { Vector } from "../model/Vector";
 import { ViewportPanel } from "./ViewportPanel";
 import { themeColors } from "../theme";

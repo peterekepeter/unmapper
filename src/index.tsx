@@ -6,14 +6,18 @@ import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
-import { registerCommands } from "./controller/commands";
 import { initializeClipboardIntegration } from "./controller/clipboard";
+import * as select_all from './commands/select_all';
 
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
+
+    controller.commands.register_commands_v2([
+        select_all
+    ])
     
-    registerCommands([{
+    controller.commands.registerCommands([{
         description: "Undo Previous Edit",
         implementation: controller.undo,
         shortcut: 'ctrl + z'
@@ -22,11 +26,6 @@ function main() {
         description: "Redo Edit",
         implementation: controller.redo,
         shortcut: 'ctrl + y'
-    },
-    {
-        description: "Select All Objects",
-        implementation: controller.selectAll,
-        shortcut: 'ctrl + a'
     },
     {
         description: "Delete Selection",
@@ -84,17 +83,28 @@ function main() {
         'ctrl + y' : controller.redo,
         'ctrl + shift + z' : controller.redo,
         'ctrl + shift + y' : controller.undo,
-        'ctrl + a' : controller.selectAll,
         'delete' : controller.deleteSelected,
         'f1' : controller.showAllCommands
     }
 
     initializeClipboardIntegration(window.document, controller);
-    
+
     for (const key in shortcutBindings){
-        keyboard.bindShortcut(key, shortcutBindings[key]);
+        keyboard.bind_command_shortcut({ 
+            shortcut: key, 
+            implementation: async (state) => { 
+                await shortcutBindings[key]();
+                return state;
+            }
+        });
     }
 
+    keyboard.bind_command_executor(controller.execute);
+    
+    for (const command of controller.commands.get_all_commands_v2()){
+        keyboard.bind_command_shortcut(command);
+    }
+    
     controller.loadFromString(dummyData2);
     setWindowTitle("Work in progress experimental stuff");
     initializeReact(document.body, controller);

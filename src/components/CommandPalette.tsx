@@ -4,7 +4,7 @@ import { themeColors } from "../theme"
 import { createController } from "../controller";
 import { UiText } from "../ui/UiText";
 import { font } from "../ui/typography";
-import { getAllCommands, ICommandInfo } from "../controller/commands";
+import { ICommandInfo, ICommandInfoV2, ICommandRegistry } from "../controller/command_registry";
 import { buttonStyle } from "../ui/UiButton";
 
 export const CommandPalette = ({ controller = createController() }) => {
@@ -16,7 +16,6 @@ export const CommandPalette = ({ controller = createController() }) => {
     const [isMouseOver, xxx] = React.useState(false);
 
     function setIsMouseOver(state:boolean){
-        console.log('mouseover', state);
         xxx(state);
     }
 
@@ -24,7 +23,7 @@ export const CommandPalette = ({ controller = createController() }) => {
         return <></>;
     }
 
-    const matching = getMatchingCommands(value);
+    const matching = getMatchingCommands(controller.commands, value);
 
     return <div style={{
         background: colors.background,
@@ -90,10 +89,10 @@ export const CommandPalette = ({ controller = createController() }) => {
     }
 
     function submit(){
-        const cmds = getMatchingCommands(value);
+        const cmds = getMatchingCommands(controller.commands, value);
         const cmd = cmds[selectedIndex];
         if (cmd){
-            cmd.implementation();
+            controller.execute(cmd);
         }
         hide();
     }
@@ -115,13 +114,13 @@ export const CommandPalette = ({ controller = createController() }) => {
     }
 }
 
-function getMatchingCommands(str : string){
-    return getAllCommands().filter(
+function getMatchingCommands(registry: ICommandRegistry, str : string){
+    return registry.get_all_commands_v2().filter(
         cmd => cmd.description.toLocaleLowerCase()
             .indexOf(str.toLocaleLowerCase()) >= 0);
 }
 
-const CommandItem = ({command, selected, onClick, onMouseEnter} : {command:ICommandInfo, selected:boolean, onClick:()=>void, onMouseEnter:()=>void}) => {
+const CommandItem = ({command, selected, onClick, onMouseEnter} : {command:ICommandInfoV2, selected:boolean, onClick:()=>void, onMouseEnter:()=>void}) => {
     const background = selected 
         ? themeColors.value.accent + '2'
         : 'none'

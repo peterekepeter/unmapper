@@ -1,26 +1,36 @@
-import { ICommand } from "./ICommand"
 
-const bindings : { [key:string] : ICommand } = {};
+import { ICommandInfoV2 } from "./command_registry";
+import { ICommand, ICommandV2 } from "./ICommand"
 
-/** accepts shorctus like "ctrl + alt + shift + f" */
-export function bindShortcut(shortcut: string, command : ICommand)
+const bindings : { [key:string] : ICommandInfoV2 } = {};
+let executor_fn : (cmd : ICommandInfoV2) => void
+
+export function bind_command_shortcut(command: ICommandInfoV2){
+    if (!command.shortcut){
+        return;
+    }
+    bindings[command.shortcut.toLowerCase()] = command;
+}
+
+export function bind_command_executor(exec_fn : (cmd : ICommandInfoV2) => void)
 {
-    bindings[shortcut.toLowerCase()] = command;
+    executor_fn = exec_fn;
 }
 
 const listener = (event : KeyboardEvent) => {
-
+    if (event.target !== document.body){
+        // ignore targeted input
+        return;
+    }
     const shortcut = shortcutFromEvent(event);
     
     const command = bindings[shortcut];
     if (!command){
+        // command not implemented
         return;
     }
-    if (command.canExecute === undefined || command.canExecute.value){
-        event.preventDefault();
-        command();
-        return false;
-    }
+    executor_fn(command);
+    event.preventDefault();
 }
 
 function shortcutFromEvent(event : KeyboardEvent){

@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { IRenderer } from "../render/IRenderer";
 import { createWireframeRenderer } from "../render/WireframeRenderer";
-import { UnrealMap } from "../model/UnrealMap";
 import { Vector } from "../model/Vector";
 import React = require("react");
 import { createController } from "../controller";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
 import { useSignal } from "./useSignal";
-
-export enum ViewportMode {
-    Top,
-    Front,
-    Side,
-    Perspective
-}
+import { ViewportMode } from "../model/ViewportMode";
 
 const levelPerDouble = 8;
 
@@ -146,8 +139,7 @@ export const Viewport = ({
             setZoomLevel(zoomLevel - (event.deltaX + event.deltaY + event.deltaZ));
             event.preventDefault();
             return false;
-        } 
-        console.log(event, event.deltaMode, event.deltaX, event.deltaY, event.deltaZ);
+        }
     }
 
     function onPointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -209,7 +201,6 @@ function nextViewState(
             } else if (rightPress) {
                 nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0);
             } else if (bothPress) {
-                console.log('both');
                 const matrix = Matrix3x3
                     .rotateDegreesZ(rotation.yaw)
                     .rotateDegreesY(rotation.pitch);

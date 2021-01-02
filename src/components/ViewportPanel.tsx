@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Vector } from '../model/Vector';
-import { ViewportMode, Viewport } from './Viewport';
+import { Viewport } from './Viewport';
+import { ViewportMode } from "../model/ViewportMode";
 import { SectionTitle } from '../ui/SectionTitle';
 import { createController } from '../controller';
 import { UiButton } from '../ui/UiButton';

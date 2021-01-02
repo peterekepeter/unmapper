@@ -12,20 +12,50 @@ import { deleteBrushData } from '../model/algorithms/deleteBrushData';
 import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 import { createBrushPolygon } from '../model/algorithms/createBrushPolygon';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
-import { BrushVertex } from '../model/BrushVertex';
+import { EditorState } from '../model/EditorState';
+import { create_command_registry, ICommandInfoV2 } from './command_registry';
+import { change_actors_list, change_map, select_actors, select_actors_list } from '../model/algorithms/common';
 
 export const createController = () => {
 
+    const state = createSignal<EditorState>(create_initial_state());
+    const command_registry = create_command_registry();
     var vertexMode = createSignal(false);
     var map = createSignal(new UnrealMap());
     var history = createHistory(map);
     var commandsShownState = createSignal(false);
 
+    state.event(s => map.value = s.map);
     //@ts-ignore
-    map.event(map => window.map = map)
+    map.event(m => window.map = m)
+
+    async function execute_command(command_info: ICommandInfoV2){
+        const next_state = await command_info.implementation(state.value);
+        if (state.value === next_state){
+            // no change
+            return;
+        }
+        if (state.value.map !== next_state.map){
+            // map state change triggers history push
+            history.push();
+        }
+        state.value = next_state;
+    }
+
+    function create_initial_state() : EditorState{
+        return {
+            history: {
+                get_next_state: () => null,
+                get_previous_state: () => null,
+            },
+            map: new UnrealMap(),
+            vertex_mode: false,
+            viewports: []
+        }
+    }
 
     function loadFromString(str:string){
-        map.value = loadMapFromString(str);
+        state.value = change_map(state.value, () => loadMapFromString(str));
     }
 
     function toggleSelection(prev: Actor)
@@ -38,33 +68,7 @@ export const createController = () => {
 
     function makeSelection(actor: Actor)
     {
-        selectActors(a => a === actor);
-    }
-
-    function selectAll(){
-        if (vertexMode.value === true)
-        {
-            modifySelectedBrushes(old_brush => {
-                if (old_brush.vertexes.find(v => !v.selected) == null){
-                    return old_brush; // all vertexes already selected
-                }
-                const new_brush = old_brush.shallowCopy();
-                new_brush.vertexes = new_brush.vertexes.map((v):BrushVertex => {
-                    if (v.selected){
-                        return v;
-                    } else {
-                        const new_vertex = v.shallowCopy();
-                        new_vertex.selected = true;
-                        return new_vertex;
-                    }
-                })
-                return new_brush;
-            })
-        } 
-        else 
-        {
-            selectActors((_) => true);
-        }
+        updateActorList(select_actors_list(map.value.actors, a => a === actor));
     }
 
     function deleteSelected(){
@@ -108,22 +112,6 @@ export const createController = () => {
         });
     }
 
-    function selectActors(filter: (actor : Actor) => boolean)
-    {
-        let change = false;
-        const newActors = map.value.actors.map<Actor>(a => {
-            const shouldBeSelected = filter(a);
-            change = change || a.selected !== shouldBeSelected;
-            if (a.selected === shouldBeSelected){
-                return a;
-            } else {
-                const next = a.shallowCopy();
-                next.selected = shouldBeSelected;
-                return next;
-            }
-        });
-        if (change) updateActorList(newActors);
-    }
     function updateActor(prev: Actor, next: Actor)
     {
         const newActors = map.value.actors.map(a => a === prev ? next : a);
@@ -131,9 +119,7 @@ export const createController = () => {
     }
 
     function updateActorList(actors : Actor[]){
-        const nextMap = new UnrealMap();
-        nextMap.actors = actors;
-        map.value = nextMap;
+        state.value = change_actors_list(state.value, () => actors);
     }
 
     function showAllCommands(){
@@ -331,6 +317,8 @@ export const createController = () => {
     }
 
     return {
+        execute: execute_command,
+        commands: command_registry,
         map,
         vertexMode,
         commandsShownState,
@@ -348,7 +336,6 @@ export const createController = () => {
         alignMeshVertexesToGrid,
         uv_triplanar_map_selected,
         undoCopyMove,
-        selectAll,
         showAllCommands,
         undo: history.back,
         redo: history.forward,

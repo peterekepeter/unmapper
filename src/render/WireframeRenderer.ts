@@ -303,7 +303,6 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         if (bestDistance > MAX_DISTANCE) {
             bestMatch = null; // to far away
         }
-        console.log(bestMatch);
         return bestMatch;
     }
 
@@ -359,7 +358,6 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             bestMatchActor = null;
             bestMatchVertex = -1;
         }
-        console.log('VERTEX', bestMatchVertex, 'ACTOR', bestMatchActor);
         return [bestMatchActor, bestMatchVertex];
     }
 
