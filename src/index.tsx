@@ -58,10 +58,12 @@ function main() {
     },
     {
         description: "Toggle Vertex Mode",
+        shortcut: "tab",
         implementation: controller.toggleVertexMode
     },
     {
         description: "Create polygon from selected vertexes",
+        shortcut: "f",
         implementation: controller.createPolygonFromSelectedVertexes
     },
     {

@@ -134,11 +134,9 @@ export const Viewport = ({
     }
 
     function onWheel(event: React.WheelEvent){
-        if (event.ctrlKey){
-            setZoomLevel(zoomLevel - (event.deltaX + event.deltaY + event.deltaZ));
-            event.preventDefault();
-            return false;
-        }
+        setZoomLevel(zoomLevel - (event.deltaX + event.deltaY + event.deltaZ));
+        event.preventDefault();
+        return false;
     }
 
     function onPointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
