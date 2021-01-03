@@ -43,6 +43,9 @@ export const change_selected_brushes = (
         return actor;
     }
     const new_brush = brush_fn(actor.brushModel);
+    if (!new_brush){
+        throw new Error('unexpected null brush result');
+    }
     if (new_brush === actor.brushModel){
         return actor;
     } else {
@@ -65,6 +68,9 @@ export function change_actors(state: EditorState, actor_fn: (a:Actor) => Actor){
         let new_list = [];
         for (const actor of actor_list){
             const new_actor = actor_fn(actor);
+            if (!new_actor){
+                throw new Error('unexpected null actor result');
+            }
             if (new_actor !== actor){
                 has_change = true;
             }

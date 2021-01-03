@@ -19,17 +19,18 @@ function select_all_actors(state : EditorState) : EditorState {
 
 function select_all_vertexes(state: EditorState){
     return change_selected_brushes(state, brush => {
-        if (!brush.vertexes.find(v => v.selected)){
+        if (!brush.vertexes.find(v => !v.selected)){
             return brush;
         }
         const new_brush = brush.shallowCopy();
-        new_brush.vertexes = brush.vertexes.map(v => {
-            if (v.selected){
-                return v;
+        new_brush.vertexes = brush.vertexes.map(vertex => {
+            if (vertex.selected){
+                return vertex;
             }
-            const new_vertex = v.shallowCopy();
-            v.selected = true;
+            const new_vertex = vertex.shallowCopy();
+            new_vertex.selected = true;
             return new_vertex;
         })
+        return new_brush;
     })
 }
