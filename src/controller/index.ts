@@ -257,12 +257,6 @@ export const createController = () => {
         });
     }
 
-    function toggleVertexMode(){
-        const next_state = { ...state_signal.value };
-        next_state.vertex_mode = !state_signal.value.vertex_mode;
-        state_signal.value = next_state;
-    }
-
     function selectToggleVertex(target : Actor, vertexIndex : number)
     {
         modifyBrushes((brush, actor) => {
@@ -340,6 +334,5 @@ export const createController = () => {
         redo: history.forward,
         importFromString,
         exportSelectionToString,
-        toggleVertexMode,
     }
 }

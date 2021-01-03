@@ -7,15 +7,12 @@ import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
 import { initializeClipboardIntegration } from "./controller/clipboard";
-import * as select_all from './commands/select_all';
-
+import { get_all_commands_v2 } from "./commands";
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
 
-    controller.commands.register_commands_v2([
-        select_all
-    ])
+    controller.commands.register_commands_v2(get_all_commands_v2())
     
     controller.commands.registerCommands([{
         description: "Undo Previous Edit",
@@ -55,11 +52,6 @@ function main() {
     {
         description: "Undo Copy Move",
         implementation: controller.undoCopyMove
-    },
-    {
-        description: "Toggle Vertex Mode",
-        shortcut: "tab",
-        implementation: controller.toggleVertexMode
     },
     {
         description: "Create polygon from selected vertexes",

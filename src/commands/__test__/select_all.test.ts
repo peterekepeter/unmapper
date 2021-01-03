@@ -1,8 +1,8 @@
-import { Actor } from '../model/Actor';
-import { BrushModel } from '../model/BrushModel';
-import { editor_state_from_actors } from '../model/EditorState';
-import { Vector } from '../model/Vector';
-import * as select_all from './select_all';
+import { Actor } from '../../model/Actor';
+import { BrushModel } from '../../model/BrushModel';
+import { editor_state_from_actors } from '../../model/EditorState';
+import { Vector } from '../../model/Vector';
+import * as select_all from '../select_all';
 
 describe('select all actors', () =>{
 
