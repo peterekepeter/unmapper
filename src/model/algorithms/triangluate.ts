@@ -33,6 +33,6 @@ export function triangulateBrush(brush: BrushModel) : BrushModel
     }
     const triangulated = brush.shallowCopy();
     triangulated.polygons = result;
-    triangulated.buildAllPolygonEdges();
+    triangulated.rebuild_all_poly_edges();
     return triangulated;
 }

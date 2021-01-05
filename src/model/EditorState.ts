@@ -24,15 +24,19 @@ export interface EditorState
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
+    const state = create_initial_editor_state();
+    state.map.actors = actors;
+    return state;
+}
+
+export function create_initial_editor_state() : EditorState{
     return {
-        map: {
-            actors: actors
-        },
-        vertex_mode: false,
-        viewports: [],
         history: {
             get_next_state: () => null,
-            get_previous_state: () => null
-        }
+            get_previous_state: () => null,
+        },
+        map: new UnrealMap(),
+        vertex_mode: false,
+        viewports: []
     }
 }

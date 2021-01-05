@@ -1,7 +1,11 @@
-import { get_all_commands_v2 } from "..";
+import { get_all_commands_v2 } from "../all_commands";
 import { ICommandInfoV2 } from "../../controller/command_registry";
 import { EditorError } from "../../model/EditorError";
 import { EditorState, editor_state_from_actors } from "../../model/EditorState";
+import { Actor } from "../../model/Actor";
+import { BrushModel } from "../../model/BrushModel";
+import { Vector } from "../../model/Vector";
+import { createBrushPolygon } from "../../model/algorithms/createBrushPolygon";
 
 /**
  * all commands must pass a few tests to make sure they don't wreck the whole system
@@ -12,10 +16,28 @@ const all_commands = get_all_commands_v2();
  * each command is ran agains a list of test editor states which are built here
  */
 function build_test_states(){
-    const state = editor_state_from_actors([]);
+
+    const brush = new BrushModel();
+    brush.addVertex(new Vector(0,0,0), true);
+    brush.addVertex(new Vector(1,0,0), true);
+    brush.addVertex(new Vector(1,1,0), true);
+    brush.addVertex(new Vector(0,1,0), true);
+    const brushWithPoly = createBrushPolygon(brush, [0,1,2,3]);
+
+    const actor_1 = new Actor();
+    actor_1.name = 'Actor1';
+    actor_1.selected = true;
+    actor_1.brushModel = brushWithPoly;
+
+    const actor_2 = new Actor();
+    actor_2.name = 'Actor2';
+    actor_2.selected = false;
+    actor_2.brushModel = brushWithPoly;
+
+    const state = editor_state_from_actors([actor_1, actor_2]);
     state.vertex_mode = false;
     
-    const state_vertex_mode = editor_state_from_actors([])
+    const state_vertex_mode = editor_state_from_actors([actor_1, actor_2])
     state_vertex_mode.vertex_mode = true;
     
     return [
@@ -25,8 +47,7 @@ function build_test_states(){
         },
         {
             state: state_vertex_mode,
-            description: 'vertex mode state',
-            serialized: JSON.stringify(state)
+            description: 'vertex mode state'
         }
     ]
 }
@@ -35,7 +56,7 @@ all_commands.forEach(command => describe(format_label(command), () => {
 
     build_test_states().forEach(test_state => describe(test_state.description, () => {
 
-        const initial_json = JSON.stringify(test_state.state);
+        const initially_serialized = serialize(test_state.state);
         let next_state : EditorState;
         let caught_error : any;
         let success: boolean = null;
@@ -67,11 +88,15 @@ all_commands.forEach(command => describe(format_label(command), () => {
 
         test('input not modified', () => {
             // in any case input must not be modified!!
-            expect(JSON.stringify(test_state.state)).toBe(initial_json);
+            expect(serialize(test_state.state)).toBe(initially_serialized);
         })
 
     }))
 }));
+
+function serialize(state: EditorState): string {
+    return JSON.stringify(state, undefined, 2);
+}
 
 function validate_state(state: EditorState){
     // some basic validation checks

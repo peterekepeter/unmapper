@@ -7,7 +7,7 @@ import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
 import { initializeClipboardIntegration } from "./controller/clipboard";
-import { get_all_commands_v2 } from "./commands";
+import { get_all_commands_v2 } from "./commands/all_commands";
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
@@ -23,11 +23,6 @@ function main() {
         description: "Redo Edit",
         implementation: controller.redo,
         shortcut: 'ctrl + y'
-    },
-    {
-        description: "Delete Selection",
-        implementation: controller.deleteSelected,
-        shortcut: 'delete'
     },
     {
         description: "Align Mesh Vertexes to 32x32x32 Grid",
@@ -54,16 +49,6 @@ function main() {
         implementation: controller.undoCopyMove
     },
     {
-        description: "Create polygon from selected vertexes",
-        shortcut: "f",
-        implementation: controller.createPolygonFromSelectedVertexes
-    },
-    {
-        description: "Extrude selected polygons by 32 units",
-        implementation: controller.extrudeSelectedPolygons,
-        shortcut: 'e'
-    },
-    {
         description: "Flip polygon (normal, winding, facing)",
         implementation: controller.flipPolygonNormal
     },
@@ -77,7 +62,6 @@ function main() {
         'ctrl + y' : controller.redo,
         'ctrl + shift + z' : controller.redo,
         'ctrl + shift + y' : controller.undo,
-        'delete' : controller.deleteSelected,
         'f1' : controller.showAllCommands
     }
 
@@ -99,7 +83,7 @@ function main() {
         keyboard.bind_command_shortcut(command);
     }
     
-    controller.loadFromString(dummyData2);
+    controller.importFromString(dummyData2);
     setWindowTitle("Work in progress experimental stuff");
     initializeReact(document.body, controller);
 }

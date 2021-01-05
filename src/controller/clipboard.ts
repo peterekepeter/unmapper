@@ -1,6 +1,7 @@
 // cliboard integration
 
 import { createController } from ".";
+import * as delete_selected_command from '../commands/delete_selected';
 
 export function initializeClipboardIntegration(document: Document, controller = createController()){
 
@@ -11,7 +12,7 @@ export function initializeClipboardIntegration(document: Document, controller = 
 
     document.addEventListener('cut', function(event) {
         event.clipboardData.setData('text/plain', controller.exportSelectionToString());
-        controller.deleteSelected();
+        controller.execute(delete_selected_command);
         event.preventDefault();
     });
 

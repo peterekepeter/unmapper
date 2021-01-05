@@ -9,14 +9,19 @@ export function createBrushPolygon(brush: BrushModel, selected_vertexes: number[
     return createBrushPolygons(brush, [selected_vertexes]);
 }
 
-export function createBrushPolygons(brush: BrushModel, polygons_to_create: number[][]) : BrushModel {
+export function createBrushPolygons(old_brush: BrushModel, polygons_to_create: number[][]) : BrushModel {
 
-    const nextBrush = brush.shallowCopy();
-    nextBrush.polygons = [...nextBrush.polygons];
-    
-    const newPolygons = polygons_to_create.map(vertex_list => createPolygon(brush, vertex_list));
-    nextBrush.polygons = [...nextBrush.polygons, ...newPolygons];
-    return nextBrush;
+    const new_brush = old_brush.shallowCopy();
+    new_brush.edges = old_brush.edges.map(e => e.deep_copy());
+
+    const new_polygons = polygons_to_create.map(vertex_list => createPolygon(old_brush, vertex_list));
+    new_brush.polygons = [...old_brush.polygons, ...new_polygons];
+
+    for (let i=old_brush.polygons.length; i<new_brush.polygons.length; i++){
+        new_brush.rebuild_poly_edges(i);
+    }
+
+    return new_brush;
 }
 
 function createPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushPolygon {

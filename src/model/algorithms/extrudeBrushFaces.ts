@@ -9,10 +9,11 @@ export function extrudeBrushFaces(brush: BrushModel, facesIndices: number[], dis
     let new_brush = brush.shallowCopy();
     new_brush.vertexes = [...new_brush.vertexes];
     new_brush.polygons = [...new_brush.polygons];
+    new_brush.edges = [...new_brush.edges];
     for (const faceIndex of facesIndices){
         new_brush = extrudeFaceDistance(new_brush, faceIndex, distance);
     }
-    new_brush.buildAllPolygonEdges()
+    new_brush.rebuild_all_poly_edges()
     return new_brush;
 }
 

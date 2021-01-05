@@ -56,7 +56,7 @@ export function polygonDataToBrush(data : BrushPolygonData[]) : BrushModel {
         brush.polygons.push(poly);
     }
     brush.calculateAllPolygonMedian();
-    brush.buildAllPolygonEdges();
+    brush.rebuild_all_poly_edges();
     return brush;
 }
 

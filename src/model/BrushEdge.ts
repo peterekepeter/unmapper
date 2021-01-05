@@ -24,9 +24,15 @@ export class BrushEdge
             || this.vertexIndexA === edgeVertexB && this.vertexIndexB === edgeVertexA; 
     }
 
-    shallowCopy() {
+    shallow_copy() {
         const copy = new BrushEdge();
         Object.assign(copy, this);
+        return copy;
+    }
+
+    deep_copy(){
+        const copy = this.shallow_copy();
+        copy.polygons = [...this.polygons];
         return copy;
     }
 

@@ -139,7 +139,7 @@ function executeDeleteOp(
         if (!needVertexUpdate && !needUpdatePolys){
             continue;
         }
-        const edge = currentEdge.shallowCopy();
+        const edge = currentEdge.shallow_copy();
         brush.edges[i] = edge; // brush is a fesh copy, can edit it in place
         if (needVertexUpdate) {
             for (const toDeleteIndex of vertexesToDelete)

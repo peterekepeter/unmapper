@@ -78,15 +78,15 @@ export class BrushModel
         return index;
     }
 
-    buildAllPolygonEdges(){
-        this._removeAllPolygonEdges();
+    rebuild_all_poly_edges(){
+        this._remove_all_poly_edges();
         for (let i=0; i<this.polygons.length; i++){
             addPolygonEdges(this, i);
         }
     }
 
-    buildPolygonEdges(polygonIndex: number){
-        this._removePolygonEdges(polygonIndex);
+    rebuild_poly_edges(polygonIndex: number){
+        this._remove_poly_edges(polygonIndex);
         addPolygonEdges(this, polygonIndex);
     }
 
@@ -155,7 +155,7 @@ export class BrushModel
         return result;
     }
 
-    private _removeAllPolygonEdges(){
+    private _remove_all_poly_edges(){
         for (const edge of this.edges){
             if (edge.polygons.length != 0){
                 edge.polygons = [];
@@ -168,7 +168,7 @@ export class BrushModel
         }
     }
 
-    private _removePolygonEdges(polygonIndex: number){
+    private _remove_poly_edges(polygonIndex: number){
         const poly = this.polygons[polygonIndex];
         poly.edges = [];
         for (const edge of this.edges){

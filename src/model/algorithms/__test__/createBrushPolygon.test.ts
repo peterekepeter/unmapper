@@ -43,7 +43,7 @@ const BRUSH = new BrushModel();
 
 BRUSH.vertexes = VERTEXES;
 BRUSH.polygons = POLYS;
-BRUSH.buildAllPolygonEdges();
+BRUSH.rebuild_all_poly_edges();
 
 describe("create_brush_polygon", () => {
 

@@ -8,27 +8,30 @@ import { triangulateBrush } from '../model/algorithms/triangluate';
 import { shuffleBrushPolygons } from '../model/algorithms/shuffle';
 import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
 import { BrushModel } from '../model/BrushModel';
-import { deleteBrushData } from '../model/algorithms/deleteBrushData';
 import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
-import { createBrushPolygon } from '../model/algorithms/createBrushPolygon';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
-import { EditorState } from '../model/EditorState';
+import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
 import { change_actors_list, change_map, select_actors, select_actors_list } from '../model/algorithms/common';
 
 export const createController = () => {
 
-    const state_signal = createSignal<EditorState>(create_initial_state());
+    const state_signal = createSignal<EditorState>(create_initial_editor_state());
     const command_registry = create_command_registry();
     var history = create_history(state_signal);
     var commandsShownState = createSignal(false);
 
-    async function execute_command(command_info: ICommandInfoV2){
+    async function execute_undoable_command(command_info: ICommandInfoV2){
         const next_state = await command_info.implementation(state_signal.value);
         if (command_info.legacy_handling){
             // legacy commands update state_signal & history directly
             return;
         }
+        undoable_state_change(next_state);
+    }
+
+    function undoable_state_change(next_state: EditorState)
+    {
         if (state_signal.value === next_state){
             // no change
             return;
@@ -40,74 +43,17 @@ export const createController = () => {
         state_signal.value = next_state;
     }
 
-    function create_initial_state() : EditorState{
-        return {
-            history: {
-                get_next_state: () => null,
-                get_previous_state: () => null,
-            },
-            map: new UnrealMap(),
-            vertex_mode: false,
-            viewports: []
-        }
-    }
-
-    function loadFromString(str:string){
-        state_signal.value = change_map(state_signal.value, () => loadMapFromString(str));
-    }
-
-    function toggleSelection(prev: Actor)
+    function toggle_actor_selected(actor_ref: Actor)
     {
-        if (prev == null) return; // nothing to toggle
-        const next = prev.shallowCopy(); 
-        next.selected = !prev.selected;
-        updateActor(prev, next);
+        if (actor_ref == null) return; // nothing to toggle
+        const next = actor_ref.shallowCopy(); 
+        next.selected = !actor_ref.selected;
+        updateActor(actor_ref, next);
     }
 
-    function makeSelection(actor: Actor)
+    function make_actor_selection(actor: Actor)
     {
         updateActorList(select_actors_list(state_signal.value.map.actors, a => a === actor));
-    }
-
-    function deleteSelected(){
-        if (state_signal.value.vertex_mode === true)
-        {
-            history.push();
-            modifySelectedBrushes(b => deleteBrushData(b, { 
-                vertexes: b.getSelectedVertexIndices() 
-            }));
-        }
-        else {
-            const newActors = state_signal.value.map.actors.filter(a => !a.selected);
-            if (newActors.length !== state_signal.value.map.actors.length){
-                history.push();
-                updateActorList(newActors);
-            }
-        }
-    }
-
-    function createPolygonFromSelectedVertexes(){
-        if (!state_signal.value.vertex_mode === true){
-            return;
-        }
-        history.push();
-        modifySelectedBrushes(brush => {
-            if (!state_signal.value.vertex_mode){
-                return;
-            }
-            const selected = brush.getSelectedVertexIndices();
-            return createBrushPolygon(brush, selected);
-        });
-    }
-
-    function extrudeSelectedPolygons(){
-        if (!state_signal.value.vertex_mode){
-            return;
-        }
-        history.push();
-        modifySelectedBrushes(oldBrush => {
-            return extrudeBrushFaces(oldBrush, oldBrush.getSelectedPolygonIndices() , 32.0)
-        });
     }
 
     function updateActor(prev: Actor, next: Actor)
@@ -307,22 +253,18 @@ export const createController = () => {
                 }
             });
             return newBrush;
-        })
+        }) 
     }
 
     return {
-        execute: execute_command,
+        execute: execute_undoable_command,
         commands: command_registry,
         state_signal,
         commandsShownState,
-        loadFromString,
-        toggleSelection,
-        makeSelection,
+        toggleSelection: toggle_actor_selected,
+        makeSelection: make_actor_selection,
         selectToggleVertex,
         selectVertex,
-        deleteSelected,
-        createPolygonFromSelectedVertexes,
-        extrudeSelectedPolygons,
         flipPolygonNormal,
         triangulateMeshPolygons,
         shuffleMeshPolygons,

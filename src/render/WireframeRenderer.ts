@@ -149,7 +149,17 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     function renderWireframeEdges(brush: BrushModel, colorBasedOnPolyCount: boolean) {
+        let warned_brush_edges = false;
         for (const edge of brush.edges) {
+            const brushVertexA = brush.vertexes[edge.vertexIndexA];
+            const brushVertexB = brush.vertexes[edge.vertexIndexB];
+            if (!brushVertexA || !brushVertexB){
+                if (!warned_brush_edges){
+                    warned_brush_edges = true;
+                    console.warn('corrupted brush edges', brush);
+                }
+                continue;
+            }
             const vertexA = objectTransform(brush.vertexes[edge.vertexIndexA].position);
             const vertexB = objectTransform(brush.vertexes[edge.vertexIndexB].position);
 
