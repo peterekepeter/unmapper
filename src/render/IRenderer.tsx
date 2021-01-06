@@ -2,6 +2,7 @@ import { UnrealMap } from "../model/UnrealMap";
 import { Vector } from "../model/Vector";
 import { Actor } from "../model/Actor";
 import { Rotation } from "../model/Rotation";
+import { EditorState } from "../model/EditorState";
 
 export interface IRenderer {
     setShowVertexes(state: boolean) : void;
@@ -12,6 +13,7 @@ export interface IRenderer {
     setFrontMode(scale : number) : void;
     setSideMode(scale : number) : void;
     render (unrealMap : UnrealMap) : void;
+    render_v2 (state : EditorState) : void;
     findNearestActor(map: UnrealMap, canvasX: number, canvasY: number) : Actor;
     findNearestVertex(map: UnrealMap, canvasX: number, canvasY: number): [Actor, number];
 }

@@ -1,6 +1,5 @@
 import { UnrealMap } from "../model/UnrealMap";
 import { Actor } from "../model/Actor";
-import { BrushPolygonData } from "../model/BrushPolygonData";
 import { IRenderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
@@ -9,8 +8,7 @@ import { Color } from "../model/Color";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
 import { BrushModel } from "../model/BrushModel";
-import { BrushVertex } from "../model/BrushVertex";
-import { BrushEdge } from "../model/BrushEdge";
+import { EditorState } from "../model/EditorState";
 
 const backgroundColor = '#222';
 
@@ -82,6 +80,10 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     let deviceSize = Math.min(width, height);
     let showVertexes = false;
 
+    function render(state : EditorState) : void {
+        renderMap(state.map);
+    }  
+
     function renderMap(map: UnrealMap) {
 
         width = canvas.width;
@@ -97,6 +99,10 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
         for (const actor of map.actors) {
             if (!actor.selected) { renderActor(actor); }
+        }
+        if (showVertexes){
+            context.fillStyle = backgroundColor + '8';
+            context.fillRect(0, 0, width, height);
         }
         for (const actor of map.actors) {
             if (actor.selected) { renderActor(actor); }
@@ -373,6 +379,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
     const s: IRenderer = {
         render: renderMap,
+        render_v2: render,
         setCenterTo: setCenterTo,
         setFrontMode: setFrontMode,
         setPerspectiveMode: setPerspectiveMode,
