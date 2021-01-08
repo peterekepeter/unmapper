@@ -9,7 +9,7 @@ import { Matrix3x3 } from "../model/Matrix3x3";
 import { useSignal } from "./useSignal";
 import { ViewportMode } from "../model/ViewportMode";
 
-const levelPerDouble = 8;
+const levelPerDouble = 4;
 
 export const Viewport = ({
     width = 500,
@@ -134,7 +134,14 @@ export const Viewport = ({
     }
 
     function onWheel(event: React.WheelEvent){
-        setZoomLevel(zoomLevel - (event.deltaX + event.deltaY + event.deltaZ));
+        let new_zoom_level = zoomLevel;
+        if (event.deltaY > 0){
+            new_zoom_level--;
+        }
+        if (event.deltaY < 0){
+            new_zoom_level ++;
+        }
+        setZoomLevel(new_zoom_level);
         event.preventDefault();
         return false;
     }
