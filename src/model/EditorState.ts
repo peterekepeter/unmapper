@@ -5,7 +5,7 @@ import { ViewportMode } from "./ViewportMode";
 
 export interface ViewportState
 {
-    center: Vector
+    center_location: Vector
     mode: ViewportMode
 }
 
@@ -37,6 +37,23 @@ export function create_initial_editor_state() : EditorState{
         },
         map: new UnrealMap(),
         vertex_mode: false,
-        viewports: []
+        viewports: [
+            {
+                mode: ViewportMode.Top,
+                center_location: Vector.ZERO
+            },
+            {
+                mode: ViewportMode.Front,
+                center_location: Vector.ZERO
+            },
+            {
+                mode: ViewportMode.Perspective,
+                center_location: new Vector(-500,-300,300)
+            },
+            {
+                mode: ViewportMode.Side,
+                center_location: Vector.ZERO
+            },
+        ]
     }
 }

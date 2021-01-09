@@ -1,7 +1,8 @@
 import { Actor } from "../Actor";
 import { BrushModel } from "../BrushModel";
 import { BrushVertex } from "../BrushVertex";
-import { EditorState } from "../EditorState";
+import { EditorError } from "../EditorError";
+import { EditorState, ViewportState } from "../EditorState";
 import { UnrealMap } from "../UnrealMap";
 
 export function select_actors(state: EditorState, filter: (actor: Actor) => boolean): EditorState
@@ -102,5 +103,44 @@ export function change_map(state: EditorState, map_fn: (map: UnrealMap) => Unrea
     }
     const next_state = {...state};
     next_state.map = next_map;
+    return next_state;
+}
+
+export function change_viewport_at_index(state: EditorState, index: number, viewport_fn : (viewport : ViewportState) => ViewportState){
+    return change_viewports(state, (viewport, viewport_index) => {
+        return viewport_index === index ? viewport_fn(viewport) : viewport;
+    });
+}
+
+export function change_viewports(state: EditorState, viewport_fn: (viewport: ViewportState, index: number) => ViewportState){
+    return change_viewport_list(state, viewports => {
+        let has_change = false;
+        let new_list = [];
+        let index = 0;
+        for (const viewport of viewports){
+            const new_viewport = viewport_fn(viewport, index);
+            if (!new_viewport){
+                throw new Error('unexpected null viewport result');
+            }
+            if (new_viewport !== viewport){
+                has_change = true;
+            }
+            new_list.push(new_viewport);
+            index++;
+        }
+        if (has_change){
+            return new_list;
+        }
+        return viewports;
+    });
+}
+
+export function change_viewport_list(state: EditorState, viewport_fn: (viewport: ViewportState[]) => ViewportState[]){
+    const next_viewport_list = viewport_fn(state.viewports);
+    if (next_viewport_list === state.viewports){
+        return state;
+    }
+    const next_state = {...state};
+    next_state.viewports = next_viewport_list;
     return next_state;
 }

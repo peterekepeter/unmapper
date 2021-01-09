@@ -53,17 +53,21 @@ export const MainGrid = ({ controller = createController() }) => {
 
         <ActorList controller={controller}/>
         <ViewportPanel 
+            viewport_index={0}
             mode={ViewportMode.Top} 
             controller={controller}/>
         <ViewportPanel 
+            viewport_index={1}
             mode={ViewportMode.Front} 
             controller={controller}/>
         <PropertyEditor controller={controller}/> 
         <ViewportPanel 
+            viewport_index={2}
             location={new Vector(-500,-300,300)}
             mode={ViewportMode.Perspective} 
             controller={controller}/>
         <ViewportPanel 
+            viewport_index={3}
             mode={ViewportMode.Side} 
             controller={controller}/>
     </div>;

@@ -12,14 +12,17 @@ import { ViewportMode } from "../model/ViewportMode";
 const levelPerDouble = 4;
 
 export const Viewport = ({
+    viewport_index = 0,
     width = 500,
     height = 300,
     controller = createController(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }) => {
 
-    const { map, vertex_mode } = useSignal(controller.state_signal);
+    const { map, vertex_mode, viewports } = useSignal(controller.state_signal);
 
+    const viewport_state = viewports[viewport_index];
+    
     let [canvas, setCanvas]
         = useState<HTMLCanvasElement>(null);
 
@@ -54,7 +57,7 @@ export const Viewport = ({
             const perspectiveFov = 90;
             const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
             renderer.setShowVertexes(vertex_mode);
-            renderer.setCenterTo(viewLocation);
+            renderer.setCenterTo(viewport_state.center_location);
             switch (viewMode) {
                 case ViewportMode.Perspective:
                     renderer.setPerspectiveRotation(rotation);
@@ -163,8 +166,8 @@ export const Viewport = ({
         const scale = ortohoScale * deviceSize;
         setDidMouseMove(true);
         const [nextRotation, nextLocation] =
-            nextViewState(viewLocation, rotation, viewMode, dx, dy, event.buttons, deviceSize, ortohoScale);
-        setViewLocation(nextLocation);
+            nextViewState(viewport_state.center_location, rotation, viewMode, dx, dy, event.buttons, deviceSize, ortohoScale);
+        controller.update_view_location(viewport_index, nextLocation);
         setRotation(nextRotation);
     }
 

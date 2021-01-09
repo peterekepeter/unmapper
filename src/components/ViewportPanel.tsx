@@ -7,6 +7,7 @@ import { createController } from '../controller';
 import { UiButton } from '../ui/UiButton';
 
 export function ViewportPanel({
+    viewport_index = 0,
     controller = createController(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }
@@ -48,6 +49,7 @@ export function ViewportPanel({
             placeContent: 'center'
         }}>
             <Viewport 
+                viewport_index={viewport_index}
                 width={viewportWidth} height={viewportHeight}
                 controller={controller} location={location} mode={viewMode}></Viewport>
         </div>

@@ -12,7 +12,7 @@ import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
 import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
-import { change_actors_list, change_map, select_actors, select_actors_list } from '../model/algorithms/common';
+import { change_actors_list, change_map, change_viewport_at_index, select_actors, select_actors_list } from '../model/algorithms/common';
 
 export const createController = () => {
 
@@ -96,6 +96,12 @@ export const createController = () => {
                 return a;
             }
         }))
+    }
+
+    function update_view_location(viewport_index: number, location: Vector){
+        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+            return { ...viewport, center_location: location }
+        });
     }
 
     function modifyBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel) {
@@ -276,5 +282,6 @@ export const createController = () => {
         redo: history.forward,
         importFromString,
         exportSelectionToString,
+        update_view_location,
     }
 }
