@@ -35,7 +35,6 @@ export const Viewport = ({
     let [last_width, set_last_width] = useState<number>(null);
     let [last_height, set_last_height] = useState<number>(null);
 
-
     function canvas_ref(new_canvas: HTMLCanvasElement) {
         if (new_canvas == null)
         {
@@ -48,13 +47,11 @@ export const Viewport = ({
         }
         let needs_render = false;
         if (last_render_map !== map){
-            console.log('map change');
             set_last_render_map(map);
             needs_render = true;
         }
         if (last_render_viewport !== viewport_state){
             set_last_render_viewport(viewport_state);
-            console.log('viewport change');
             needs_render = true;
         }
         if (last_vertex_mode !== vertex_mode){
@@ -70,7 +67,7 @@ export const Viewport = ({
             needs_render = true;
         }
         if (needs_render){
-            setTimeout(() => renderUpdate(renderer),0);
+            renderUpdate(renderer);
         }
     }
 
@@ -102,9 +99,10 @@ export const Viewport = ({
                     break;
             }
             // re-render
-            
-            console.log('re-rendering', viewport_index);
+            const before_time = Date.now();
             target.render(map);
+            const delta_time = Date.now() - before_time;
+            // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', viewport_state.center_location);
         }
     }
 

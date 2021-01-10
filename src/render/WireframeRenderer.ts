@@ -74,18 +74,26 @@ function getBrushWireColor(actor: Actor): string {
     }
 }
 
+interface ActorRenderMemo
+{
+    world_vertexes : Vector[]
+}
+
 export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     const context = canvas.getContext("2d");
     let { width, height } = canvas;
     let deviceSize = Math.min(width, height);
     let showVertexes = false;
+    let actor_memo : ActorRenderMemo[] = [];
+    let prev_actor_list : Actor[] = null;
+    let view_center : Vector = Vector.ZERO;
 
     function render(state : EditorState) : void {
         renderMap(state.map);
     }  
 
     function renderMap(map: UnrealMap) {
-        
+
         width = canvas.width;
         height = canvas.height;
         deviceSize = Math.min(width, height);
@@ -97,56 +105,74 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             return;
         }
 
-        for (const actor of map.actors) {
-            if (!actor.selected) { renderActor(actor); }
+        for (let i=0; i<map.actors.length; i++) {
+            const actor = map.actors[i];
+            if (!actor.selected) { renderActor(actor, get_actor_memo(actor, i)); }
         }
         if (showVertexes){
             context.fillStyle = backgroundColor + '8';
             context.fillRect(0, 0, width, height);
         }
-        for (const actor of map.actors) {
-            if (actor.selected) { renderActor(actor); }
+        for (let i=0; i<map.actors.length; i++) {
+            const actor = map.actors[i];
+            if (actor.selected) { renderActor(actor, get_actor_memo(actor, i)); }
         }
+
+        prev_actor_list = map.actors;
     }
 
-    function renderActor(actor: Actor) {
+    function get_actor_memo(actor: Actor, actor_index: number){
+        if (prev_actor_list && prev_actor_list[actor_index] === actor){
+            return actor_memo[actor_index];
+        }
+        const new_memo : ActorRenderMemo = {
+            world_vertexes: null
+        };
+        actor_memo[actor_index] = new_memo;
+        return new_memo;
+    }
+
+    function get_world_transformed_vertexes(actor: Actor, memo: ActorRenderMemo){
+        if (memo.world_vertexes){
+            return memo.world_vertexes; // cached ;)
+        }
+        
+        const object_matrix = actor.postScale.toMatrix()
+            .multiply(actor.rotation.toMatrix())
+            .multiply(actor.mainScale.toMatrix());
+
+        const transformed = actor.brushModel.vertexes.map(
+            vertex => objectTransform(object_matrix, vertex.position, actor.prePivot || Vector.ZERO, actor.location));
+           
+        memo.world_vertexes = transformed;
+        return transformed;
+    }
+
+    function renderActor(actor: Actor, memo: ActorRenderMemo) {
         if (actor.brushModel != null) { 
-            let save_tx = tx, save_ty = ty, save_tz = tz;
-            if (actor.prePivot){
-                tpx = -actor.prePivot.x;
-                tpy = -actor.prePivot.y;
-                tpz = -actor.prePivot.z;
-            } else {
-                tpx = tpy = tpz = 0;
-            }
-            tx += actor.location.x;
-            ty += actor.location.y;
-            tz += actor.location.z;
-            const rot = new Rotation(-actor.rotation.pitch, -actor.rotation.yaw, -actor.rotation.roll)
-            const matrix = actor.postScale.toMatrix()
-                .multiply(actor.rotation.toMatrix())
-                .multiply(actor.mainScale.toMatrix());
-            objectMatrix = matrix;
-            const polygons = actor.brushModel.polygons;
+
+            const transformed_vertexes = get_world_transformed_vertexes(actor, memo);
+
             context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.5;
-            renderWireframeEdges(actor.brushModel, actor.selected && showVertexes);
+
+            renderWireframeEdges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
             if (showVertexes && actor.selected){
-                renderVertexes(actor.brushModel);
+                renderVertexes(actor.brushModel, transformed_vertexes);
             }
-            tx = save_tx, ty = save_ty, tz = save_tz;
         }
     }
 
-    function renderVertexes(brush: BrushModel){
-        for (const vertex of brush.vertexes){
-            const point = objectTransform(vertex.position);
+    function renderVertexes(brush: BrushModel, transformed_vertexes: Vector[]){
+        for (let i=0; i<brush.vertexes.length; i++){
+            const is_selected = brush.vertexes[i].selected;
+            const point = transformed_vertexes[i];
             const x = viewTransformX(point);
             const y = viewTransformY(point);
 
             if (!isNaN(x) && !isNaN(y))
             {
-                context.fillStyle = vertex.selected ? vertexSelectedColor : vertexColor;
+                context.fillStyle = is_selected ? vertexSelectedColor : vertexColor;
                 context.beginPath();
                 context.arc(x,y,3,0,Math.PI*2);
                 context.fill();
@@ -154,7 +180,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         }
     }
 
-    function renderWireframeEdges(brush: BrushModel, colorBasedOnPolyCount: boolean) {
+    function renderWireframeEdges(brush: BrushModel, transformed_vertexes: Vector[], colorBasedOnPolyCount: boolean) {
         let warned_brush_edges = false;
         for (const edge of brush.edges) {
             const brushVertexA = brush.vertexes[edge.vertexIndexA];
@@ -166,8 +192,8 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 }
                 continue;
             }
-            const vertexA = objectTransform(brush.vertexes[edge.vertexIndexA].position);
-            const vertexB = objectTransform(brush.vertexes[edge.vertexIndexB].position);
+            const vertexA = transformed_vertexes[edge.vertexIndexA];
+            const vertexB = transformed_vertexes[edge.vertexIndexB];
 
             const x0 = viewTransformX(vertexA), y0 = viewTransformY(vertexA);
             const x1 = viewTransformX(vertexB), y1 = viewTransformY(vertexB);
@@ -204,15 +230,12 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         }
     }
 
-    let tx = 0.0, tpx = 0.0;
-    let ty = 0.0, tpy = 0.0;
-    let tz = 0.0, tpz = 0.0;
-    let objectMatrix = Matrix3x3.IDENTITY;
-
-    function objectTransform(vector : Vector) : Vector {
-        return objectMatrix
-            .apply(vector.add(tpx, tpy, tpz))
-            .add(tx,ty,tz);
+    function objectTransform(matrix: Matrix3x3, vector : Vector, pivot: Vector, location: Vector) : Vector {
+        if (!pivot) pivot = Vector.ZERO;
+        if (!location) location = Vector.ZERO;
+        return matrix
+            .apply(vector.subtractVector(pivot))
+            .addVector(location);
     }
 
     let viewTransformX: (vector: Vector) => number;
@@ -224,15 +247,21 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
     function setPerspectiveMode(fieldOfView: number): void {
         viewTransformX = v => {
-            const x = perspectiveMatrix.getTransformedX(v.x, v.y, v.z);
-            const y = perspectiveMatrix.getTransformedY(v.x, v.y, v.z);
+            const w_x = v.x - view_center.x;
+            const w_y = v.y - view_center.y;
+            const w_z = v.z - view_center.z;
+            const x = perspectiveMatrix.getTransformedX(w_x, w_y, w_z);
+            const y = perspectiveMatrix.getTransformedY(w_x, w_y, w_z);
             return x < 0
                 ? Number.NaN
                 : (y / x) * deviceSize + width * .5;
         }
         viewTransformY = v => {
-            const x = perspectiveMatrix.getTransformedX(v.x, v.y, v.z);
-            const z = perspectiveMatrix.getTransformedZ(v.x, v.y, v.z);
+            const w_x = v.x - view_center.x;
+            const w_y = v.y - view_center.y;
+            const w_z = v.z - view_center.z;
+            const x = perspectiveMatrix.getTransformedX(w_x, w_y, w_z);
+            const z = perspectiveMatrix.getTransformedZ(w_x, w_y, w_z);
             return x < 0
                 ? Number.NaN
                 : (-z / x) * deviceSize + height * .5;
@@ -240,9 +269,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     function setCenterTo(location: Vector): void {
-        tx = -location.x;
-        ty = -location.y;
-        tz = -location.z;
+        view_center = location;
     }
 
     function setPerspectiveRotation(rotation: Rotation): void {
@@ -253,23 +280,23 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
     function setTopMode(scale: number): void {
         viewTransformX = vector =>
-            vector.x * deviceSize * scale + width / 2;
+            (vector.x - view_center.x) * deviceSize * scale + width / 2;
         viewTransformY = vector =>
-            vector.y * deviceSize * scale + height / 2;
+            (vector.y - view_center.y) * deviceSize * scale + height / 2;
     }
 
     function setFrontMode(scale: number): void {
         viewTransformX = vector =>
-            vector.x * deviceSize * scale + width / 2;
+            (vector.x - view_center.x) * deviceSize * scale + width / 2;
         viewTransformY = vector =>
-            vector.z * -1 * deviceSize * scale + height / 2;
+            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
     }
 
     function setSideMode(scale: number): void {
         viewTransformX = vector =>
-            vector.y * deviceSize * scale + width / 2;
+            (vector.y - view_center.y) * deviceSize * scale + width / 2;
         viewTransformY = vector =>
-            vector.z * -1 * deviceSize * scale + height / 2;
+            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
     }
 
     function findNearestActor(
@@ -280,29 +307,17 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         const MAX_DISTANCE = 8;
         let bestMatch: Actor = null;
         let bestDistance = Number.MAX_VALUE;
-        for (let actorIndex=map.actors.length-1; actorIndex >= 0; actorIndex--) {
-            const actor = map.actors[actorIndex]; // reverse iterate to find topmost actor
+        for (let actor_index=map.actors.length-1; actor_index >= 0; actor_index--) {
+            const actor = map.actors[actor_index]; // reverse iterate to find topmost actor
             if (actor.brushModel != null) {
-                const matrix = actor.mainScale.toMatrix()
-                    .multiply(actor.rotation.toMatrix())
-                    .multiply(actor.postScale.toMatrix());
-                objectMatrix = matrix;
-                if (actor.prePivot){
-                    tpx = -actor.prePivot.x;
-                    tpy = -actor.prePivot.y;
-                    tpz = -actor.prePivot.z;
-                } else {
-                    tpx = tpy = tpz = 0;
-                }
-                let save_tx = tx, save_ty = ty, save_tz = tz;
-                tx += actor.location.x;
-                ty += actor.location.y;
-                tz += actor.location.z;
+
+                const vertexes = get_world_transformed_vertexes(actor, get_actor_memo(actor, actor_index));
+
                 for (const edge of actor.brushModel.edges) {
-                    let p0 = objectTransform(actor.brushModel.vertexes[edge.vertexIndexA].position);
+                    let p0 = vertexes[edge.vertexIndexA];
                     let x0 = viewTransformX(p0);
                     let y0 = viewTransformY(p0);
-                    const p1 = objectTransform(actor.brushModel.vertexes[edge.vertexIndexB].position);
+                    const p1 = vertexes[edge.vertexIndexB];
                     let x1 = viewTransformX(p1);
                     let y1 = viewTransformY(p1);
                     if (!isNaN(x0) && !isNaN(x1)) {
@@ -313,7 +328,6 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                         }
                     }
                 }
-                tx = save_tx, ty = save_ty, tz = save_tz;
             }
         }
         if (bestDistance > MAX_DISTANCE) {
@@ -338,37 +352,23 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             if (!actor.selected || actor.brushModel == null){
                 continue; // skip actors which are not selected or don't have a brushModel
             }
-            const matrix = actor.mainScale.toMatrix()
-                .multiply(actor.rotation.toMatrix())
-                .multiply(actor.postScale.toMatrix());
-            objectMatrix = matrix;
-            if (actor.prePivot){
-                tpx = -actor.prePivot.x;
-                tpy = -actor.prePivot.y;
-                tpz = -actor.prePivot.z;
-            } else {
-                tpx = tpy = tpz = 0;
-            }
-            let save_tx = tx, save_ty = ty, save_tz = tz;
-            tx += actor.location.x;
-            ty += actor.location.y;
-            tz += actor.location.z;
+
+            const transformed_vertexes = get_world_transformed_vertexes(actor, get_actor_memo(actor, actorIndex));
             const vertexes = actor.brushModel.vertexes;
-            for (let vertexIndex = vertexes.length-1; vertexIndex >= 0; vertexIndex--) {
-                const vertex = actor.brushModel.vertexes[vertexIndex];
-                let p0 = objectTransform(vertex.position);
+
+            for (let vertex_index = vertexes.length-1; vertex_index >= 0; vertex_index--) {
+                let p0 = transformed_vertexes[vertex_index];
                 let x0 = viewTransformX(p0);
                 let y0 = viewTransformY(p0);
                 if (!isNaN(x0) && !isNaN(y0)) {
                     let distance = distance2dToPoint(canvasX, canvasY, x0, y0);
                     if (distance < bestDistance) {
                         bestMatchActor = actor;
-                        bestMatchVertex = vertexIndex;
+                        bestMatchVertex = vertex_index;
                         bestDistance = distance;
                     }
                 }
             }
-            tx = save_tx, ty = save_ty, tz = save_tz;
         }
         if (bestDistance > MAX_DISTANCE){
             bestMatchActor = null;
