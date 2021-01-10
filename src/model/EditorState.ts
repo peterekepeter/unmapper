@@ -1,12 +1,15 @@
 import { Actor } from "./Actor";
+import { Rotation } from "./Rotation";
 import { UnrealMap } from "./UnrealMap";
 import { Vector } from "./Vector";
 import { ViewportMode } from "./ViewportMode";
 
 export interface ViewportState
 {
-    center_location: Vector
-    mode: ViewportMode
+    center_location: Vector;
+    mode: ViewportMode;
+    rotation: Rotation;
+    zoom_level: number;
 }
 
 export interface IHistoryStateAccess
@@ -40,19 +43,27 @@ export function create_initial_editor_state() : EditorState{
         viewports: [
             {
                 mode: ViewportMode.Top,
-                center_location: Vector.ZERO
+                center_location: Vector.ZERO,
+                rotation: Rotation.IDENTITY,
+                zoom_level: 0
             },
             {
                 mode: ViewportMode.Front,
-                center_location: Vector.ZERO
+                center_location: Vector.ZERO,
+                rotation: Rotation.IDENTITY,
+                zoom_level: 0
             },
             {
                 mode: ViewportMode.Perspective,
-                center_location: new Vector(-500,-300,300)
+                center_location: new Vector(-500,-300,300),
+                rotation: Rotation.IDENTITY,
+                zoom_level: 0
             },
             {
                 mode: ViewportMode.Side,
-                center_location: Vector.ZERO
+                center_location: Vector.ZERO,
+                rotation: Rotation.IDENTITY,
+                zoom_level: 0
             },
         ]
     }

@@ -6,75 +6,105 @@ import React = require("react");
 import { createController } from "../controller";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
-import { useSignal } from "./useSignal";
 import { ViewportMode } from "../model/ViewportMode";
+import { UnrealMap } from "../model/UnrealMap";
+import { ViewportState } from "../model/EditorState";
 
-const levelPerDouble = 4;
 
 export const Viewport = ({
     viewport_index = 0,
     width = 500,
     height = 300,
     controller = createController(),
-    location = new Vector(0, 0, 0),
-    mode = ViewportMode.Top }) => {
+    map = new UnrealMap(),
+    viewport_state = {} as ViewportState,
+    vertex_mode = false}) => {
 
-    const { map, vertex_mode, viewports } = useSignal(controller.state_signal);
+    let [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 
-    const viewport_state = viewports[viewport_index];
-    
-    let [canvas, setCanvas]
-        = useState<HTMLCanvasElement>(null);
+    let [renderer, set_renderer] = useState<IRenderer>(null);
 
-    let [renderer, setRenderer]
-        = useState<IRenderer>(null);
-
-    let [zoomLevel, setZoomLevel] = useState(-12 * levelPerDouble);
-
-    const viewMode = mode;
-
-    let [viewLocation, setViewLocation]
-        = useState(location);
-
-    let [rotation, setRotation]
-        = useState(Rotation.IDENTITY);
+    const view_mode = viewport_state.mode;
 
     let [isMouseDown, setMouseDown] = useState(false);
     let [didMouseMove, setDidMouseMove] = useState(false);
 
-    function canvasRef(attachedCanvas: HTMLCanvasElement) {
-        if (attachedCanvas != null) {
-            if (canvas == null || renderer == null) {
-                setCanvas(attachedCanvas);
-                setRenderer(createWireframeRenderer(attachedCanvas));
-            }
-            renderUpdate();
+    let [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
+    let [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
+    let [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
+    let [last_width, set_last_width] = useState<number>(null);
+    let [last_height, set_last_height] = useState<number>(null);
+
+
+    function canvas_ref(new_canvas: HTMLCanvasElement) {
+        if (new_canvas == null)
+        {
+            return;
+        }
+        if (new_canvas !== canvas){
+            set_canvas(new_canvas);
+            set_renderer(createWireframeRenderer(new_canvas));
+            return;
+        }
+        let needs_render = false;
+        if (last_render_map !== map){
+            console.log('map change');
+            set_last_render_map(map);
+            needs_render = true;
+        }
+        if (last_render_viewport !== viewport_state){
+            set_last_render_viewport(viewport_state);
+            console.log('viewport change');
+            needs_render = true;
+        }
+        if (last_vertex_mode !== vertex_mode){
+            set_last_vertex_mode(vertex_mode);
+            needs_render = true;
+        }
+        if (last_width !== width){
+            set_last_width(width);
+            needs_render = true;
+        }
+        if (last_height !== height){
+            set_last_height(height);
+            needs_render = true;
+        }
+        if (needs_render){
+            setTimeout(() => renderUpdate(renderer),0);
         }
     }
 
-    function renderUpdate() {
-        if (renderer != null) {
+    function get_ortoho_scale(){
+        const levels_per_double = 4;
+        const scale = 1/4096*Math.pow(2, viewport_state.zoom_level/levels_per_double); 
+        return scale;
+    }
+
+    function renderUpdate(target: IRenderer) {
+        if (target != null) {
             const perspectiveFov = 90;
-            const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
-            renderer.setShowVertexes(vertex_mode);
-            renderer.setCenterTo(viewport_state.center_location);
-            switch (viewMode) {
+            const scale = get_ortoho_scale();
+            target.setShowVertexes(vertex_mode);
+            target.setCenterTo(viewport_state.center_location);
+            switch (view_mode) {
                 case ViewportMode.Perspective:
-                    renderer.setPerspectiveRotation(rotation);
-                    renderer.setPerspectiveMode(perspectiveFov);
+                    target.setPerspectiveRotation(viewport_state.rotation);
+                    target.setPerspectiveMode(perspectiveFov);
                     break;
                 case ViewportMode.Top:
-                    renderer.setTopMode(ortohoScale);
+                    target.setTopMode(scale);
                     break;
                 case ViewportMode.Front:
-                    renderer.setFrontMode(ortohoScale);
+                    target.setFrontMode(scale);
                     break;
                 case ViewportMode.Side:
-                    renderer.setSideMode(ortohoScale);
+                    target.setSideMode(scale);
                     break;
             }
             // re-render
-            renderer.render(map);
+            
+            console.log('re-rendering', viewport_index);
+            target.render(map);
         }
     }
 
@@ -89,7 +119,7 @@ export const Viewport = ({
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerMove={onPointerMove}
-        ref={canvas => canvasRef(canvas)}
+        ref={canvas => canvas_ref(canvas)}
         style={{
             maxWidth: '100%',
             maxHeight: '100%'
@@ -137,14 +167,14 @@ export const Viewport = ({
     }
 
     function onWheel(event: React.WheelEvent){
-        let new_zoom_level = zoomLevel;
+        let new_zoom_level = viewport_state.zoom_level;
         if (event.deltaY > 0){
             new_zoom_level--;
         }
         if (event.deltaY < 0){
             new_zoom_level ++;
         }
-        setZoomLevel(new_zoom_level);
+        controller.set_viewport_zoom_level(viewport_index, new_zoom_level);
         event.preventDefault();
         return false;
     }
@@ -161,14 +191,14 @@ export const Viewport = ({
             dx *= -1;
             dy *= -1;
         }
-        const ortohoScale = Math.pow(2, zoomLevel/levelPerDouble);
+        const ortohoScale = get_ortoho_scale();
         const deviceSize = Math.min(width, height);
         const scale = ortohoScale * deviceSize;
         setDidMouseMove(true);
-        const [nextRotation, nextLocation] =
-            nextViewState(viewport_state.center_location, rotation, viewMode, dx, dy, event.buttons, deviceSize, ortohoScale);
+        const [next_rotation, nextLocation] =
+            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, deviceSize, ortohoScale);
         controller.update_view_location(viewport_index, nextLocation);
-        setRotation(nextRotation);
+        controller.update_view_rotation(viewport_index, next_rotation);
     }
 
 }

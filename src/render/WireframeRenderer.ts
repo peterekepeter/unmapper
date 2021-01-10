@@ -85,7 +85,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }  
 
     function renderMap(map: UnrealMap) {
-
+        
         width = canvas.width;
         height = canvas.height;
         deviceSize = Math.min(width, height);

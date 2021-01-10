@@ -5,6 +5,7 @@ import { ViewportMode } from "../model/ViewportMode";
 import { SectionTitle } from '../ui/SectionTitle';
 import { createController } from '../controller';
 import { UiButton } from '../ui/UiButton';
+import { useSignal } from './useSignal';
 
 export function ViewportPanel({
     viewport_index = 0,
@@ -13,7 +14,7 @@ export function ViewportPanel({
     mode = ViewportMode.Top }
 ) {
 
-    let [viewMode, setViewMode] = React.useState(mode);
+    const state = useSignal(controller.state_signal);
     let [viewportWidth, setViewportWidth] = React.useState(10);
     let [viewportHeight, setViewportHeight] = React.useState(10);
 
@@ -30,17 +31,20 @@ export function ViewportPanel({
         }
     }
 
+    function set_mode(mode: ViewportMode){
+        controller.set_viewport_mode(viewport_index, mode)
+    }
 
     return <div style={{
         display: 'grid',
         gridTemplate: 'auto 1fr / 1fr'
     }}>
         <SectionTitle>
-            <div style={{ maxWidth:'100px', flexGrow:.2 }} >{generateTitle(viewMode)}</div>
-            <UiButton onClick={()=> setViewMode(ViewportMode.Top)}>Top</UiButton>
-            <UiButton onClick={()=> setViewMode(ViewportMode.Front)}>Front</UiButton>
-            <UiButton onClick={()=> setViewMode(ViewportMode.Side)}>Side</UiButton>
-            <UiButton onClick={()=> setViewMode(ViewportMode.Perspective)}>Perspective</UiButton>
+            <div style={{ maxWidth:'100px', flexGrow:.2 }} >{generateTitle(state.viewports[viewport_index].mode)}</div>
+            <UiButton onClick={()=> set_mode(ViewportMode.Top)}>Top</UiButton>
+            <UiButton onClick={()=> set_mode(ViewportMode.Front)}>Front</UiButton>
+            <UiButton onClick={()=> set_mode(ViewportMode.Side)}>Side</UiButton>
+            <UiButton onClick={()=> set_mode(ViewportMode.Perspective)}>Perspective</UiButton>
         </SectionTitle>
         <div ref={viewportContainer} style={{
             display: 'grid',
@@ -51,7 +55,10 @@ export function ViewportPanel({
             <Viewport 
                 viewport_index={viewport_index}
                 width={viewportWidth} height={viewportHeight}
-                controller={controller} location={location} mode={viewMode}></Viewport>
+                controller={controller}
+                vertex_mode={state.vertex_mode}
+                map={state.map}
+                viewport_state={state.viewports[viewport_index]}></Viewport>
         </div>
     </div>
 }

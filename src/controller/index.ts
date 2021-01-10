@@ -8,11 +8,12 @@ import { triangulateBrush } from '../model/algorithms/triangluate';
 import { shuffleBrushPolygons } from '../model/algorithms/shuffle';
 import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
 import { BrushModel } from '../model/BrushModel';
-import { extrudeBrushFaces } from '../model/algorithms/extrudeBrushFaces';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
 import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
 import { change_actors_list, change_map, change_viewport_at_index, select_actors, select_actors_list } from '../model/algorithms/common';
+import { Rotation } from '../model/Rotation';
+import { ViewportMode } from '../model/ViewportMode';
 
 export const createController = () => {
 
@@ -85,6 +86,11 @@ export const createController = () => {
         return storeMapToString(mapToExport);
     }
 
+    function set_viewport_zoom_level(index: number, level: number)
+    {
+        console.log('set_viewport_zoom_level', index, level);
+    }
+
     function undoCopyMove() {
         updateActorList(state_signal.value.map.actors.map(a => {
             if (a.selected){
@@ -101,6 +107,18 @@ export const createController = () => {
     function update_view_location(viewport_index: number, location: Vector){
         state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
             return { ...viewport, center_location: location }
+        });
+    }
+
+    function set_viewport_mode(viewport_index: number, mode: ViewportMode){
+        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+            return { ...viewport, mode }
+        });
+    }
+
+    function update_view_rotation(viewport_index: number, rotation: Rotation){
+        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+            return { ...viewport, rotation: rotation }
         });
     }
 
@@ -276,6 +294,9 @@ export const createController = () => {
         shuffleMeshPolygons,
         alignMeshVertexesToGrid,
         uv_triplanar_map_selected,
+        set_viewport_zoom_level,
+        set_viewport_mode,
+        update_view_rotation,
         undoCopyMove,
         showAllCommands,
         undo: history.back,
