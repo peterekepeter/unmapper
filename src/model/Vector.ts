@@ -6,6 +6,7 @@ export class Vector {
 
     static ZERO: Vector = new Vector(0, 0, 0);
     static ONES: Vector = new Vector(1, 1, 1);
+    static NEGATIVE_ONES: Vector = new Vector(-1, -1, -1);
 
     static FORWARD: Vector = new Vector(1, 0, 0);
     static RIGHT: Vector = new Vector(0, 1, 0);
@@ -22,6 +23,9 @@ export class Vector {
     static UNIT_NEGATIVE_X: Vector = new Vector(-1, 0, 0);
     static UNIT_NEGATIVE_Y: Vector = new Vector(0, -1, 0);
     static UNIT_NEGATIVE_Z: Vector = new Vector(0, 0, -1);
+
+    static NEGATIVE_INFINITY = new Vector(-Infinity, -Infinity, -Infinity);
+    static INFINITY = new Vector(Infinity, Infinity, Infinity);
 
     constructor(x: number, y: number, z: number) {
         this.x = x;
