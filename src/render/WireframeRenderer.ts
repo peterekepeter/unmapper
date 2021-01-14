@@ -43,13 +43,11 @@ const selectedColors: IBrushColors = {
     invalidBrush: makeSelectedColor(colors.invalidBrush),
 }
 
-function getColorBasedOnPolyCount(count : number){
+function get_color_based_on_poly_count(count : number){
     switch(count){
         case 0: return "#666";
         case 1: return "#8c4";
-        case 2: return "#c12";
-        default: 
-            case 2: return "#c19";
+        default: case 2: return "#c19";
     }
 }
 
@@ -79,7 +77,7 @@ interface ActorRenderMemo
     world_vertexes : Vector[]
 }
 
-export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
+export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer {
     const context = canvas.getContext("2d");
     let { width, height } = canvas;
     let deviceSize = Math.min(width, height);
@@ -89,10 +87,10 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     let view_center : Vector = Vector.ZERO;
 
     function render(state : EditorState) : void {
-        renderMap(state.map);
+        render_map(state.map);
     }  
 
-    function renderMap(map: UnrealMap) {
+    function render_map(map: UnrealMap) {
 
         width = canvas.width;
         height = canvas.height;
@@ -107,7 +105,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
         for (let i=0; i<map.actors.length; i++) {
             const actor = map.actors[i];
-            if (!actor.selected) { renderActor(actor, get_actor_memo(actor, i)); }
+            if (!actor.selected) { render_actor(actor, get_actor_memo(actor, i)); }
         }
         if (showVertexes){
             context.fillStyle = backgroundColor + '8';
@@ -115,7 +113,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         }
         for (let i=0; i<map.actors.length; i++) {
             const actor = map.actors[i];
-            if (actor.selected) { renderActor(actor, get_actor_memo(actor, i)); }
+            if (actor.selected) { render_actor(actor, get_actor_memo(actor, i)); }
         }
 
         prev_actor_list = map.actors;
@@ -142,13 +140,21 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             .multiply(actor.mainScale.toMatrix());
 
         const transformed = actor.brushModel.vertexes.map(
-            vertex => objectTransform(object_matrix, vertex.position, actor.prePivot || Vector.ZERO, actor.location));
+            vertex => object_transform(object_matrix, vertex.position, actor.prePivot || Vector.ZERO, actor.location));
            
         memo.world_vertexes = transformed;
         return transformed;
     }
+    
+    function object_transform(matrix: Matrix3x3, vector : Vector, pivot: Vector, location: Vector) : Vector {
+        if (!pivot) pivot = Vector.ZERO;
+        if (!location) location = Vector.ZERO;
+        return matrix
+            .apply(vector.subtractVector(pivot))
+            .addVector(location);
+    }
 
-    function renderActor(actor: Actor, memo: ActorRenderMemo) {
+    function render_actor(actor: Actor, memo: ActorRenderMemo) {
         if (actor.brushModel != null) { 
 
             const transformed_vertexes = get_world_transformed_vertexes(actor, memo);
@@ -156,14 +162,14 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
             context.strokeStyle = getBrushWireColor(actor);
             context.lineWidth = 1.5;
 
-            renderWireframeEdges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
+            render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
             if (showVertexes && actor.selected){
-                renderVertexes(actor.brushModel, transformed_vertexes);
+                render_vertexes(actor.brushModel, transformed_vertexes);
             }
         }
     }
 
-    function renderVertexes(brush: BrushModel, transformed_vertexes: Vector[]){
+    function render_vertexes(brush: BrushModel, transformed_vertexes: Vector[]){
         for (let i=0; i<brush.vertexes.length; i++){
             const is_selected = brush.vertexes[i].selected;
             const point = transformed_vertexes[i];
@@ -180,7 +186,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
         }
     }
 
-    function renderWireframeEdges(brush: BrushModel, transformed_vertexes: Vector[], colorBasedOnPolyCount: boolean) {
+    function render_wireframe_edges(brush: BrushModel, transformed_vertexes: Vector[], colorBasedOnPolyCount: boolean) {
         let warned_brush_edges = false;
         for (const edge of brush.edges) {
             const brushVertexA = brush.vertexes[edge.vertexIndexA];
@@ -202,7 +208,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
 
             if (colorBasedOnPolyCount)
             {
-                context.strokeStyle = getColorBasedOnPolyCount(edge.polygons.length);
+                context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length);
             }
             
             if (!invalid0 && !invalid1)
@@ -228,14 +234,6 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
                 }
             }
         }
-    }
-
-    function objectTransform(matrix: Matrix3x3, vector : Vector, pivot: Vector, location: Vector) : Vector {
-        if (!pivot) pivot = Vector.ZERO;
-        if (!location) location = Vector.ZERO;
-        return matrix
-            .apply(vector.subtractVector(pivot))
-            .addVector(location);
     }
 
     let viewTransformX: (vector: Vector) => number;
@@ -378,7 +376,7 @@ export function createWireframeRenderer(canvas: HTMLCanvasElement): IRenderer {
     }
 
     const s: IRenderer = {
-        render: renderMap,
+        render: render_map,
         render_v2: render,
         setCenterTo: setCenterTo,
         setFrontMode: setFrontMode,

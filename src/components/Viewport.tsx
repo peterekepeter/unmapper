@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IRenderer } from "../render/IRenderer";
-import { createWireframeRenderer } from "../render/WireframeRenderer";
+import { create_wireframe_renderer } from "../render/WireframeRenderer";
 import { Vector } from "../model/Vector";
 import React = require("react");
 import { createController } from "../controller";
@@ -42,7 +42,7 @@ export const Viewport = ({
         }
         if (new_canvas !== canvas){
             set_canvas(new_canvas);
-            set_renderer(createWireframeRenderer(new_canvas));
+            set_renderer(create_wireframe_renderer(new_canvas));
             return;
         }
         let needs_render = false;
