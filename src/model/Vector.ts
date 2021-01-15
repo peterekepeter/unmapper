@@ -34,6 +34,15 @@ export class Vector {
         Object.freeze(this);
     }
 
+    get_component(index: number){
+        switch(index){
+            case 0: return this.x;
+            case 1: return this.y;
+            case 2: return this.z;
+            default: throw new Error('invalid index, it must be 0, 1 or 2')
+        }
+    }
+
     addVector(v: Vector) {
         return this.add(v.x, v.y, v.z);
     }
