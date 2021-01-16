@@ -9,7 +9,7 @@ import { shuffleBrushPolygons } from '../model/algorithms/shuffle';
 import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
 import { BrushModel } from '../model/BrushModel';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
-import { create_initial_editor_state, EditorState } from '../model/EditorState';
+import { create_initial_editor_state, EditorState, ViewportState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
 import { change_actors_list, change_map, change_viewport_at_index, select_actors, select_actors_list } from '../model/algorithms/common';
 import { Rotation } from '../model/Rotation';
@@ -88,7 +88,9 @@ export const createController = () => {
 
     function set_viewport_zoom_level(index: number, level: number)
     {
-        console.log('set_viewport_zoom_level', index, level);
+        state_signal.value = change_viewport_at_index(state_signal.value, index, (viewport : ViewportState) => {
+            return { ...viewport, zoom_level: level }
+        });
     }
 
     function undoCopyMove() {
