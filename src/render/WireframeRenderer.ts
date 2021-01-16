@@ -48,7 +48,8 @@ function get_color_based_on_poly_count(count : number){
     switch(count){
         case 0: return "#666";
         case 1: return "#8c4";
-        default: case 2: return "#c19";
+        case 2: return "#c12";
+        default: return "#c19";
     }
 }
 
