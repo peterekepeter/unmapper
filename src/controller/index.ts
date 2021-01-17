@@ -22,8 +22,8 @@ export const createController = () => {
     var history = create_history(state_signal);
     var commandsShownState = createSignal(false);
 
-    async function execute_undoable_command(command_info: ICommandInfoV2){
-        const next_state = await command_info.implementation(state_signal.value);
+    async function execute_undoable_command(command_info: ICommandInfoV2, ...args: any){
+        const next_state = await command_info.implementation(state_signal.value, ...args);
         if (command_info.legacy_handling){
             // legacy commands update state_signal & history directly
             return;

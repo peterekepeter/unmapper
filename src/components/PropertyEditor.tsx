@@ -5,9 +5,10 @@ import { Actor } from "../model/Actor";
 import { UiText } from "../ui/UiText";
 import { PolyFlags } from "../model/PolyFlags";
 import { KnownClasses } from "../model/KnownClasses";
-import { UiButton } from "../ui/UiButton";
 import { Vector } from "../model/Vector";
 import { useSignal } from "./useSignal";
+import { UiVectorInput } from "../ui/UiVectorInput";
+import * as edit_property from "../commands/edit_property";
 
 export function PropertyEditor({ controller = createController() }) {
 
@@ -20,6 +21,8 @@ export function PropertyEditor({ controller = createController() }) {
             ? `(${selection.length} selected)`
             : null;
 
+    const prop = property_context(controller, selection);
+
     return <div>
         <SectionTitle>Properties <span>{titleDetail}</span></SectionTitle>
         <div style={propertyEditorStyle}>
@@ -27,9 +30,9 @@ export function PropertyEditor({ controller = createController() }) {
             <StringProp selection={selection} name="Class" getter={a => a.className} />
             <StringProp selection={selection} name="Model" getter={a => a.brushModel?.name} />
             <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
-            <VectorProp selection={selection} name="Location" getter={a => a.location}/>
-            <VectorProp selection={selection} name="OldLocation" getter={a => a.oldLocation}/>
-            <VectorProp selection={selection} name="PrePivot" getter={a => a.prePivot}/>
+            <prop.Vector name="Location" getter={a => a.location}/>
+            <prop.Vector name="OldLocation" getter={a => a.oldLocation}/>
+            <prop.Vector name="PrePivot"/>
         </div>
     </div>;
 }
@@ -39,6 +42,46 @@ const propertyEditorStyle = {
     grid: "auto / 1fr 2fr"
 }
 
+function property_context(controller: ReturnType<typeof createController>, selection: Actor[]){
+    
+    function Vector({
+        name = '',
+        getter = (a:Actor) => a.location
+    }) {
+        let aggregate : Vector;
+        let aggregateCount = 0;
+        for (const actor of selection){
+            const value = getter ? getter(actor) : actor.get_property(name);
+            if (value === null){
+                continue;
+            }
+            if (aggregateCount === 0){
+                aggregate = value;
+            } else {
+                aggregate = aggregate.addVector(value);
+            }
+            aggregateCount ++;
+        }
+        if (!aggregate){
+            return <></>
+        }
+        if (aggregateCount > 1){
+            aggregate = aggregate.scale(1/aggregateCount);
+        }
+        const str = aggregateCount === 1 
+            ? `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z`
+            : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
+        return <>
+            <UiText>{name}</UiText>
+            <UiVectorInput value={aggregate} next_value={value => controller.execute(edit_property, name, value)}/>
+        </>
+    }
+
+    
+    return {
+        Vector
+    }
+}
 
 function VectorProp({
     selection = new Array<Actor>(),
@@ -70,7 +113,7 @@ function VectorProp({
         : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
     return <>
         <UiText>{name}</UiText>
-        <UiText>{str}</UiText>
+        <UiVectorInput value={aggregate} next_value={value => console.log(value)}/>
     </>
 }
 

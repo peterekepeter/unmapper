@@ -1,5 +1,5 @@
 import { Vector } from "../Vector";
-import { vector_from_expression as v } from "./expression"
+import { expression_from_vector as e, vector_from_expression as v } from "./expression"
 
 test('default returns zero vector', () => {
     expect(v('')).toEqual(Vector.ZERO);
@@ -39,4 +39,27 @@ test('components may cancel each other out', () => {
 
 test('positive sign accepted', () => {
     expect(v('+24y')).toMatchObject({ y: 24 })
+})
+
+describe('expression from vector', () => {
+
+    test('each component to string', () => {
+        expect(e(Vector.ONES)).toBe('1x 1y 1z')
+    })
+
+    test('negatives components to string', () => {
+        expect(e(Vector.NEGATIVE_ONES)).toBe('-1x -1y -1z')
+    })
+
+    test('only x component', () => {
+        expect(e(Vector.UNIT_X)).toBe('1x')
+    })
+
+    test('only y component', () => {
+        expect(e(Vector.UNIT_X)).toBe('1x')
+    })
+
+    test('only z component', () => {
+        expect(e(Vector.UNIT_X)).toBe('1x')
+    })
 })

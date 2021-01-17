@@ -2,6 +2,22 @@ import { Vector } from "../Vector";
 import { split_tokens } from "./split_tokens";
 
 
+export function expression_from_vector(vector: Vector) : string {
+    const result = [];
+    if (vector.x !== 0){
+        result.push(vector.x, 'x');
+    }
+    if (vector.y !== 0){
+        if (result.length > 0) { result.push(' ') }
+        result.push(vector.y, 'y');
+    }
+    if (vector.z !== 0){
+        if (result.length > 0) { result.push(' ') }
+        result.push(vector.z, 'z');
+    }
+    return result.join('');
+}
+
 export function vector_from_expression(original: string) : Vector {
     const whitespace_rule = /\s+/g;
     const number_rule = /[+-]?\d+/g;
