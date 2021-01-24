@@ -76,7 +76,7 @@ function VectorProp({
     let aggregateCount = 0;
     for (const actor of selection){
         const value = getter ? getter(actor) : actor.get_property(name);
-        if (value === null){
+        if (value === null || value === undefined){
             continue;
         }
         if (aggregateCount === 0){

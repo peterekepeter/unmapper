@@ -19,10 +19,10 @@ export const createController = () => {
 
     const state_signal = createSignal<EditorState>();
     const command_registry = create_command_registry();
-    var history = create_history(state_signal);
     var commandsShownState = createSignal(false);
     let current_state: EditorState = create_initial_editor_state();
     state_signal.value = current_state;
+    var history = create_history(() => current_state, new_state => legacy_state_change(new_state));
 
     async function execute_undoable_command(command_info: ICommandInfoV2, ...args: any){
         const next_state = await command_info.implementation(current_state, ...args)

@@ -20,7 +20,7 @@ export function expression_from_vector(vector: Vector): string {
 
 export function vector_from_expression(original: string): Vector {
     const whitespace_rule = /\s+/g;
-    const number_rule = /[+-]?\d+/g;
+    const number_rule = /[+-]?\d+\.?\d*/g;
     const no_whitespace = split_tokens([original], whitespace_rule, { discard: true });
     const tokens = split_tokens(no_whitespace, number_rule);
 

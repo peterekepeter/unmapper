@@ -19,27 +19,31 @@ type UiInputProps = {
 }
 
 export function UiInput({
-    value: original_value = "",
-    suggested_value = null,
+    value: state_value = "",
+    suggested_value: suggested_edit = null,
     next_value = null,
     preview_value = null,
     value_drag = null
 }: UiInputProps) {
+    const [original_value, set_original_value] = React.useState<string>(null)
     const [edited_value, set_edited_value] = React.useState('')
     const [dirty, set_dirty] = React.useState(false)
     const pointer_down_at_y = React.useRef<number>(null);
     const cursor_at = React.useRef(0)
     const prev_suggested_value = React.useRef<string>(null);
-    if (suggested_value !== null && suggested_value !== undefined){
-        if (prev_suggested_value.current !== suggested_value){
-            set_edited_value(suggested_value);
-            set_dirty(true);
-            prev_suggested_value.current = suggested_value;
-            if (preview_value) preview_value(suggested_value)
+    if (suggested_edit !== null && suggested_edit !== undefined){
+        if (prev_suggested_value.current !== suggested_edit){
+            if (dirty === false){
+                set_original_value(state_value)
+                set_dirty(true)
+            }
+            set_edited_value(suggested_edit);
+            prev_suggested_value.current = suggested_edit;
+            if (preview_value) preview_value(suggested_edit)
         }
     }
     return <input
-        value={dirty ? edited_value : original_value}
+        value={dirty ? edited_value : state_value}
         onPointerDown={value_drag ? (event) => {
             const input = event.target as HTMLInputElement
             pointer_down_at_y.current = event.clientY
@@ -57,13 +61,20 @@ export function UiInput({
         onPointerUp={value_drag ? (event) => {
             pointer_down_at_y.current = null
         } : null}
-        onChange={(event) => {
-            const value = event.target.value
+        onInput={(event) => {
+            const input = event.target as HTMLInputElement
+            const value = input.value
+            if (dirty === false){
+                set_original_value(state_value)
+                set_dirty(true)
+            }
             set_edited_value(value)
-            set_dirty(true)
-            if (preview_value) preview_value(original_value)
+            if (preview_value) preview_value(value)
         }}
-        onBlur={() => save_value_edit()}
+        onBlur={() => {
+            console.log('BLUR')
+            save_value_edit()
+        }}
         onKeyDown={(event) => {
             console.log(event.key);
             switch (event.key) {
@@ -80,6 +91,7 @@ export function UiInput({
         style={uiTextStyle}></ input>
 
     function save_value_edit() {
+        console.log('save', dirty, edited_value, state_value)
         if (dirty) {
             if (edited_value !== original_value) {
                 if (next_value) next_value(edited_value)

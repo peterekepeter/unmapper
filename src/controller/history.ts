@@ -12,14 +12,14 @@ interface IHistory<T>
     get_previous_state: () => T;
 }
 
-export function create_history<T>(map : ISignal<T>) : IHistory<T> {
+export function create_history<T>(get_current_state: () => T, set_current_state: (t:T) => void) : IHistory<T> {
     
     var past : T[] = [];
     var future : T[] = [];
 
     function push()
     {
-        past.push(map.value);
+        past.push(get_current_state());
         if (future.length > 0){
             future = [];
         }
@@ -31,8 +31,8 @@ export function create_history<T>(map : ISignal<T>) : IHistory<T> {
         if (past.length <= 0){
             throw new Error('no past');
         }
-        future.push(map.value);
-        map.value = past.pop();
+        future.push(get_current_state());
+        set_current_state(past.pop());
         updateBoth();
     }
 
@@ -41,8 +41,8 @@ export function create_history<T>(map : ISignal<T>) : IHistory<T> {
         if (future.length <= 0){
             throw new Error('no future');
         }
-        past.push(map.value);
-        map.value = future.pop();
+        past.push(get_current_state());
+        set_current_state(future.pop());
         updateBoth();
     }
 
