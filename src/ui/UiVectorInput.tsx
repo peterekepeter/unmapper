@@ -3,16 +3,12 @@ import { expression_from_vector, tweak_expression_value, vector_from_expression 
 import { Vector } from "../model/Vector";
 import { UiInput } from "./UiInput";
 
-let generator = 0;
-
 export function UiVectorInput({
     value: original_value = Vector.ZERO,
     next_value = (value: Vector) => { },
     preview_value = (value: Vector) => { }
 }) {
     const [suggested_value, set_suggested_value] = React.useState<string>(null)
-    const [p] = React.useState(generator++)
-    console.log(p,'th vector ui input instance', original_value, next_value, preview_value);
     const last_preview_str = React.useRef<string>(null)
     return <UiInput 
         value={expression_from_vector(original_value)}

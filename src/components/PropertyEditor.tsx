@@ -10,31 +10,53 @@ import { useSignal } from "./useSignal";
 import { UiVectorInput } from "../ui/UiVectorInput";
 import * as edit_property from "../commands/edit_property";
 
+
 export function PropertyEditor({ controller = createController() }) {
 
     const map = useSignal(controller.state_signal).map;
-    
-    const selection = map.actors.filter(a => a.selected);
+    let reuse_property_context = true;
+    // get selection
+    let selection = map.actors.filter(a => a.selected);
+    const selection_ref = React.useRef<Actor[]>();
+    if (is_same_selection(selection, selection_ref.current)){
+        selection = selection_ref.current
+    } else {
+        selection_ref.current = selection
+        reuse_property_context = false;
+    }
+
+    const controller_ref = React.useRef<ReturnType<typeof createController>>();
+    if (controller_ref.current !== controller){
+        controller_ref.current = controller
+        reuse_property_context = false
+    }
+
     const titleDetail = selection.length == 0
         ? '(no selection)'
         : selection.length > 1
             ? `(${selection.length} selected)`
             : null;
 
-    const prop = property_context(controller, selection);
-
     return <div>
         <SectionTitle>Properties <span>{titleDetail}</span></SectionTitle>
         <div style={propertyEditorStyle}>
-            <StringProp selection={selection} name="Name" getter={a => a.name} />
-            <StringProp selection={selection} name="Class" getter={a => a.className} />
-            <StringProp selection={selection} name="Model" getter={a => a.brushModel?.name} />
-            <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
-            <prop.Vector key="Location" name="Location" getter={a => a.location}/>
-            <prop.Vector key="OldLocation" name="OldLocation" getter={a => a.oldLocation}/>
-            <prop.Vector key="PrePivot" name="PrePivot"/>
+            <StringProp key="Name" selection={selection} name="Name" getter={a => a.name} />
+            <StringProp key="Class" selection={selection} name="Class" getter={a => a.className} />
+            <StringProp key="Model" selection={selection} name="Model" getter={a => a.brushModel?.name} />
+            <PolyFlagsProp key="PolyFlags" selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
+            <VectorProp controller={controller} selection={selection} key="Location" name="Location" getter={a => a.location}/>
+            <VectorProp controller={controller} selection={selection} key="OldLocation" name="OldLocation" getter={a => a.oldLocation}/>
+            <VectorProp controller={controller} selection={selection} key="PrePivot" name="PrePivot"/>
         </div>
     </div>;
+}
+
+function is_same_selection(a : Actor[], b : Actor[]){
+    if (b == null && a != null || b != null && a == null) return false
+    if (a === b) return true
+    if (a.length != b.length) return false
+    for (let i=0; i<a.length; i++) if (a[i] !== b[i]) return false
+    return true
 }
 
 const propertyEditorStyle = {
@@ -42,59 +64,18 @@ const propertyEditorStyle = {
     grid: "auto / 1fr 2fr"
 }
 
-function property_context(controller: ReturnType<typeof createController>, selection: Actor[]){
-    
-    function Vector({
-        name = '',
-        getter = (a:Actor) => a.location
-    }) {
-        let aggregate : Vector;
-        let aggregateCount = 0;
-        for (const actor of selection){
-            const value = getter ? getter(actor) : actor.get_property(name);
-            if (value === null){
-                continue;
-            }
-            if (aggregateCount === 0){
-                aggregate = value;
-            } else {
-                aggregate = aggregate.addVector(value);
-            }
-            aggregateCount ++;
-        }
-        if (!aggregate){
-            return <></>
-        }
-        if (aggregateCount > 1){
-            aggregate = aggregate.scale(1/aggregateCount);
-        }
-        const str = aggregateCount === 1 
-            ? `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z`
-            : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
-        return <>
-            <UiText>{name}</UiText>
-            <UiVectorInput value={aggregate} 
-                next_value={value => { console.log('next_value', value); controller.execute(edit_property, name, value)}}
-                // preview_value={value => { console.log('preview_value', value); controller.preview(edit_property, name, value)}}
-                />
-        </>
-    }
-
-    
-    return {
-        Vector
-    }
-}
 
 function VectorProp({
-    selection = new Array<Actor>(),
-    name = '',
-    getter = (a:Actor) => a.location
-}) {
+    selection,
+    controller,
+    name,
+    getter
+}: { selection: Actor[], controller: ReturnType<typeof createController>, name: string, getter?: (a:Actor) => Vector }) {
+    
     let aggregate : Vector;
     let aggregateCount = 0;
     for (const actor of selection){
-        const value = getter(actor);
+        const value = getter ? getter(actor) : actor.get_property(name);
         if (value === null){
             continue;
         }
@@ -116,7 +97,10 @@ function VectorProp({
         : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
     return <>
         <UiText>{name}</UiText>
-        <UiVectorInput value={aggregate} next_value={value => console.log(value)}/>
+        <UiVectorInput value={aggregate} 
+            next_value={value => { console.log('next_value', value); controller.execute(edit_property, name, value)}}
+            preview_value={value => { console.log('preview_value', value); controller.preview(edit_property, name, value)}}
+            />
     </>
 }
 
