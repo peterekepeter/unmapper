@@ -30,9 +30,9 @@ export function PropertyEditor({ controller = createController() }) {
             <StringProp selection={selection} name="Class" getter={a => a.className} />
             <StringProp selection={selection} name="Model" getter={a => a.brushModel?.name} />
             <PolyFlagsProp selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
-            <prop.Vector name="Location" getter={a => a.location}/>
-            <prop.Vector name="OldLocation" getter={a => a.oldLocation}/>
-            <prop.Vector name="PrePivot"/>
+            <prop.Vector key="Location" name="Location" getter={a => a.location}/>
+            <prop.Vector key="OldLocation" name="OldLocation" getter={a => a.oldLocation}/>
+            <prop.Vector key="PrePivot" name="PrePivot"/>
         </div>
     </div>;
 }
@@ -73,7 +73,10 @@ function property_context(controller: ReturnType<typeof createController>, selec
             : `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z avg`
         return <>
             <UiText>{name}</UiText>
-            <UiVectorInput value={aggregate} next_value={value => controller.execute(edit_property, name, value)}/>
+            <UiVectorInput value={aggregate} 
+                next_value={value => { console.log('next_value', value); controller.execute(edit_property, name, value)}}
+                // preview_value={value => { console.log('preview_value', value); controller.preview(edit_property, name, value)}}
+                />
         </>
     }
 

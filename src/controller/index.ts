@@ -17,18 +17,28 @@ import { ViewportMode } from '../model/ViewportMode';
 
 export const createController = () => {
 
-    const state_signal = createSignal<EditorState>(create_initial_editor_state());
+    const state_signal = createSignal<EditorState>();
     const command_registry = create_command_registry();
     var history = create_history(state_signal);
     var commandsShownState = createSignal(false);
+    let current_state: EditorState = create_initial_editor_state();
+    state_signal.value = current_state;
 
     async function execute_undoable_command(command_info: ICommandInfoV2, ...args: any){
-        const next_state = await command_info.implementation(state_signal.value, ...args);
+        const next_state = await command_info.implementation(current_state, ...args)
         if (command_info.legacy_handling){
             // legacy commands update state_signal & history directly
-            return;
+            return
         }
         undoable_state_change(next_state);
+    }
+
+    async function execute_preview_command(command_info: ICommandInfoV2, ...args: any){
+        if (command_info.legacy_handling){
+            return // legacy commands cannot be previewed
+        }
+        const next_state = await command_info.implementation(current_state, ...args)
+        preview_state_change(next_state)
     }
 
     function undoable_state_change(next_state: EditorState)
@@ -41,7 +51,19 @@ export const createController = () => {
             // map state change triggers history push
             history.push();
         }
-        state_signal.value = next_state;
+        current_state = next_state
+        state_signal.value = next_state
+        console.log('commit')
+    }
+
+    function legacy_state_change(next_state: EditorState){
+        current_state = next_state
+        state_signal.value = next_state
+    }
+
+    function preview_state_change(next_state: EditorState){
+        state_signal.value = next_state
+        console.log('preview')
     }
 
     function toggle_actor_selected(actor_ref: Actor)
@@ -54,17 +76,17 @@ export const createController = () => {
 
     function make_actor_selection(actor: Actor)
     {
-        updateActorList(select_actors_list(state_signal.value.map.actors, a => a === actor));
+        updateActorList(select_actors_list(current_state.map.actors, a => a === actor));
     }
 
     function updateActor(prev: Actor, next: Actor)
     {
-        const newActors = state_signal.value.map.actors.map(a => a === prev ? next : a);
+        const newActors = current_state.map.actors.map(a => a === prev ? next : a);
         updateActorList(newActors);
     }
 
     function updateActorList(actors : Actor[]){
-        state_signal.value = change_actors_list(state_signal.value, () => actors);
+        legacy_state_change(change_actors_list(current_state, () => actors));
     }
 
     function showAllCommands(){
@@ -74,13 +96,13 @@ export const createController = () => {
     function importFromString(str : string){
         const newData = loadMapFromString(str);
         updateActorList([
-            ...state_signal.value.map.actors,
+            ...current_state.map.actors,
             ...newData.actors
         ])
     }
 
     function exportSelectionToString() : string {
-        const actors = state_signal.value.map.actors.filter(a => a.selected);
+        const actors = current_state.map.actors.filter(a => a.selected);
         const mapToExport = new UnrealMap();
         mapToExport.actors = actors;
         return storeMapToString(mapToExport);
@@ -88,13 +110,13 @@ export const createController = () => {
 
     function set_viewport_zoom_level(index: number, level: number)
     {
-        state_signal.value = change_viewport_at_index(state_signal.value, index, (viewport : ViewportState) => {
+        legacy_state_change(change_viewport_at_index(current_state, index, (viewport : ViewportState) => {
             return { ...viewport, zoom_level: level }
-        });
+        }));
     }
 
     function undoCopyMove() {
-        updateActorList(state_signal.value.map.actors.map(a => {
+        updateActorList(current_state.map.actors.map(a => {
             if (a.selected){
                 const copy = a.shallowCopy();
                 a.location = a.location.add(-32,-32,-32);
@@ -107,25 +129,25 @@ export const createController = () => {
     }
 
     function update_view_location(viewport_index: number, location: Vector){
-        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
             return { ...viewport, center_location: location }
-        });
+        }));
     }
 
     function set_viewport_mode(viewport_index: number, mode: ViewportMode){
-        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
             return { ...viewport, mode }
-        });
+        }));
     }
 
     function update_view_rotation(viewport_index: number, rotation: Rotation){
-        state_signal.value = change_viewport_at_index(state_signal.value, viewport_index, viewport => {
+        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
             return { ...viewport, rotation: rotation }
-        });
+        }));
     }
 
     function modifyBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel) {
-        updateActorList(state_signal.value.map.actors.map(a => {
+        updateActorList(current_state.map.actors.map(a => {
             if (a.brushModel){
                 const newBrush = op(a.brushModel, a);
                 if (newBrush == null){
@@ -211,7 +233,7 @@ export const createController = () => {
         history.push();
         const grid = new Vector(size, size, size);
         modifySelectedBrushes(brush => {
-            if (state_signal.value.vertex_mode === true){
+            if (current_state.vertex_mode === true){
                 const next = brush.shallowCopy();
                 next.vertexes = next.vertexes.map(currentVertex => {
                     if (currentVertex.selected){
@@ -284,6 +306,7 @@ export const createController = () => {
 
     return {
         execute: execute_undoable_command,
+        preview: execute_preview_command,
         commands: command_registry,
         state_signal,
         commandsShownState,

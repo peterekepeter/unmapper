@@ -1,5 +1,5 @@
 import { Vector } from "../Vector";
-import { expression_from_vector as e, vector_from_expression as v } from "./expression"
+import { expression_from_vector as e, vector_from_expression as v, tweak_expression_value as t } from "./expression"
 
 test('default returns zero vector', () => {
     expect(v('')).toEqual(Vector.ZERO);
@@ -62,4 +62,15 @@ describe('expression from vector', () => {
     test('only z component', () => {
         expect(e(Vector.UNIT_X)).toBe('1x')
     })
+})
+
+describe('tweak_expression_value', () => {
+    
+    test('number', () => expect(t("13",0,+1)).toBe("14"));
+    test('component 1', () => expect(t("13 42",0,+1)).toBe("14 42"));
+    test('component 2', () => expect(t("13 42",3,+1)).toBe("13 43"));
+    test('component 2', () => expect(t("13 42",3,+1)).toBe("13 43"));
+    test('negative to positive', () => expect(t("-13",0,+16)).toBe("3"));
+    test('positive to negative', () => expect(t("+13",0,-16)).toBe("-3"));
+
 })
