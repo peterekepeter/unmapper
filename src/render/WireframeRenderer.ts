@@ -58,7 +58,7 @@ function makeSelectedColor(cstr: string) {
     return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex();
 }
 
-function getBrushWireColor(actor: Actor): string {
+function get_brush_wire_color(actor: Actor): string {
     const set: IBrushColors = actor.selected ? selectedColors : colors;
     switch (actor.csgOperation) {
         case CsgOperation.Active: return set.activeBrush;
@@ -92,7 +92,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
     let get_view_bounding_box: () => BoundingBox;
     let view_transform_x: (vector: Vector) => number;
     let view_transform_y: (vector: Vector) => number;
-    let perspective_matrix = Matrix3x3.IDENTITY;
+    let view_transform: (in_vector: Vector) => Vector;
+    let view_rotation = Matrix3x3.IDENTITY;
 
 
     function render(state : EditorState) : void {
@@ -188,7 +189,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
 
         const transformed_vertexes = get_world_transformed_vertexes(actor, memo);
 
-        context.strokeStyle = getBrushWireColor(actor);
+        context.strokeStyle = get_brush_wire_color(actor);
         context.lineWidth = 1.5;
 
         render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
@@ -228,16 +229,41 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
             }
             const vertexA = transformed_vertexes[edge.vertexIndexA];
             const vertexB = transformed_vertexes[edge.vertexIndexB];
+            
+            if (colorBasedOnPolyCount)
+            {
+                context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length);
+            }
+
+            if (view_transform != null){
+                let out_vertex_a = view_transform(vertexA);
+                let out_vertex_b = view_transform(vertexB);
+                if (out_vertex_a.x < 0 && out_vertex_b.x < 0){
+                    continue;
+                }
+                else if (out_vertex_a.x < 0)
+                {
+                    out_vertex_a = intersectSegmentWithPlane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1);
+                }
+                else if (out_vertex_b.x < 0){
+                    out_vertex_b = intersectSegmentWithPlane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1);
+                }
+                const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * deviceSize + width * .5;
+                const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * deviceSize + height * .5;
+                const screen_b_x = (out_vertex_b.y / out_vertex_b.x) * deviceSize + width * .5;
+                const screen_b_y = (-out_vertex_b.z / out_vertex_b.x) * deviceSize + height * .5;
+                context.beginPath();
+                context.moveTo(screen_a_x, screen_a_y);
+                context.lineTo(screen_b_x, screen_b_y);
+                context.stroke();
+                continue;
+            }
 
             const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA);
             const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB);
             const invalid0 = isNaN(x0) || isNaN(y0);
             const invalid1 = isNaN(x1) || isNaN(y1);
 
-            if (colorBasedOnPolyCount)
-            {
-                context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length);
-            }
             
             if (!invalid0 && !invalid1)
             {
@@ -268,7 +294,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
 
     function setPerspectiveMode(fieldOfView: number): void {
         get_view_bounding_box = () => {
-            const forward = perspective_matrix.apply(Vector.FORWARD);
+            const forward = view_rotation.apply(Vector.FORWARD);
 
             let max_squared = 0;
             let axis = 0;
@@ -300,12 +326,21 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                     throw new Error('implementation error');
             }
         }
+        view_transform = (i) => {
+            const x = i.x - view_center.x;
+            const y = i.y - view_center.y;
+            const z = i.z - view_center.z;
+            return new Vector(
+                view_rotation.getTransformedX(x, y, z),
+                view_rotation.getTransformedY(x, y, z),
+                view_rotation.getTransformedZ(x, y, z))
+        }
         view_transform_x = v => {
             const w_x = v.x - view_center.x;
             const w_y = v.y - view_center.y;
             const w_z = v.z - view_center.z;
-            const x = perspective_matrix.getTransformedX(w_x, w_y, w_z);
-            const y = perspective_matrix.getTransformedY(w_x, w_y, w_z);
+            const x = view_rotation.getTransformedX(w_x, w_y, w_z);
+            const y = view_rotation.getTransformedY(w_x, w_y, w_z);
             return x < 0
                 ? Number.NaN
                 : (y / x) * deviceSize + width * .5;
@@ -314,8 +349,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
             const w_x = v.x - view_center.x;
             const w_y = v.y - view_center.y;
             const w_z = v.z - view_center.z;
-            const x = perspective_matrix.getTransformedX(w_x, w_y, w_z);
-            const z = perspective_matrix.getTransformedZ(w_x, w_y, w_z);
+            const x = view_rotation.getTransformedX(w_x, w_y, w_z);
+            const z = view_rotation.getTransformedZ(w_x, w_y, w_z);
             return x < 0
                 ? Number.NaN
                 : (-z / x) * deviceSize + height * .5;
@@ -327,7 +362,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
     }
 
     function setPerspectiveRotation(rotation: Rotation): void {
-        perspective_matrix = Matrix3x3
+        view_rotation = Matrix3x3
             .rotateDegreesY(-rotation.pitch)
             .rotateDegreesZ(-rotation.yaw);
     }
@@ -341,6 +376,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                 min_y: view_center.y - y_size, max_y: view_center.y + y_size
             })
         }
+        view_transform = null,
         view_transform_x = vector =>
             (vector.x - view_center.x) * deviceSize * scale + width / 2;
         view_transform_y = vector =>
@@ -356,6 +392,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                 min_z: view_center.z - z_size, max_z: view_center.z + z_size
             })
         }
+        view_transform = null,
         view_transform_x = vector =>
             (vector.x - view_center.x) * deviceSize * scale + width / 2;
         view_transform_y = vector =>
