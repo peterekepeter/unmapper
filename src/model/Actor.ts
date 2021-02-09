@@ -33,7 +33,7 @@ export class Actor
     get_property(name: string): any {
         switch(name){
             case "Location": return this.location;
-            default: this.unsupportedProperties[name];
+            default: return this.unsupportedProperties[name];
         }
     }
 

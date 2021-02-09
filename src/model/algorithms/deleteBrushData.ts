@@ -25,7 +25,7 @@ export function deleteBrushData(brush: BrushModel, selection: ISelectedBrushData
         {
             if (vertexesToDelete.indexOf(polyVertex) !== -1){
                 toDelete = true;
-                break;``
+                break;
             }
         }
         if (toDelete){

@@ -12,7 +12,7 @@ describe('ExtendedMath', () => {
             [10, 360, 10],
             [-10, 360, 350],
         ]
-        .map(([input, modulo, result]) =>
+        .forEach(([input, modulo, result]) =>
             test(`fmod(${input}, ${modulo}) is ${result}`, () =>
                 expect(fmod(input, modulo))
                     .toBe(result)))
@@ -26,7 +26,7 @@ describe('ExtendedMath', () => {
             [0, 2, 2, 2],
             [0, 3, 2, 2],
         ]
-        .map(([min, value, max, result]) =>
+        .forEach(([min, value, max, result]) =>
             test(`clamp(${min}, ${value}, ${max}) is ${result}`, () =>
                 expect(clamp(min, value, max))
                     .toBe(result)))
@@ -60,7 +60,7 @@ describe('ExtendedMath', () => {
             [-360 + 45, sin45], 
             [-360 + 135, sin45], 
         ]
-        .map(([degrees, result]) =>
+        .forEach(([degrees, result]) =>
             test(`sinDegrees(${degrees}) is ${result}`, () =>
                 expect(sinDegrees(degrees)).toEqual(result)));
     })
@@ -75,7 +75,7 @@ describe('ExtendedMath', () => {
             [270, -0],
             [360 + 60, 0.5],
         ]
-        .map(([degrees, result]) =>
+        .forEach(([degrees, result]) =>
             test(`cosDegrees(${degrees}) is ${result}`, () =>
                 expect(cosDegrees(degrees)).toEqual(result)));
     })
