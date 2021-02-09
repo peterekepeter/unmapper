@@ -1,11 +1,15 @@
+import { ICommandInfoV2 } from "../controller/command_registry";
 import { change_selected_brushes, select_actors } from "../model/algorithms/common";
 import { EditorState } from "../model/EditorState";
 
-export const description = "Select All Objects";
 
-export const shortcut = 'ctrl + a';
+export const select_all_command: ICommandInfoV2 = {
+    description: "Select All Objects",
+    shortcut: 'ctrl + a',
+    exec: implementation
+}
 
-export function implementation(state : EditorState) : EditorState {
+function implementation(state : EditorState) : EditorState {
     if (state.vertex_mode){
         return select_all_vertexes(state);
     } else {

@@ -3,7 +3,7 @@ import { BrushModel } from '../../model/BrushModel';
 import { EditorError } from '../../model/EditorError';
 import { editor_state_from_actors } from '../../model/EditorState';
 import { Vector } from '../../model/Vector';
-import { implementation as create_polygon } from '../create_polygon';
+import { create_polygon_command as command } from '../create_polygon';
 
 
 describe('polygon creation', () => {
@@ -17,8 +17,7 @@ describe('polygon creation', () => {
     actor.selected = true;
     const prev_state = editor_state_from_actors([actor]);
     prev_state.vertex_mode = true;
-
-    const next_state = create_polygon(prev_state);
+    const next_state = command.exec(prev_state);
 
     test('before execution brushmodel has 0 polygons', () => 
         expect(prev_state.map.actors[0].brushModel.polygons).toHaveLength(0));
@@ -32,12 +31,12 @@ describe('polygon creation', () => {
     
 }) 
 
-test('EditorError is thrown if not in vertex mode', () => {
+test('EditorError is thrown if not in vertex mode', async () => {
     const state = editor_state_from_actors([]);
     state.vertex_mode = false;
     let error : EditorError;
     try {
-        create_polygon(state);
+        await command.exec(state);
     } catch(obj){
         error = EditorError.cast(obj);
     }

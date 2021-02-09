@@ -12,7 +12,5 @@ export interface ICommand
     canExecute? : ISignal<boolean>
 }
 
-export interface ICommandV2
-{
-    (state: EditorState, ...args: any): EditorState | Promise<EditorState>
-}
+// eslint-disable-next-line no-unused-vars
+export type ICommandV2 = (state: EditorState, ...args: unknown[]) => EditorState;

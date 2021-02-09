@@ -1,9 +1,8 @@
-// cliboard integration
-
 import { createController } from ".";
-import * as delete_selected_command from '../commands/delete_selected';
+import { delete_selected_command } from "../commands/delete_selected";
 
-export function initializeClipboardIntegration(document: Document, controller = createController()){
+/** clipboard intergration */
+export function install_clipboard_integration(document: Document, controller = createController()) : void {
 
     document.addEventListener('copy', function(event) {
         event.clipboardData.setData('text/plain', controller.exportSelectionToString());
@@ -18,7 +17,7 @@ export function initializeClipboardIntegration(document: Document, controller = 
 
     document.addEventListener('paste', function(e) {
         if (e.clipboardData.types.indexOf('text/plain') > -1) {
-          var data = e.clipboardData.getData('text/plain');
+          const data = e.clipboardData.getData('text/plain');
           controller.importFromString(data);
           e.preventDefault();
         }

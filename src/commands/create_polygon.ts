@@ -1,13 +1,17 @@
+import { ICommandInfoV2 } from "../controller/command_registry";
 import { change_selected_brushes } from "../model/algorithms/common";
 import { createBrushPolygon } from "../model/algorithms/createBrushPolygon";
 import { EditorError } from "../model/EditorError";
 import { EditorState } from "../model/EditorState";
 
-export const description = "Create polygon from selected vertexes";
 
-export const shortcut = "f";
+export const create_polygon_command : ICommandInfoV2 = {
+    description: "Create polygon from selected vertexes",
+    shortcut: "f",
+    exec
+}
 
-export function implementation(state: EditorState) : EditorState {
+function exec(state: EditorState) : EditorState {
     if (!state.vertex_mode){
         throw new EditorError("Need to be in vertex mode!");
     }

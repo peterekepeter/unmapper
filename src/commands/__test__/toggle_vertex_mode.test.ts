@@ -1,5 +1,5 @@
 import { editor_state_from_actors } from "../../model/EditorState";
-import * as toggle_vertex_mode from '../toggle_vertex_mode';
+import { toggle_vertex_mode_command as command } from "../toggle_vertex_mode";
 
 
 test('can toggle vertex mode', () => {
@@ -8,12 +8,12 @@ test('can toggle vertex mode', () => {
 
     expect(state_0.vertex_mode).toBe(false);
 
-    const state_1 = toggle_vertex_mode.implementation(state_0);
+    const state_1 = command.exec(state_0);
 
     expect(state_0.vertex_mode).toBe(false);
     expect(state_1.vertex_mode).toBe(true);
 
-    const state_2 = toggle_vertex_mode.implementation(state_1);
+    const state_2 = command.exec(state_1);
 
     expect(state_0.vertex_mode).toBe(false);
     expect(state_1.vertex_mode).toBe(true);

@@ -14,8 +14,8 @@ interface IHistory<T>
 
 export function create_history<T>(get_current_state: () => T, set_current_state: (t:T) => void) : IHistory<T> {
     
-    var past : T[] = [];
-    var future : T[] = [];
+    const past : T[] = [];
+    let future : T[] = [];
 
     function push()
     {

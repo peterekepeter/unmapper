@@ -1,16 +1,20 @@
+import { ICommandInfoV2 } from "../controller/command_registry";
 import { change_actors_list, change_selected_brushes } from "../model/algorithms/common";
 import { deleteBrushData } from "../model/algorithms/deleteBrushData";
 import { EditorState } from "../model/EditorState";
 
 
-export const description = "Delete Selection";
-    
-export const shortcut = "delete";
+export const delete_selected_command: ICommandInfoV2 = {
+    description: "Delete Selection",
+    shortcut: "delete",
+    exec: implementation
+}
 
-export const implementation = (state: EditorState) =>
-    state.vertex_mode
+function implementation(state: EditorState): EditorState {
+    return state.vertex_mode
         ? delete_vertexes(state)
-        : delete_actors(state);
+        : delete_actors(state)
+}
 
 const delete_vertexes = (state: EditorState) =>
     change_selected_brushes(state, b => deleteBrushData(b, {
@@ -24,4 +28,4 @@ const delete_actors = (state: EditorState) =>
             return next_actors;
         }
         return actors;
-    });
+    })

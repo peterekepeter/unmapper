@@ -10,7 +10,7 @@ export interface ICommandInfo
 export interface ICommandInfoV2
 {
     description?: string,
-    implementation?: ICommandV2,
+    exec?: ICommandV2,
     shortcut?: string,
     /** old commands don't return new state */
     legacy_handling?: boolean
@@ -27,21 +27,21 @@ export interface ICommandRegistry
 
 export function create_command_registry() : ICommandRegistry {
 
-    let commandList : ICommandInfoV2[] = [];
+    let command_list : ICommandInfoV2[] = [];
 
     function register_command_v2(info: ICommandInfoV2){
-        commandList.push(info);
+        command_list.push(info);
     }
     
     function register_commands_v2(info: ICommandInfoV2[]){
-        commandList = commandList.concat(info)
+        command_list = command_list.concat(info)
     }
     
     function registerCommand(info: ICommandInfo){
-        commandList.push({
+        command_list.push({
             description: info.description,
-            implementation: async (state) => {
-                await info.implementation();
+            exec: (state) => {
+                info.implementation();
                 return state;
             },
             shortcut: info.shortcut,
@@ -56,7 +56,7 @@ export function create_command_registry() : ICommandRegistry {
     }
     
     function get_all_commands_v2() : ICommandInfoV2[] {
-        return [...commandList];
+        return [...command_list];
     }
 
     return { 

@@ -5,7 +5,7 @@ import { createBrushPolygons } from "../../model/algorithms/createBrushPolygon";
 import { BrushModel } from "../../model/BrushModel";
 import { EditorState, editor_state_from_actors } from "../../model/EditorState";
 import { Vector } from "../../model/Vector";
-import { implementation as extrude_polygons } from "../extrude_polygons";
+import { extrude_polygons_command as command } from "../extrude_polygons";
 
 
 describe('extrude polygon', () => {
@@ -25,7 +25,7 @@ describe('extrude polygon', () => {
 
     let new_state : EditorState;
     beforeAll(() => {
-        new_state = extrude_polygons(old_state);
+        new_state = command.exec(old_state);
     })
 
     test('new state gets returned', () =>

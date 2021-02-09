@@ -6,7 +6,7 @@ import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
-import { initializeClipboardIntegration } from "./controller/clipboard";
+import { install_clipboard_integration } from "./controller/clipboard";
 import { get_all_commands_v2 } from "./commands/all_commands";
 function main() {
     let controller = createController();
@@ -65,13 +65,13 @@ function main() {
         'f1' : controller.showAllCommands
     }
 
-    initializeClipboardIntegration(window.document, controller);
+    install_clipboard_integration(window.document, controller);
 
     for (const key in shortcutBindings){
         keyboard.bind_command_shortcut({ 
             shortcut: key, 
-            implementation: async (state) => { 
-                await shortcutBindings[key]();
+            exec: (state) => { 
+                shortcutBindings[key]();
                 return state;
             }
         });

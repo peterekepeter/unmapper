@@ -11,21 +11,22 @@ import { BrushModel } from '../model/BrushModel';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
 import { create_initial_editor_state, EditorState, ViewportState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
-import { change_actors_list, change_map, change_viewport_at_index, select_actors, select_actors_list } from '../model/algorithms/common';
+import { change_actors_list, change_viewport_at_index, select_actors_list } from '../model/algorithms/common';
 import { Rotation } from '../model/Rotation';
 import { ViewportMode } from '../model/ViewportMode';
+import { Interaction } from '../model/interactions/Interaction';
 
 export const createController = () => {
 
     const state_signal = createSignal<EditorState>();
     const command_registry = create_command_registry();
-    var commandsShownState = createSignal(false);
+    const commandsShownState = createSignal(false);
     let current_state: EditorState = create_initial_editor_state();
     state_signal.value = current_state;
-    var history = create_history(() => current_state, new_state => legacy_state_change(new_state));
+    const history = create_history(() => current_state, new_state => legacy_state_change(new_state));
 
     async function execute_undoable_command(command_info: ICommandInfoV2, ...args: any){
-        const next_state = await command_info.implementation(current_state, ...args)
+        const next_state = await command_info.exec(current_state, ...args)
         if (command_info.legacy_handling){
             // legacy commands update state_signal & history directly
             return
@@ -37,7 +38,7 @@ export const createController = () => {
         if (command_info.legacy_handling){
             return // legacy commands cannot be previewed
         }
-        const next_state = await command_info.implementation(current_state, ...args)
+        const next_state = await command_info.exec(current_state, ...args)
         preview_state_change(next_state)
     }
 
@@ -126,6 +127,10 @@ export const createController = () => {
                 return a;
             }
         }))
+    }
+
+    function update_interaction(interaction: Interaction){
+        preview_state_change({ ...current_state, interaction });
     }
 
     function update_view_location(viewport_index: number, location: Vector){

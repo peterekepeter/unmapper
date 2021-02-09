@@ -2,7 +2,8 @@ import { Actor } from "../../model/Actor";
 import { BrushModel } from "../../model/BrushModel";
 import { editor_state_from_actors } from "../../model/EditorState"
 import { Vector } from "../../model/Vector";
-import { implementation as delete_selected } from '../delete_selected';
+import { delete_selected_command as command } from '../delete_selected';
+
 
 describe('actors are deleted', () => {
     const actor_1 = new Actor();
@@ -12,7 +13,7 @@ describe('actors are deleted', () => {
     actor_2.selected = false;
     actor_2.name = 'Actor2';
     const prev_state = editor_state_from_actors([actor_1, actor_2]);
-    const next_state = delete_selected(prev_state);
+    const next_state = command.exec(prev_state);
 
     test('only 1 actor should remain', () => 
         expect(next_state.map.actors).toHaveLength(1))
@@ -31,7 +32,7 @@ describe('vertexes are deleted', () => {
     brush.addVertex(new Vector(1,0,0), true);
     const prev_state = editor_state_from_actors([actor]);
     prev_state.vertex_mode = true;
-    const next_state = delete_selected(prev_state);
+    const next_state = command.exec(prev_state);
 
     test('only 1 vertex should remain', () => 
         expect(next_state.map.actors[0].brushModel.vertexes).toHaveLength(1))

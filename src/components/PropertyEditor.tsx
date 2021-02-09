@@ -8,7 +8,7 @@ import { KnownClasses } from "../model/KnownClasses";
 import { Vector } from "../model/Vector";
 import { useSignal } from "./useSignal";
 import { UiVectorInput } from "../ui/UiVectorInput";
-import * as edit_property from "../commands/edit_property";
+import { edit_property_command as edit_property } from "../commands/edit_property";
 
 
 export function PropertyEditor({ controller = createController() }) {

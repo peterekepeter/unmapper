@@ -2,14 +2,15 @@ import { Actor } from '../../model/Actor';
 import { BrushModel } from '../../model/BrushModel';
 import { editor_state_from_actors } from '../../model/EditorState';
 import { Vector } from '../../model/Vector';
-import * as select_all from '../select_all';
+import { select_all_command as command } from '../select_all';
+
 
 describe('select all actors', () =>{
 
     const actor_a = new Actor();
     const actor_b = new Actor();
     const current_state = editor_state_from_actors([actor_a, actor_b]);
-    const next_state = select_all.implementation(current_state);
+    const next_state = command.exec(current_state);
     
     test('next_state actor 0 is selected', () => {
         expect(next_state.map.actors[0].selected).toBe(true);
@@ -29,7 +30,6 @@ describe('select all actors', () =>{
     
 })
 
-
 describe('select all vertexes', () => {
 
     const actor_a = new Actor();
@@ -42,7 +42,7 @@ describe('select all vertexes', () => {
     actor_b.selected = false;
     const current_state = editor_state_from_actors([actor_a, actor_b]);
     current_state.vertex_mode = true;
-    const next_state = select_all.implementation(current_state);
+    const next_state = command.exec(current_state);
 
     test('current_state vertexes of selected actor are not selected', () =>
         expect(current_state.map.actors[0].brushModel.vertexes[0].selected).toBe(false)

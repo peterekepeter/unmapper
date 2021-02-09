@@ -42,7 +42,7 @@ function build_test_states(){
     
     return [
         {
-            state: state,
+            state,
             description: 'normal state',
         },
         {
@@ -58,12 +58,12 @@ all_commands.forEach(command => describe(format_label(command), () => {
 
         const initially_serialized = serialize(test_state.state);
         let next_state : EditorState;
-        let caught_error : any;
+        let caught_error : unknown;
         let success: boolean = null;
 
         beforeAll(async () =>{
             try {
-                next_state = await command.implementation(test_state.state);
+                next_state = await command.exec(test_state.state);
                 success = true;
             }
             catch (error){

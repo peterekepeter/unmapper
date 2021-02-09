@@ -1,7 +1,12 @@
-import { change_selected_actors, change_selected_brushes, select_actors } from "../model/algorithms/common";
+import { ICommandInfoV2 } from "../controller/command_registry";
+import { change_selected_actors } from "../model/algorithms/common";
 import { EditorState } from "../model/EditorState";
 
-export const description = "Edit Object Property";
+
+export const edit_property_command : ICommandInfoV2 = {
+    description: "Edit Object Property",
+    exec: implementation
+}
 
 export function implementation(state : EditorState, name: string, value: any) : EditorState {
     return edit_property(state, name, value);
