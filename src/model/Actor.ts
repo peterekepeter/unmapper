@@ -5,19 +5,18 @@ import { PolyFlags } from "./PolyFlags";
 import { Scale } from "./Scale";
 import { Rotation } from "./Rotation";
 
-export class Actor
-{
-    public name : string = Actor.DEFAULT_ACTOR_NAME;
-    public className : string = "Actor";
-    public rotation : Rotation = Rotation.IDENTITY;
-    public location : Vector = Vector.ZERO;
-    public oldLocation : Vector | null = null;
+export class Actor {
+    public name: string = Actor.DEFAULT_ACTOR_NAME;
+    public className = "Actor";
+    public rotation: Rotation = Rotation.IDENTITY;
+    public location: Vector = Vector.ZERO;
+    public oldLocation: Vector | null = null;
     public prePivot: Vector | null = null;
-    public group : string[] = [];
+    public group: string[] = [];
     public brushModel: BrushModel | null = null;
     public csgOperation: CsgOperation | null = null;
-    public selected : boolean = false;
-    public polyFlags : PolyFlags = PolyFlags.None;
+    public selected = false;
+    public polyFlags: PolyFlags = PolyFlags.None;
     public mainScale = Scale.DEFAULT_SCALE;
     public postScale = Scale.DEFAULT_SCALE;
     public tempScale = Scale.DEFAULT_SCALE;
@@ -26,46 +25,45 @@ export class Actor
     public static SUPPORTED_PROPERTIES = [
         "Location"
     ]
-    
-    // additional unsupported props go here, these still need to be reencoded
-    public unsupportedProperties : { [key:string] : any } = {};
 
-    get_property(name: string): any {
-        switch(name){
+    // additional unsupported props go here, these still need to be reencoded
+    public unsupportedProperties: { [key: string]: any } = {};
+
+    get_property(name: string): unknown {
+        switch (name) {
             case "Location": return this.location;
             default: return this.unsupportedProperties[name];
         }
     }
 
-    set_property_immutable(name: string, value: any) : Actor {
-        const new_actor = this.shallowCopy();
+    set_property_immutable(name: string, value: unknown): Actor {
+        const new_actor = this.shallow_copy();
         new_actor.set_property_mutable(name, value);
         return new_actor;
     }
 
-    set_property_mutable(name: string, value: any) : void {
-        switch(name){
-            case "Location": 
+    set_property_mutable(name: string, value: unknown): void {
+        switch (name) {
+            case "Location":
                 this.location = accept_vector(value);
                 break;
         }
     }
 
-    is_supported_property(name: string)
-    {
+    is_supported_property(name: string): boolean {
         return Actor.SUPPORTED_PROPERTIES.indexOf(name) !== -1
     }
 
-    shallowCopy(){
+    shallow_copy(): Actor {
         const copy = new Actor();
         Object.assign(copy, this);
         return copy;
     }
 }
 
-function accept_vector(value: any) : Vector {
-    if (typeof value === 'object'){
-        if(value.constructor === Vector){
+function accept_vector(value: unknown): Vector {
+    if (typeof value === 'object') {
+        if (value.constructor === Vector) {
             return value;
         }
     }

@@ -8,11 +8,11 @@ export const edit_property_command : ICommandInfoV2 = {
     exec: implementation
 }
 
-export function implementation(state : EditorState, name: string, value: any) : EditorState {
+export function implementation(state : EditorState, name: string, value: unknown) : EditorState {
     return edit_property(state, name, value);
 }
 
-export function edit_property(state : EditorState, name: string, value: any) : EditorState {
+export function edit_property(state : EditorState, name: string, value: unknown) : EditorState {
     return change_selected_actors(state, actor => 
         actor.set_property_immutable(name, value))
 }

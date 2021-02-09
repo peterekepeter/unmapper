@@ -12,7 +12,7 @@ export function select_actors(state: EditorState, filter: (actor: Actor) => bool
         if (a.selected === shouldBeSelected){
             return a;
         } else {
-            const next = a.shallowCopy();
+            const next = a.shallow_copy();
             next.selected = shouldBeSelected;
             return next;
         }
@@ -28,7 +28,7 @@ export function select_actors_list(actors: Actor[], filter: (actor : Actor) => b
         if (a.selected === shouldBeSelected){
             return a;
         } else {
-            const next = a.shallowCopy();
+            const next = a.shallow_copy();
             next.selected = shouldBeSelected;
             return next;
         }
@@ -50,7 +50,7 @@ export const change_selected_brushes = (
     if (new_brush === actor.brushModel){
         return actor;
     } else {
-        const new_actor = actor.shallowCopy();
+        const new_actor = actor.shallow_copy();
         new_actor.brushModel = new_brush;
         return new_actor;
     }
