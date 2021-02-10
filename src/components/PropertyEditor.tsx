@@ -46,7 +46,7 @@ export function PropertyEditor({ controller = createController() }) {
             <PolyFlagsProp key="PolyFlags" selection={selection} name="PolyFlags" getter={a => a.polyFlags} />
             <VectorProp controller={controller} selection={selection} key="Location" name="Location" getter={a => a.location}/>
             <VectorProp controller={controller} selection={selection} key="OldLocation" name="OldLocation" getter={a => a.oldLocation}/>
-            <VectorProp controller={controller} selection={selection} key="PrePivot" name="PrePivot"/>
+            <VectorProp controller={controller} selection={selection} key="PrePivot" name="PrePivot" getter={a => a.prePivot}/>
         </div>
     </div>;
 }
@@ -75,7 +75,7 @@ function VectorProp({
     let aggregate : Vector;
     let aggregateCount = 0;
     for (const actor of selection){
-        const value = getter ? getter(actor) : actor.get_property(name);
+        const value = getter ? getter(actor) : actor.get_vector_property(name);
         if (value === null || value === undefined){
             continue;
         }

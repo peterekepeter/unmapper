@@ -36,9 +36,21 @@ export class Actor {
         }
     }
 
+    get_vector_property(name: string): Vector {
+        const value = this.get_property(name);
+        if (value instanceof Vector){
+            return value;
+        }
+        throw new Error(`property "${name}" is not a vector`);
+    }
+
     set_property_immutable(name: string, value: unknown): Actor {
+        return this.immutable_update(actor => actor.set_property_mutable(name, value));
+    }
+
+    immutable_update(fn: (actor: Actor) => void): Actor{
         const new_actor = this.shallow_copy();
-        new_actor.set_property_mutable(name, value);
+        fn(new_actor);
         return new_actor;
     }
 

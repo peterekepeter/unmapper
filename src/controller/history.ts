@@ -1,6 +1,4 @@
-import { UnrealMap } from "../model/UnrealMap";
-import { ISignal, createSignal } from "reactive-signals";
-import { EditorState } from "../model/EditorState";
+import { createSignal } from "reactive-signals";
 
 
 interface IHistory<T>

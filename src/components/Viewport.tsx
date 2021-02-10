@@ -9,6 +9,7 @@ import { Matrix3x3 } from "../model/Matrix3x3";
 import { ViewportMode } from "../model/ViewportMode";
 import { UnrealMap } from "../model/UnrealMap";
 import { ViewportState } from "../model/EditorState";
+import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
 
 
 export const Viewport = ({
@@ -155,7 +156,7 @@ export const Viewport = ({
             } else {
                 const actor = renderer.findNearestActor(map, canvasX, canvasY);
                 if (event.ctrlKey) {
-                    controller.toggleSelection(actor);
+                    controller.execute(toggle_actor_selected_command, actor);
                 } else {
                     controller.makeSelection(actor);
                 }

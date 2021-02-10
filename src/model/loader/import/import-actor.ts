@@ -44,7 +44,9 @@ export function importActor(arg : Parser | string) : Actor {
 
 
 function parseActorProp(actor : Actor, key :string, parser : Parser){
-    
+
+    let value: string;
+
     switch(key){
 
         case "Class": 
@@ -96,7 +98,7 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             break;
 
         default:
-            let value : string | object = parser.getCurrentToken();
+            value = parser.getCurrentToken();
             if (value === '('){
                 value = importSubobject(parser);
             } else {
@@ -108,14 +110,18 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
 }
 
 function parseActorArrayProp(actor : Actor, key:string, index:number, parser:Parser){
+
+    let list: Array<unknown>;
+    let value: string;
+
     switch(key)
     {
         default:
-            let list : Array<any> = actor.unsupportedProperties[key];
+            list = actor.unsupportedProperties[key];
             if (list == null){
                 list = actor.unsupportedProperties[key] = [];
             }
-            let value : string | object = parser.getCurrentToken();
+            value = parser.getCurrentToken();
             if (value === '('){
                 value = importSubobject(parser);
             } else {
@@ -127,7 +133,7 @@ function parseActorArrayProp(actor : Actor, key:string, index:number, parser:Par
 }
 
 function parseInteger(parser : Parser){
-    let token = parser.getCurrentTokenAndMoveToNext();
+    const token = parser.getCurrentTokenAndMoveToNext();
     return Number.parseInt(token);
 }
 

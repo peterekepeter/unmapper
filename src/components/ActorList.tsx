@@ -6,6 +6,7 @@ import { createController } from "../controller";
 import { Actor } from "../model/Actor";
 import { themeColors } from "../theme";
 import { useSignal } from "./useSignal";
+import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
 
 export function ActorList({ controller = createController() }) {
 
@@ -33,7 +34,7 @@ export function ActorList({ controller = createController() }) {
 
     function handleClick(event: React.MouseEvent<HTMLElement>, actor : Actor){
         if (event.ctrlKey){
-            controller.toggleSelection(actor);
+            controller.execute(toggle_actor_selected_command, actor);
         } else {
             controller.makeSelection(actor);
         }

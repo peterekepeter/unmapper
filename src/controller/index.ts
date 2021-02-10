@@ -25,7 +25,7 @@ export const createController = () => {
     state_signal.value = current_state;
     const history = create_history(() => current_state, new_state => legacy_state_change(new_state));
 
-    async function execute_undoable_command(command_info: ICommandInfoV2, ...args: any){
+    async function execute_undoable_command(command_info: ICommandInfoV2, ...args: unknown[]){
         const next_state = await command_info.exec(current_state, ...args)
         if (command_info.legacy_handling){
             // legacy commands update state_signal & history directly
@@ -34,7 +34,7 @@ export const createController = () => {
         undoable_state_change(next_state);
     }
 
-    async function execute_preview_command(command_info: ICommandInfoV2, ...args: any){
+    async function execute_preview_command(command_info: ICommandInfoV2, ...args: unknown[]){
         if (command_info.legacy_handling){
             return // legacy commands cannot be previewed
         }
@@ -65,14 +65,6 @@ export const createController = () => {
     function preview_state_change(next_state: EditorState){
         state_signal.value = next_state
         console.log('preview')
-    }
-
-    function toggle_actor_selected(actor_ref: Actor)
-    {
-        if (actor_ref == null) return; // nothing to toggle
-        const next = actor_ref.shallowCopy(); 
-        next.selected = !actor_ref.selected;
-        updateActor(actor_ref, next);
     }
 
     function make_actor_selection(actor: Actor)
@@ -119,7 +111,7 @@ export const createController = () => {
     function undoCopyMove() {
         updateActorList(current_state.map.actors.map(a => {
             if (a.selected){
-                const copy = a.shallowCopy();
+                const copy = a.shallow_copy();
                 a.location = a.location.add(-32,-32,-32);
                 return a;
             }   
@@ -161,7 +153,7 @@ export const createController = () => {
                 if (newBrush === a.brushModel){
                     return a;
                 }
-                const copy = a.shallowCopy();
+                const copy = a.shallow_copy();
                 copy.brushModel = newBrush;
                 return copy;
             }   
@@ -315,7 +307,6 @@ export const createController = () => {
         commands: command_registry,
         state_signal,
         commandsShownState,
-        toggleSelection: toggle_actor_selected,
         makeSelection: make_actor_selection,
         selectToggleVertex,
         selectVertex,
