@@ -7,6 +7,7 @@ import { Actor } from "../model/Actor";
 import { themeColors } from "../theme";
 import { useSignal } from "./useSignal";
 import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
+import { make_actor_selection_command } from "../commands/make_actor_selection";
 
 export function ActorList({ controller = createController() }) {
 
@@ -36,7 +37,7 @@ export function ActorList({ controller = createController() }) {
         if (event.ctrlKey){
             controller.execute(toggle_actor_selected_command, actor);
         } else {
-            controller.makeSelection(actor);
+            controller.execute(make_actor_selection_command, actor);
         }
     }
 }

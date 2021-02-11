@@ -67,17 +67,6 @@ export const createController = () => {
         console.log('preview')
     }
 
-    function make_actor_selection(actor: Actor)
-    {
-        updateActorList(select_actors_list(current_state.map.actors, a => a === actor));
-    }
-
-    function updateActor(prev: Actor, next: Actor)
-    {
-        const newActors = current_state.map.actors.map(a => a === prev ? next : a);
-        updateActorList(newActors);
-    }
-
     function updateActorList(actors : Actor[]){
         legacy_state_change(change_actors_list(current_state, () => actors));
     }
@@ -307,7 +296,6 @@ export const createController = () => {
         commands: command_registry,
         state_signal,
         commandsShownState,
-        makeSelection: make_actor_selection,
         selectToggleVertex,
         selectVertex,
         flipPolygonNormal,

@@ -10,6 +10,7 @@ import { ViewportMode } from "../model/ViewportMode";
 import { UnrealMap } from "../model/UnrealMap";
 import { ViewportState } from "../model/EditorState";
 import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
+import { make_actor_selection_command } from "../commands/make_actor_selection";
 
 
 export const Viewport = ({
@@ -158,7 +159,7 @@ export const Viewport = ({
                 if (event.ctrlKey) {
                     controller.execute(toggle_actor_selected_command, actor);
                 } else {
-                    controller.makeSelection(actor);
+                    controller.execute(make_actor_selection_command, actor);
                 }
             }
         }
