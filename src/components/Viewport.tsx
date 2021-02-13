@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { FunctionComponent, useState } from "react";
 import { IRenderer } from "../render/IRenderer";
 import { create_wireframe_renderer } from "../render/WireframeRenderer";
 import { Vector } from "../model/Vector";
 import React = require("react");
-import { createController } from "../controller";
+import { createController, IAppController } from "../controller";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
 import { ViewportMode } from "../model/ViewportMode";
@@ -11,9 +11,20 @@ import { UnrealMap } from "../model/UnrealMap";
 import { ViewportState } from "../model/EditorState";
 import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
 import { make_actor_selection_command } from "../commands/make_actor_selection";
+import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation";
+import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom";
 
+export interface IViewportProps{
+    viewport_index: number,
+    width: number, 
+    height: number, 
+    controller: IAppController,
+    map: UnrealMap,
+    viewport_state : ViewportState,
+    vertex_mode : boolean
+}
 
-export const Viewport = ({
+export const Viewport : FunctionComponent<IViewportProps> = ({
     viewport_index = 0,
     width = 500,
     height = 300,
@@ -21,21 +32,22 @@ export const Viewport = ({
     map = new UnrealMap(),
     viewport_state = {} as ViewportState,
     vertex_mode = false}) => {
+        
 
-    let [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
+    const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 
-    let [renderer, set_renderer] = useState<IRenderer>(null);
+    const [renderer, set_renderer] = useState<IRenderer>(null);
 
     const view_mode = viewport_state.mode;
 
-    let [isMouseDown, setMouseDown] = useState(false);
-    let [didMouseMove, setDidMouseMove] = useState(false);
+    const [isMouseDown, setMouseDown] = useState(false);
+    const [didMouseMove, setDidMouseMove] = useState(false);
 
-    let [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
-    let [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
-    let [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
-    let [last_width, set_last_width] = useState<number>(null);
-    let [last_height, set_last_height] = useState<number>(null);
+    const [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
+    const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
+    const [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
+    const [last_width, set_last_width] = useState<number>(null);
+    const [last_height, set_last_height] = useState<number>(null);
 
     function canvas_ref(new_canvas: HTMLCanvasElement) {
         if (new_canvas == null)
@@ -54,6 +66,7 @@ export const Viewport = ({
         }
         if (last_render_viewport !== viewport_state){
             set_last_render_viewport(viewport_state);
+            console.log('vp change', viewport_state);
             needs_render = true;
         }
         if (last_vertex_mode !== vertex_mode){
@@ -174,7 +187,7 @@ export const Viewport = ({
         if (event.deltaY < 0){
             new_zoom_level ++;
         }
-        controller.set_viewport_zoom_level(viewport_index, new_zoom_level);
+        controller.execute(zoom, viewport_index, new_zoom_level);
         event.preventDefault();
         return false;
     }
@@ -197,8 +210,7 @@ export const Viewport = ({
         setDidMouseMove(true);
         const [next_rotation, nextLocation] =
             nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, deviceSize, ortohoScale);
-        controller.update_view_location(viewport_index, nextLocation);
-        controller.update_view_rotation(viewport_index, next_rotation);
+        controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation);
     }
 
 }

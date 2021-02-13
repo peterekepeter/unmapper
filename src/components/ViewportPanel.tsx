@@ -6,6 +6,7 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { createController } from '../controller';
 import { UiButton } from '../ui/UiButton';
 import { useSignal } from './useSignal';
+import { set_viewport_mode_command } from '../commands/viewport/set_viewport_mode';
 
 export function ViewportPanel({
     viewport_index = 0,
@@ -32,7 +33,7 @@ export function ViewportPanel({
     }
 
     function set_mode(mode: ViewportMode){
-        controller.set_viewport_mode(viewport_index, mode)
+        controller.execute(set_viewport_mode_command, viewport_index, mode)
     }
 
     return <div style={{

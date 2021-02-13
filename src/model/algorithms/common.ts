@@ -106,13 +106,13 @@ export function change_map(state: EditorState, map_fn: (map: UnrealMap) => Unrea
     return next_state;
 }
 
-export function change_viewport_at_index(state: EditorState, index: number, viewport_fn : (viewport : ViewportState) => ViewportState){
+export function change_viewport_at_index(state: EditorState, index: number, viewport_fn : (viewport : ViewportState) => ViewportState): EditorState {
     return change_viewports(state, (viewport, viewport_index) => {
         return viewport_index === index ? viewport_fn(viewport) : viewport;
     });
 }
 
-export function change_viewports(state: EditorState, viewport_fn: (viewport: ViewportState, index: number) => ViewportState){
+export function change_viewports(state: EditorState, viewport_fn: (viewport: ViewportState, index: number) => ViewportState): EditorState{
     return change_viewport_list(state, viewports => {
         let has_change = false;
         let new_list = [];
@@ -135,7 +135,7 @@ export function change_viewports(state: EditorState, viewport_fn: (viewport: Vie
     });
 }
 
-export function change_viewport_list(state: EditorState, viewport_fn: (viewport: ViewportState[]) => ViewportState[]){
+export function change_viewport_list(state: EditorState, viewport_fn: (viewport: ViewportState[]) => ViewportState[]): EditorState{
     const next_viewport_list = viewport_fn(state.viewports);
     if (next_viewport_list === state.viewports){
         return state;

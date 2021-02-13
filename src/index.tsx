@@ -8,6 +8,7 @@ import * as keyboard from './controller/keyboard';
 import { ICommand } from "./controller/ICommand";
 import { install_clipboard_integration } from "./controller/clipboard";
 import { get_all_commands_v2 } from "./commands/all_commands";
+import { import_from_string_command } from "./commands/import_from_string";
 function main() {
     let controller = createController();
     keyboard.addEventListener(window);
@@ -83,7 +84,7 @@ function main() {
         keyboard.bind_command_shortcut(command);
     }
     
-    controller.importFromString(dummyData2);
+    controller.execute(import_from_string_command, dummyData2);
     setWindowTitle("Work in progress experimental stuff");
     initializeReact(document.body, controller);
 }

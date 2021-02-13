@@ -1,4 +1,4 @@
-import { loadMapFromString, storeMapToString } from ".."
+import { load_map_from_string, store_map_to_string } from ".."
 
 
 test('brushmodel ref is after brush defintion', () => {
@@ -33,8 +33,8 @@ Begin Actor Class=Brush Name=Brush2
 End Actor
 End Map
 `
-    const map = loadMapFromString(initial);
-    const exported = storeMapToString(map);
+    const map = load_map_from_string(initial);
+    const exported = store_map_to_string(map);
     expect(exported.indexOf("Brush=Model'MyLevel.Model3'"))
         .toBeGreaterThan(exported.indexOf("Begin PolyList"));
 

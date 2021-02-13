@@ -1,10 +1,10 @@
-import { loadMapFromString, storeMapToString } from '..';
+import { load_map_from_string, store_map_to_string } from '..';
 
 // these tests check that after importing and exporting the map, 
 // the importer reads back the same map, ensures no properties are lost
 // during the export phase
 
-testReImport("a light",`Begin Map
+test_reimport("a light",`Begin Map
 Begin Actor Class=Light Name=Light0
     bDynamicLight=True
     Level=LevelInfo'MyLevel.LevelInfo0'
@@ -18,7 +18,7 @@ End Actor
 End Map
 `);
 
-testReImport("plane brush", `Begin Map
+test_reimport("plane brush", `Begin Map
 Begin Actor Class=Brush Name=Brush1
     CsgOper=CSG_Add
     MainScale=(SheerAxis=SHEER_ZX)
@@ -47,7 +47,7 @@ End Actor
 End Map
 `);
 
-testReImport("brush with scale rotate and shear", `Begin Map
+test_reimport("brush with scale rotate and shear", `Begin Map
     Begin Actor Class=Brush Name=Brush96
        CsgOper=CSG_Add
        MainScale=(Scale=(X=2.000000),SheerAxis=SHEER_ZX)
@@ -79,11 +79,11 @@ testReImport("brush with scale rotate and shear", `Begin Map
 End Map
 `);
 
-function testReImport(name : string, input : string){
+function test_reimport(name : string, input : string){
     test(name, () => {
-        const loaded = loadMapFromString(input);
-        const reExported = storeMapToString(loaded);
-        const reLoaded = loadMapFromString(reExported);
+        const loaded = load_map_from_string(input);
+        const reExported = store_map_to_string(loaded);
+        const reLoaded = load_map_from_string(reExported);
         expect(reLoaded).toEqual(loaded);
     })
 }

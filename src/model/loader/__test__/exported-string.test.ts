@@ -1,4 +1,4 @@
-import { loadMapFromString, storeMapToString } from '..';
+import { load_map_from_string, store_map_to_string } from '..';
 
 // these tests check that after importing a map, the exporter is capable of
 // reproducing the imported string
@@ -108,8 +108,8 @@ End Map
 
 function testExporter(name : string, input : string){
     test(name, () => {
-        const loaded = loadMapFromString(input);
-        const reExported = storeMapToString(loaded);
+        const loaded = load_map_from_string(input);
+        const reExported = store_map_to_string(loaded);
         expect(reExported).toEqual(input);
     });
 }

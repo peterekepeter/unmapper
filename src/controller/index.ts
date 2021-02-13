@@ -1,6 +1,4 @@
 import { createSignal } from 'reactive-signals';
-import { UnrealMap } from '../model/UnrealMap';
-import { loadMapFromString, storeMapToString } from '../model/loader';
 import { Actor } from '../model/Actor';
 import { create_history } from './history';
 import { Vector } from '../model/Vector';
@@ -9,19 +7,19 @@ import { shuffleBrushPolygons } from '../model/algorithms/shuffle';
 import { alignBrushModelToGrid, alignToGrid } from '../model/algorithms/alignToGrid';
 import { BrushModel } from '../model/BrushModel';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
-import { create_initial_editor_state, EditorState, ViewportState } from '../model/EditorState';
+import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
-import { change_actors_list, change_viewport_at_index, select_actors_list } from '../model/algorithms/common';
-import { Rotation } from '../model/Rotation';
-import { ViewportMode } from '../model/ViewportMode';
+import { change_actors_list } from '../model/algorithms/common';
 import { Interaction } from '../model/interactions/Interaction';
+
+export type IAppController = ReturnType<typeof createController>;
 
 export const createController = () => {
 
-    const state_signal = createSignal<EditorState>();
+    let current_state: EditorState = create_initial_editor_state();
+    const state_signal = createSignal<EditorState>(current_state, { delay: 0 });
     const command_registry = create_command_registry();
     const commandsShownState = createSignal(false);
-    let current_state: EditorState = create_initial_editor_state();
     state_signal.value = current_state;
     const history = create_history(() => current_state, new_state => legacy_state_change(new_state));
 
@@ -54,7 +52,6 @@ export const createController = () => {
         }
         current_state = next_state
         state_signal.value = next_state
-        console.log('commit')
     }
 
     function legacy_state_change(next_state: EditorState){
@@ -64,7 +61,6 @@ export const createController = () => {
 
     function preview_state_change(next_state: EditorState){
         state_signal.value = next_state
-        console.log('preview')
     }
 
     function updateActorList(actors : Actor[]){
@@ -73,28 +69,6 @@ export const createController = () => {
 
     function showAllCommands(){
         commandsShownState.value = true;
-    }
-
-    function importFromString(str : string){
-        const newData = loadMapFromString(str);
-        updateActorList([
-            ...current_state.map.actors,
-            ...newData.actors
-        ])
-    }
-
-    function exportSelectionToString() : string {
-        const actors = current_state.map.actors.filter(a => a.selected);
-        const mapToExport = new UnrealMap();
-        mapToExport.actors = actors;
-        return storeMapToString(mapToExport);
-    }
-
-    function set_viewport_zoom_level(index: number, level: number)
-    {
-        legacy_state_change(change_viewport_at_index(current_state, index, (viewport : ViewportState) => {
-            return { ...viewport, zoom_level: level }
-        }));
     }
 
     function undoCopyMove() {
@@ -112,24 +86,6 @@ export const createController = () => {
 
     function update_interaction(interaction: Interaction){
         preview_state_change({ ...current_state, interaction });
-    }
-
-    function update_view_location(viewport_index: number, location: Vector){
-        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
-            return { ...viewport, center_location: location }
-        }));
-    }
-
-    function set_viewport_mode(viewport_index: number, mode: ViewportMode){
-        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
-            return { ...viewport, mode }
-        }));
-    }
-
-    function update_view_rotation(viewport_index: number, rotation: Rotation){
-        legacy_state_change(change_viewport_at_index(current_state, viewport_index, viewport => {
-            return { ...viewport, rotation: rotation }
-        }));
     }
 
     function modifyBrushes(op: (brush: BrushModel, actor: Actor) => BrushModel) {
@@ -303,15 +259,9 @@ export const createController = () => {
         shuffleMeshPolygons,
         alignMeshVertexesToGrid,
         uv_triplanar_map_selected,
-        set_viewport_zoom_level,
-        set_viewport_mode,
-        update_view_rotation,
         undoCopyMove,
         showAllCommands,
         undo: history.back,
         redo: history.forward,
-        importFromString,
-        exportSelectionToString,
-        update_view_location,
     }
 }
