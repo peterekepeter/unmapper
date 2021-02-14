@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../../controller/command_registry"
-import { change_viewport_at_index } from "../../model/algorithms/common"
+import { change_viewport_at_index } from "../../model/algorithms/editor_state_change"
 import { Vector } from "../../model/Vector"
 
 export const update_view_location_command: ICommandInfoV2 = {

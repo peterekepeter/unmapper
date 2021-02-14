@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../../controller/command_registry"
-import { change_viewport_at_index } from "../../model/algorithms/common"
+import { change_viewport_at_index } from "../../model/algorithms/editor_state_change"
 import { Rotation } from "../../model/Rotation"
 
 export const update_view_rotation_command: ICommandInfoV2 = {

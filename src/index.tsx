@@ -46,10 +46,6 @@ function main() {
         implementation: controller.triangulateMeshPolygons,
     },
     {
-        description: "Undo Copy Move",
-        implementation: controller.undoCopyMove
-    },
-    {
         description: "Flip polygon (normal, winding, facing)",
         implementation: controller.flipPolygonNormal
     },

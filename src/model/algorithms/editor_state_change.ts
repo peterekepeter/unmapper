@@ -63,7 +63,7 @@ export const change_selected_actors = (
     actor => actor.selected ? actor_fn(actor) : actor
 );
 
-export function change_actors(state: EditorState, actor_fn: (a:Actor) => Actor){
+export function change_actors(state: EditorState, actor_fn: (a:Actor) => Actor) : EditorState {
     return change_actors_list(state, actor_list => {
         let has_change = false;
         let new_list = [];

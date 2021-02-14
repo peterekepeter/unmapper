@@ -9,7 +9,7 @@ import { BrushModel } from '../model/BrushModel';
 import { uv_triplanar_map } from '../model/algorithms/uv-triplanar-map';
 import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry, ICommandInfoV2 } from './command_registry';
-import { change_actors_list } from '../model/algorithms/common';
+import { change_actors_list } from '../model/algorithms/editor_state_change';
 import { Interaction } from '../model/interactions/Interaction';
 
 export type IAppController = ReturnType<typeof createController>;
@@ -17,7 +17,7 @@ export type IAppController = ReturnType<typeof createController>;
 export const createController = () => {
 
     let current_state: EditorState = create_initial_editor_state();
-    const state_signal = createSignal<EditorState>(current_state, { delay: 0 });
+    const state_signal = createSignal<EditorState>(current_state);
     const command_registry = create_command_registry();
     const commandsShownState = createSignal(false);
     state_signal.value = current_state;
@@ -69,19 +69,6 @@ export const createController = () => {
 
     function showAllCommands(){
         commandsShownState.value = true;
-    }
-
-    function undoCopyMove() {
-        updateActorList(current_state.map.actors.map(a => {
-            if (a.selected){
-                const copy = a.shallow_copy();
-                a.location = a.location.add(-32,-32,-32);
-                return a;
-            }   
-            else {
-                return a;
-            }
-        }))
     }
 
     function update_interaction(interaction: Interaction){
@@ -259,7 +246,6 @@ export const createController = () => {
         shuffleMeshPolygons,
         alignMeshVertexesToGrid,
         uv_triplanar_map_selected,
-        undoCopyMove,
         showAllCommands,
         undo: history.back,
         redo: history.forward,

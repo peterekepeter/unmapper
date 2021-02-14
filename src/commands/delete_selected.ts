@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command_registry";
-import { change_actors_list, change_selected_brushes } from "../model/algorithms/common";
+import { change_actors_list, change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { deleteBrushData } from "../model/algorithms/deleteBrushData";
 import { EditorState } from "../model/EditorState";
 
