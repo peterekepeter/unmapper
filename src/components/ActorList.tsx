@@ -6,8 +6,8 @@ import { createController } from "../controller";
 import { Actor } from "../model/Actor";
 import { themeColors } from "../theme";
 import { useSignal } from "./useSignal";
-import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
-import { make_actor_selection_command } from "../commands/make_actor_selection";
+import { toggle_actor_selected_command } from "../commands/selection/toggle_actor_selected";
+import { make_actor_selection_command } from "../commands/selection/make_actor_selection";
 
 export function ActorList({ controller = createController() }) {
 

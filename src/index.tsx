@@ -24,35 +24,7 @@ function main() {
         description: "Redo Edit",
         implementation: controller.redo,
         shortcut: 'ctrl + y'
-    },
-    {
-        description: "Align Mesh Vertexes to 32x32x32 Grid",
-        implementation: () => controller.alignMeshVertexesToGrid(32),
-    },
-    {
-        description: "Align Mesh Vertexes to 16x16x16 Grid",
-        implementation: () => controller.alignMeshVertexesToGrid(16),
-    },
-    {
-        description: "Align Mesh Vertexes to 8x8x8 Grid",
-        implementation: () => controller.alignMeshVertexesToGrid(8),
-    },
-    {
-        description: "Shuffle Mesh Polygons",
-        implementation: controller.shuffleMeshPolygons,
-    },
-    {
-        description: "Triangulate Mesh Polygons",
-        implementation: controller.triangulateMeshPolygons,
-    },
-    {
-        description: "Flip polygon (normal, winding, facing)",
-        implementation: controller.flipPolygonNormal
-    },
-    {
-       description: 'UV: triplanar map brush polygons',
-       implementation: controller.uv_triplanar_map_selected
-    }])
+    }]);
 
     const shortcutBindings : { [key:string] : ICommand } = {
         'ctrl + z' : controller.undo,

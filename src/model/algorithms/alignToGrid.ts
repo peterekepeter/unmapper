@@ -3,7 +3,7 @@ import { BrushVertex } from "../BrushVertex";
 import { Vector } from "../Vector";
 
 
-export function alignToGrid(vector : Vector, grid : Vector)
+export function align_to_grid(vector : Vector, grid : Vector) : Vector
 {
     let {x,y,z} = vector;
     
@@ -19,13 +19,13 @@ export function alignToGrid(vector : Vector, grid : Vector)
     }
 }
 
-export function alignBrushModelToGrid(brush : BrushModel, grid : Vector)
+export function align_brush_model_to_grid(brush : BrushModel, grid : Vector) : BrushModel
 {
     const result : BrushVertex[] = [];
     let changeDetected = false;
     for(const vertex of brush.vertexes)
     {
-        const newPos = alignToGrid(vertex.position, grid);
+        const newPos = align_to_grid(vertex.position, grid);
         if (newPos !== vertex.position){
             const alignedVertex = vertex.shallowCopy();
             alignedVertex.position = newPos;

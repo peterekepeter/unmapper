@@ -2,10 +2,10 @@ import { brushToPolygonData, polygonDataToBrush } from "../../brush-convert";
 import { BrushModel } from "../../BrushModel";
 import { BrushPolygonData } from "../../BrushPolygonData";
 import { Vector } from "../../Vector";
-import { triangulateBrush } from "../triangluate";
+import { triangulate_brush } from "../triangluate";
 
 
-const op = (data : BrushPolygonData[]) => brushToPolygonData(triangulateBrush(polygonDataToBrush(data)));
+const op = (data : BrushPolygonData[]) => brushToPolygonData(triangulate_brush(polygonDataToBrush(data)));
 
 test('empty returns empty', () => expect(op([])).toEqual([]));
 
@@ -33,7 +33,7 @@ describe('triangulate a single quad', () =>{
         poly.vertexes.push(new Vector(+1, +1, 0));
         poly.vertexes.push(new Vector( 0, +1, 0));
         initial.push(poly);
-        triangulatedBrush = triangulateBrush(polygonDataToBrush(initial));
+        triangulatedBrush = triangulate_brush(polygonDataToBrush(initial));
         triangulated = op(initial);
     })
 

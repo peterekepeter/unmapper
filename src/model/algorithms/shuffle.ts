@@ -1,6 +1,6 @@
 import { BrushModel } from "../BrushModel";
 
-export function shuffleBrushPolygons(brush : BrushModel){
+export function shuffle_brush_polygons(brush : BrushModel) : BrushModel{
     const newBrush = brush.shallowCopy();
     newBrush.polygons = shuffle(newBrush.polygons);
     return newBrush;

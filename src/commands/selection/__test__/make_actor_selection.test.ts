@@ -1,5 +1,5 @@
-import { Actor } from "../../model/Actor";
-import { editor_state_from_actors } from "../../model/EditorState";
+import { Actor } from "../../../model/Actor";
+import { editor_state_from_actors } from "../../../model/EditorState";
 import { make_actor_selection_command } from "../make_actor_selection";
 
 

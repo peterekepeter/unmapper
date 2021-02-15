@@ -1,6 +1,6 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
-import { Actor } from "../model/Actor";
-import { change_actors } from "../model/algorithms/editor_state_change";
+import { ICommandInfoV2 } from "../../controller/command_registry";
+import { Actor } from "../../model/Actor";
+import { change_actors } from "../../model/algorithms/editor_state_change";
 
 
 export const make_actor_selection_command : ICommandInfoV2 = {

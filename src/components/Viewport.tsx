@@ -9,10 +9,12 @@ import { Matrix3x3 } from "../model/Matrix3x3";
 import { ViewportMode } from "../model/ViewportMode";
 import { UnrealMap } from "../model/UnrealMap";
 import { ViewportState } from "../model/EditorState";
-import { toggle_actor_selected_command } from "../commands/toggle_actor_selected";
-import { make_actor_selection_command } from "../commands/make_actor_selection";
+import { toggle_actor_selected_command } from "../commands/selection/toggle_actor_selected";
+import { make_actor_selection_command } from "../commands/selection/make_actor_selection";
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation";
 import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom";
+import { select_toggle_vertex_command } from "../commands/selection/select_toggle_vertex";
+import { select_vertex_command } from "../commands/selection/select_vertex";
 
 export interface IViewportProps{
     viewport_index: number,
@@ -163,9 +165,9 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             if (vertex_mode){
                 const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY);
                 if (event.ctrlKey){
-                    controller.selectToggleVertex(actor, vertexIndex);
+                    controller.execute(select_toggle_vertex_command, actor, vertexIndex);
                 } else {
-                    controller.selectVertex(actor, vertexIndex);
+                    controller.execute(select_vertex_command, actor, vertexIndex);
                 }
             } else {
                 const actor = renderer.findNearestActor(map, canvasX, canvasY);

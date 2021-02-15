@@ -1,7 +1,7 @@
 import { BrushModel } from "../BrushModel";
 import { Vector } from "../Vector";
 
-export function uv_triplanar_map(input_brush : BrushModel) : BrushModel {
+export function uv_triplanar_map(input_brush: BrushModel): BrushModel {
     const new_brush = input_brush.shallowCopy();
     new_brush.polygons = new_brush.polygons.map(input_poly => {
         const new_poly = input_poly.shallowCopy();
@@ -13,15 +13,15 @@ export function uv_triplanar_map(input_brush : BrushModel) : BrushModel {
         const abs_z = Math.abs(input_poly.normal.z);
         let best_axis: 0 | 1 | 2 = 0;
         let best_length = abs_x;
-        if (abs_y > best_length){
+        if (abs_y > best_length) {
             best_axis = 1;
             best_length = abs_y;
         }
-        if (abs_z > best_length){
+        if (abs_z > best_length) {
             best_axis = 2;
             best_length = abs_z;
         }
-        switch (best_axis){
+        switch (best_axis) {
             case 0:
                 // TODO: not calcualted correcly
                 new_poly.textureU = Vector.UNIT_Y;

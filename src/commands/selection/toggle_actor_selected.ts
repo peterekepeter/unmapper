@@ -1,7 +1,7 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
-import { Actor } from "../model/Actor";
-import { change_actors } from "../model/algorithms/editor_state_change";
-import { EditorState } from "../model/EditorState";
+import { ICommandInfoV2 } from "../../controller/command_registry";
+import { Actor } from "../../model/Actor";
+import { change_actors } from "../../model/algorithms/editor_state_change";
+import { EditorState } from "../../model/EditorState";
 
 
 export const toggle_actor_selected_command: ICommandInfoV2 = {

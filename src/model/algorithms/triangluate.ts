@@ -2,7 +2,7 @@ import { BrushModel } from "../BrushModel";
 import { BrushPolygon } from "../BrushPolygon";
 
 
-export function triangulateBrush(brush: BrushModel) : BrushModel
+export function triangulate_brush(brush: BrushModel) : BrushModel
 {
     const polygons = brush.polygons;
     if (polygons.length == 0){
@@ -20,13 +20,13 @@ export function triangulateBrush(brush: BrushModel) : BrushModel
             result.push(poly);
         }
         else {
-            const vertexA = poly.vertexes[0];
+            const vertex_a = poly.vertexes[0];
             for (let i=2; i<poly.vertexes.length; i++){
                 // triangulate !
                 const triangle = poly.shallowCopy();
-                const vertexB = poly.vertexes[i-1];
-                const vertexC = poly.vertexes[i];
-                triangle.vertexes = [vertexA, vertexB, vertexC];
+                const vertex_b = poly.vertexes[i-1];
+                const vertex_c = poly.vertexes[i];
+                triangle.vertexes = [vertex_a, vertex_b, vertex_c];
                 result.push(triangle);
             }
         }

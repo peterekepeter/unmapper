@@ -1,7 +1,7 @@
-import { Actor } from '../../model/Actor';
-import { BrushModel } from '../../model/BrushModel';
-import { editor_state_from_actors } from '../../model/EditorState';
-import { Vector } from '../../model/Vector';
+import { Actor } from '../../../model/Actor';
+import { BrushModel } from '../../../model/BrushModel';
+import { editor_state_from_actors } from '../../../model/EditorState';
+import { Vector } from '../../../model/Vector';
 import { select_all_command as command } from '../select_all';
 
 
