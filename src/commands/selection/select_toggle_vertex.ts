@@ -30,21 +30,7 @@ function select_toggle_vertex(state: EditorState, target: Actor, vertexIndex : n
                 }
             })
         }
-        else {
-            // clear selection for unselected brushes
-            if (target.brushModel.vertexes.findIndex(v => v.selected) !== -1){
-                new_brush = target.brushModel.shallowCopy();
-                new_brush.vertexes = old_brush.vertexes.map((vertex) => {
-                    if (vertex.selected){
-                        const newVertex = vertex.shallowCopy();
-                        newVertex.selected = false;
-                        return newVertex;
-                    } else {
-                        return vertex
-                    }
-                })
-            }
-        }
+        // TODO: deselect vertexes of not selected models
         if (new_brush != null) {
             const new_actor = actor.shallow_copy();
             new_actor.brushModel = new_brush;
