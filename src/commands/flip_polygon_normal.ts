@@ -32,13 +32,15 @@ function flip_polygon_normal(state: EditorState): EditorState {
                 }
             }
             if (is_poly_selected) {
-                if (poly_list_copied) {
-                    new_brush.polygons = new_brush.polygons.slice();
+                if (!poly_list_copied) {
+                    new_brush.polygons = [ ...new_brush.polygons ]
+                    poly_list_copied = true;
                 }
                 const new_poly = poly.shallowCopy();
                 new_brush.polygons[i] = new_poly;
-                new_poly.vertexes = new_poly.vertexes.slice().reverse();
-                new_poly.normal = Vector.ZERO.subtract(new_poly.normal.x, new_poly.normal.y, new_poly.normal.z);
+                new_poly.vertexes = [ ...new_poly.vertexes ];
+                new_poly.vertexes.reverse();
+                new_poly.normal = Vector.ZERO.subtractVector(new_poly.normal);
             }
         }
         return new_brush;

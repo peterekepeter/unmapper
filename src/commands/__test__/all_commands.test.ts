@@ -82,7 +82,11 @@ all_commands.forEach(command => describe(format_label(command), () => {
             else 
             {
                 // or MUST be an EditorError
-                expect(EditorError.cast(caught_error)).not.toBeNull();
+                const casted = EditorError.cast(caught_error);
+                if (casted == null){
+                    console.error(caught_error);
+                }
+                expect(casted).not.toBeNull();
             }
         });
 
