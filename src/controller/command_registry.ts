@@ -1,3 +1,5 @@
+import { InteractionType } from "../model/interactions/InteractionType";
+import { Vector } from "../model/Vector";
 import { ICommand, ICommandV2 } from "./ICommand";
     
 export interface ICommandInfo 
@@ -14,6 +16,14 @@ export interface ICommandInfoV2
     shortcut?: string,
     /** old commands don't return new state */
     legacy_handling?: boolean
+    args?: [
+        {
+            name?: string,
+            interaction_type?: InteractionType,
+            example_values?: unknown[],
+            default_value?: unknown
+        }
+    ]
 }
 
 export interface ICommandRegistry

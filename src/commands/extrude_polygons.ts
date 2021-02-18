@@ -1,14 +1,24 @@
 import { ICommandInfoV2 } from "../controller/command_registry";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
-import { extrudeBrushFaces } from "../model/algorithms/extrudeBrushFaces";
+import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
 import { EditorError } from "../model/EditorError";
 import { EditorState } from "../model/EditorState";
+import { InteractionType } from "../model/interactions/InteractionType";
+import { Vector } from "../model/Vector";
 
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
-    description: "Extrude selected polygons by 32 units",
+    description: "extrude selected polygons",
     shortcut: 'e',
-    exec: implementation
+    exec: implementation,
+    args: [
+        {
+            interaction_type: InteractionType.VectorOrScalarInput,
+            name: "extrusion",
+            example_values: [32, new Vector(32,0,0)],
+            default_value: 32
+        }
+    ]
 }
 
 function implementation(state: EditorState, distance = 32.0) : EditorState {
@@ -17,6 +27,6 @@ function implementation(state: EditorState, distance = 32.0) : EditorState {
     }
     return change_selected_brushes(state, brush => {
         const polygon_indexes = brush.getSelectedPolygonIndices();
-        return extrudeBrushFaces(brush, polygon_indexes, distance);
+        return extrude_brush_faces(brush, polygon_indexes, distance);
     });
 }

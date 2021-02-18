@@ -53,50 +53,93 @@ function build_test_states(){
 }
 
 all_commands.forEach(command => describe(format_label(command), () => {
-
-    build_test_states().forEach(test_state => describe(test_state.description, () => {
-
-        const initially_serialized = serialize(test_state.state);
-        let next_state : EditorState;
-        let caught_error : unknown;
-        let success: boolean = null;
-
-        beforeAll(async () =>{
-            try {
-                next_state = await command.exec(test_state.state);
-                success = true;
-            }
-            catch (error){
-                // may or may not throw, app should handle that
-                caught_error = error;
-                success = false;
-            }
+    for (const [args,args_description] of iterate_args_test_cases(command)){
+        describe(args_description, () => {
+            build_test_states().forEach(test_state => describe(test_state.description, () => {
+                command_test_case(command, test_state.state, args);
+            }))
         })
-
-        test('valid result', () => {
-            if (success)
-            {
-                // command result MUST be either a valid state
-                validate_state(next_state);
-            } 
-            else 
-            {
-                // or MUST be an EditorError
-                const casted = EditorError.cast(caught_error);
-                if (casted == null){
-                    console.error(caught_error);
-                }
-                expect(casted).not.toBeNull();
-            }
-        });
-
-        test('input not modified', () => {
-            // in any case input must not be modified!!
-            expect(serialize(test_state.state)).toBe(initially_serialized);
-        })
-
-    }))
+    }
 }));
+
+function command_test_case(command:ICommandInfoV2, state: EditorState, args:unknown[]) {
+
+    const initially_serialized = serialize(state);
+    let next_state : EditorState;
+    let caught_error : unknown;
+    let success: boolean = null;
+
+    beforeAll(async () =>{
+        try {
+            next_state = command.exec(state, ...args);
+            success = true;
+        }
+        catch (error){
+            // may or may not throw, app should handle that
+            caught_error = error;
+            success = false;
+        }
+    })
+
+    test('valid result', () => {
+        if (success)
+        {
+            // command result MUST be either a valid state
+            validate_state(next_state);
+        } 
+        else 
+        {
+            // or MUST be an EditorError
+            const casted = EditorError.cast(caught_error);
+            if (casted == null){
+                console.error(caught_error);
+            }
+            expect(casted).not.toBeNull();
+        }
+    });
+
+    test('input not modified', () => {
+        // in any case input must not be modified!!
+        expect(serialize(state)).toBe(initially_serialized);
+    })
+}
+
+
+function* iterate_args_test_cases(command: ICommandInfoV2): Iterable<[unknown[], string]>{
+    const args = get_default_args(command);
+    yield [args, 'default args'];
+    if (!command.args){
+        return;
+    }
+    for (let i=0; i<command.args.length; i++){
+        const arg = command.args[i];
+        if (!arg.example_values){
+            continue;
+        }
+        const default_value = args[i];
+        for (let j=0; j<arg.example_values.length; j++){
+            const example_value = arg.example_values[j];
+            if (example_value != default_value) {
+                args[i] = example_value;
+                yield [args, `${arg.name??i}:${JSON.stringify(example_value)}`];
+            }
+        }
+        args[i] = default_value;
+    }
+}
+
+function get_default_args(command: ICommandInfoV2){
+    if (!command.args){
+        return [];
+    }
+    return command.args.map((arg, i) => get_default_arg(command, i));
+}
+
+function get_default_arg(command: ICommandInfoV2, index: number){
+    const arg = command.args[index];
+    return arg.default_value ?? 
+        (arg.example_values && arg.example_values.length > 0 ? arg.example_values[0] : undefined);
+}
 
 function serialize(state: EditorState): string {
     return JSON.stringify(state, undefined, 2);

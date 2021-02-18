@@ -78,16 +78,16 @@ export class BrushModel
         return index;
     }
 
-    rebuild_all_poly_edges(){
+    rebuild_all_poly_edges(): void {
         this._remove_all_poly_edges();
         for (let i=0; i<this.polygons.length; i++){
-            addPolygonEdges(this, i);
+            add_polygon_edges(this, i);
         }
     }
 
     rebuild_poly_edges(polygonIndex: number){
         this._remove_poly_edges(polygonIndex);
-        addPolygonEdges(this, polygonIndex);
+        add_polygon_edges(this, polygonIndex);
     }
 
     calculatePolygonMedian(pid: number) {
@@ -180,7 +180,7 @@ export class BrushModel
     }
 }
 
-function addPolygonEdges(brush : BrushModel, polygonIndex : number){
+function add_polygon_edges(brush : BrushModel, polygonIndex : number){
 
     const poly = brush.polygons[polygonIndex];
 
@@ -200,7 +200,7 @@ function addPolygonEdges(brush : BrushModel, polygonIndex : number){
 }
 
 function addPolyEdge(brush : BrushModel, edgeVertexA: number, edgeVertexB:number, poly:BrushPolygon, polygonIndex : number){
-    let edgeIndex = brush.findEdgeIndexOrAddEdge(edgeVertexA, edgeVertexB);
-    poly.edges.push(edgeIndex);
-    brush.edges[edgeIndex].polygons.push(polygonIndex); // single edge might actually be used by multiple polys
+    const edge_index = brush.findEdgeIndexOrAddEdge(edgeVertexA, edgeVertexB);
+    poly.edges.push(edge_index);
+    brush.edges[edge_index].polygons.push(polygonIndex); // single edge might actually be used by multiple polys
 }

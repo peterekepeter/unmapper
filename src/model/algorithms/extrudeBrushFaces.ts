@@ -2,29 +2,47 @@ import { BrushModel } from "../BrushModel";
 import { Vector } from "../Vector";
 import { createBrushPolygons } from "./createBrushPolygon";
 
-export function extrudeBrushFaces(brush: BrushModel, facesIndices: number[], distance: number) : BrushModel {
-    if (facesIndices.length == 0 || distance === 0) {
+export function extrude_brush_faces(brush: BrushModel, faces: number[], extrude_vector: Vector) : BrushModel
+export function extrude_brush_faces(brush: BrushModel, faces: number[], distance: number) : BrushModel
+export function extrude_brush_faces(brush: BrushModel, faces: number[], arg: number | Vector) : BrushModel {
+    if (faces.length == 0) {
+        return brush;
+    }
+    let distance: number = null;
+    let vector: Vector = null;
+    if (typeof arg === 'number'){
+        distance = arg;
+        if (distance === 0){
+            return brush;
+        }
+    } else {
+        vector = arg;
+        if (vector.equals(Vector.ZERO)){
+            return brush;
+        }
+    }
+    if (faces.length == 0 || distance === 0) {
         return brush;
     }
     let new_brush = brush.shallowCopy();
     new_brush.vertexes = [...new_brush.vertexes];
     new_brush.polygons = [...new_brush.polygons];
     new_brush.edges = [...new_brush.edges];
-    for (const faceIndex of facesIndices){
-        new_brush = extrudeFaceDistance(new_brush, faceIndex, distance);
+    for (const faceIndex of faces){
+        new_brush = extrude_face_distance(new_brush, faceIndex, distance);
     }
     new_brush.rebuild_all_poly_edges()
     return new_brush;
 }
 
-function extrudeFaceDistance(mutable_brush: BrushModel, face_index: number, extrude_distance: number) : BrushModel {
+function extrude_face_distance(mutable_brush: BrushModel, face_index: number, extrude_distance: number) : BrushModel {
     const targetFace = mutable_brush.polygons[face_index];
     const normal = targetFace.normal;
     const extrude_vector = normal.scale(extrude_distance);
-    return extrudeFaceVector(mutable_brush, face_index, extrude_vector);
+    return extrude_face_vector(mutable_brush, face_index, extrude_vector);
 }
 
-function extrudeFaceVector(mutable_brush: BrushModel, face_index: number, extrude_vector: Vector) : BrushModel {
+function extrude_face_vector(mutable_brush: BrushModel, face_index: number, extrude_vector: Vector) : BrushModel {
     const targetFace = mutable_brush.polygons[face_index];
     const replacementFace = targetFace.shallowCopy();
     replacementFace.vertexes = [];
@@ -45,10 +63,10 @@ function extrudeFaceVector(mutable_brush: BrushModel, face_index: number, extrud
             mutable_brush.vertexes[vertexIndex] = new_vertex;
         }
     }
-    return bridgeEdgeLoops(mutable_brush, targetFace.vertexes, replacementFace.vertexes);
+    return bridge_edge_loops(mutable_brush, targetFace.vertexes, replacementFace.vertexes);
 }
 
-function bridgeEdgeLoops(brush: BrushModel, first_loop_vertexes : number[], second_loop_vertexes: number[]) : BrushModel {
+function bridge_edge_loops(brush: BrushModel, first_loop_vertexes : number[], second_loop_vertexes: number[]) : BrushModel {
     if (first_loop_vertexes.length !== second_loop_vertexes.length){
         throw new Error('edge loops not compatible');
     }
