@@ -1,6 +1,6 @@
 import React = require("react");
 import { SectionTitle } from "../ui/SectionTitle";
-import { createController } from "../controller";
+import { create_controller } from "../controller/AppController";
 import { Actor } from "../model/Actor";
 import { UiText } from "../ui/UiText";
 import { PolyFlags } from "../model/PolyFlags";
@@ -11,7 +11,7 @@ import { UiVectorInput } from "../ui/UiVectorInput";
 import { edit_property_command as edit_property } from "../commands/edit_property";
 
 
-export function PropertyEditor({ controller = createController() }) {
+export function PropertyEditor({ controller = create_controller() }) {
 
     const map = useSignal(controller.state_signal).map;
     let reuse_property_context = true;
@@ -25,7 +25,7 @@ export function PropertyEditor({ controller = createController() }) {
         reuse_property_context = false;
     }
 
-    const controller_ref = React.useRef<ReturnType<typeof createController>>();
+    const controller_ref = React.useRef<ReturnType<typeof create_controller>>();
     if (controller_ref.current !== controller){
         controller_ref.current = controller
         reuse_property_context = false
@@ -70,7 +70,7 @@ function VectorProp({
     controller,
     name,
     getter
-}: { selection: Actor[], controller: ReturnType<typeof createController>, name: string, getter?: (a:Actor) => Vector }) {
+}: { selection: Actor[], controller: ReturnType<typeof create_controller>, name: string, getter?: (a:Actor) => Vector }) {
     
     let aggregate : Vector;
     let aggregateCount = 0;

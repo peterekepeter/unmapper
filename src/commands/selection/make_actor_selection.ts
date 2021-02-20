@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../../controller/command_registry";
+import { ICommandInfoV2 } from "../../controller/command";
 import { Actor } from "../../model/Actor";
 import { change_actors } from "../../model/algorithms/editor_state_change";
 

@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { createBrushPolygon } from "../model/algorithms/createBrushPolygon";
 import { EditorError } from "../model/EditorError";

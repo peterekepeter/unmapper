@@ -1,0 +1,67 @@
+import { createSignal } from 'reactive-signals';
+import { create_history } from './history';
+import { create_initial_editor_state, EditorState } from '../model/EditorState';
+import { create_command_registry } from './command/command_registry';
+import { ICommandInfoV2 } from "./command/ICommandInfoV2";
+import { Interaction } from '../model/interactions/Interaction';
+import { UnrealMap } from '../model/UnrealMap';
+
+export class AppController {
+
+    current_state: EditorState = create_initial_editor_state();
+    state_signal = createSignal<EditorState>(this.current_state);
+    commands = create_command_registry();
+    commands_shown_state = createSignal(false);
+
+    history = create_history<UnrealMap>({
+        get_state: () => this.current_state.map,
+        set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state })
+    });
+
+    execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
+        const next_state = command_info.exec(this.current_state, ...args)
+        if (command_info.legacy_handling) {
+            return; // legacy commands update state_signal & history directly
+        }
+        this.undoable_state_change(next_state);
+    }
+
+    preview(command_info: ICommandInfoV2, ...args: unknown[]): void {
+        if (command_info.legacy_handling) {
+            return // legacy commands cannot be previewed
+        }
+        const next_state = command_info.exec(this.current_state, ...args)
+        this.preview_state_change(next_state)
+    }
+
+    private undoable_state_change(next_state: EditorState) {
+        if (this.state_signal.value === next_state) {
+            return // no change
+        }
+        if (this.state_signal.value.map !== next_state.map) {
+            this.history.push() // map state change triggers history push
+        }
+        this.current_state = next_state
+        this.state_signal.value = next_state
+    }
+
+    private direct_state_change(next_state: EditorState) {
+        this.current_state = next_state
+        this.state_signal.value = next_state
+    }
+
+    private preview_state_change(next_state: EditorState) {
+        this.state_signal.value = next_state
+    }
+
+    public show_all_commands(): void {
+        this.commands_shown_state.value = true;
+    }
+
+    public update_interaction(interaction: Interaction): void {
+        this.preview_state_change({ ...this.current_state, interaction });
+    }
+
+}
+
+export const create_controller = (): AppController => new AppController();

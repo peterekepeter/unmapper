@@ -2,14 +2,14 @@ import React = require("react");
 import { HoverEffect } from "../ui/HoverEffect";
 import { UiText } from "../ui/UiText";
 import { SectionTitle } from "../ui/SectionTitle";
-import { createController } from "../controller";
+import { AppController } from "../controller/AppController";
 import { Actor } from "../model/Actor";
 import { themeColors } from "../theme";
 import { useSignal } from "./useSignal";
 import { toggle_actor_selected_command } from "../commands/selection/toggle_actor_selected";
 import { make_actor_selection_command } from "../commands/selection/make_actor_selection";
 
-export function ActorList({ controller = createController() }) {
+export function ActorList({ controller = new AppController() }) {
 
     const map = useSignal(controller.state_signal).map;
     const colors = useSignal(themeColors);

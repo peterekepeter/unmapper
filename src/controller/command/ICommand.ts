@@ -1,5 +1,5 @@
 import { ISignal } from "reactive-signals";
-import { EditorState } from "../model/EditorState";
+import { EditorState } from "../../model/EditorState";
 
 
 export interface ICommand

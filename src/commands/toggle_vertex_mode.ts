@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { EditorState } from "../model/EditorState";
 
 

@@ -1,5 +1,5 @@
 
-import { ICommandInfoV2 } from "./command_registry";
+import { ICommandInfoV2 } from "./command";
 
 const bindings : { [key:string] : ICommandInfoV2 } = {};
 let executor_fn : (cmd : ICommandInfoV2) => void;

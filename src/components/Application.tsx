@@ -1,5 +1,5 @@
 import React = require("react");
-import { createController } from "../controller";
+import { create_controller } from "../controller/AppController";
 import { useSignal } from "./useSignal";
 import { ViewportMode } from "../model/ViewportMode";
 import { Vector } from "../model/Vector";
@@ -9,14 +9,14 @@ import { ActorList } from "./ActorList";
 import { PropertyEditor } from "./PropertyEditor";
 import { CommandPalette } from "./CommandPalette";
 
-export const Application = ({ controller = createController() }) => {
+export const Application = ({ controller = create_controller() }) => {
     return <>
         <MainGrid controller={controller}/>
         <CommandPalette controller={controller}/>
     </>
 }
 
-export const MainGrid = ({ controller = createController() }) => {
+export const MainGrid = ({ controller = create_controller() }) => {
 
     const colors = useSignal(themeColors);
     const [resizeCount, setResizeCount] = React.useState(0);

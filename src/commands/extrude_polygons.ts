@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
 import { EditorError } from "../model/EditorError";
@@ -8,7 +8,7 @@ import { Vector } from "../model/Vector";
 
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
-    description: "extrude selected polygons",
+    description: "Extrude selected polygons",
     shortcut: 'e',
     exec: implementation,
     args: [

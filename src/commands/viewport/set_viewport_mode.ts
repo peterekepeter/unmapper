@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../../controller/command_registry"
+import { ICommandInfoV2 } from "../../controller/command"
 import { change_viewport_at_index } from "../../model/algorithms/editor_state_change"
 import { ViewportMode } from "../../model/ViewportMode"
 

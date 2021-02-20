@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { align_brush_model_to_grid, align_to_grid } from "../model/algorithms/alignToGrid";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { EditorState } from "../model/EditorState";

@@ -1,5 +1,5 @@
 import { get_all_commands_v2 } from "../all_commands";
-import { ICommandInfoV2 } from "../../controller/command_registry";
+import { ICommandInfoV2 } from "../../controller/command";
 import { EditorError } from "../../model/EditorError";
 import { EditorState, editor_state_from_actors } from "../../model/EditorState";
 import { Actor } from "../../model/Actor";

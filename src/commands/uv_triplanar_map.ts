@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { uv_triplanar_map } from "../model/algorithms/uv-triplanar-map";
 

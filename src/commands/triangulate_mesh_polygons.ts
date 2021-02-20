@@ -1,4 +1,4 @@
-import { ICommandInfoV2 } from "../controller/command_registry";
+import { ICommandInfoV2 } from "../controller/command";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { triangulate_brush } from "../model/algorithms/triangluate";
 import { EditorState } from "../model/EditorState";

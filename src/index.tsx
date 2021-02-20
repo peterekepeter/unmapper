@@ -2,36 +2,40 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { Application } from "./components/Application";
-import { createController } from "./controller";
 import { dummyData2 } from "./dummyAppData";
 import * as keyboard from './controller/keyboard';
-import { ICommand } from "./controller/ICommand";
+import { ICommand } from "./controller/command/ICommand";
 import { install_clipboard_integration } from "./controller/clipboard";
 import { get_all_commands_v2 } from "./commands/all_commands";
 import { import_from_string_command } from "./commands/import_from_string";
+import { AppController } from "./controller/AppController";
+
+
 function main() {
-    let controller = createController();
+
+    const controller = new AppController();
     keyboard.addEventListener(window);
 
     controller.commands.register_commands_v2(get_all_commands_v2())
     
-    controller.commands.registerCommands([{
+    controller.commands.register_commands_v1([{
         description: "Undo Previous Edit",
-        implementation: controller.undo,
+        implementation: controller.history.back,
         shortcut: 'ctrl + z'
     },
     {
         description: "Redo Edit",
-        implementation: controller.redo,
+        implementation: controller.history.forward,
         shortcut: 'ctrl + y'
     }]);
 
     const shortcutBindings : { [key:string] : ICommand } = {
-        'ctrl + z' : controller.undo,
-        'ctrl + y' : controller.redo,
-        'ctrl + shift + z' : controller.redo,
-        'ctrl + shift + y' : controller.undo,
-        'f1' : controller.showAllCommands
+        'ctrl + z' : controller.history.back,
+        'ctrl + y' : controller.history.forward,
+        'ctrl + shift + z' : controller.history.back,
+        'ctrl + shift + y' : controller.history.forward,
+        'f1' : controller.show_all_commands,
+        'space' : controller.show_all_commands
     }
 
     install_clipboard_integration(window.document, controller);
@@ -59,7 +63,7 @@ function main() {
 
 function initializeReact(
     parentElement: HTMLElement,
-    controller = createController()
+    controller: AppController,
 ) {
     const mainElement = createMainElement();
     parentElement.appendChild(mainElement);

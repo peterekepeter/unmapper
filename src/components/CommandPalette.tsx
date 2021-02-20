@@ -1,16 +1,17 @@
 import React = require("react")
 import { useSignal } from "./useSignal"
 import { themeColors } from "../theme"
-import { createController } from "../controller";
+import { create_controller } from "../controller/AppController";
 import { UiText } from "../ui/UiText";
 import { font } from "../ui/typography";
-import { ICommandInfo, ICommandInfoV2, ICommandRegistry } from "../controller/command_registry";
+import { ICommandRegistry } from "../controller/command";
+import { ICommandInfoV2 } from "../controller/command";
 import { buttonStyle } from "../ui/UiButton";
 
-export const CommandPalette = ({ controller = createController() }) => {
+export const CommandPalette = ({ controller = create_controller() }) => {
     
     const colors = useSignal(themeColors);
-    const shown = useSignal(controller.commandsShownState);
+    const shown = useSignal(controller.commands_shown_state);
     const [value, setValue] = React.useState('');
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const [isMouseOver, xxx] = React.useState(false);
@@ -104,7 +105,7 @@ export const CommandPalette = ({ controller = createController() }) => {
     function hide(){
         setValue('');
         setSelectedIndex(0);
-        controller.commandsShownState.value = false;
+        controller.commands_shown_state.value = false;
     }
 
     function handleBlur(){

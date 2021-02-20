@@ -1,4 +1,4 @@
-import { createController } from ".";
+import { create_controller } from "./AppController";
 import { delete_selected_command } from "../commands/delete_selected";
 import { import_from_string_command } from "../commands/import_from_string";
 import { EditorState } from "../model/EditorState";
@@ -6,7 +6,7 @@ import { store_map_to_string } from "../model/loader";
 import { UnrealMap } from "../model/UnrealMap";
 
 /** clipboard intergration */
-export function install_clipboard_integration(document: Document, controller = createController()) : void {
+export function install_clipboard_integration(document: Document, controller = create_controller()) : void {
 
     document.addEventListener('copy', function(event) {
         event.clipboardData.setData('text/plain', export_selection_to_string(controller.state_signal.value));

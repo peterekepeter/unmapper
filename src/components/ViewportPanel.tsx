@@ -3,14 +3,14 @@ import { Vector } from '../model/Vector';
 import { Viewport } from './Viewport';
 import { ViewportMode } from "../model/ViewportMode";
 import { SectionTitle } from '../ui/SectionTitle';
-import { createController } from '../controller';
+import { create_controller } from '../controller/AppController';
 import { UiButton } from '../ui/UiButton';
 import { useSignal } from './useSignal';
 import { set_viewport_mode_command } from '../commands/viewport/set_viewport_mode';
 
 export function ViewportPanel({
     viewport_index = 0,
-    controller = createController(),
+    controller = create_controller(),
     location = new Vector(0, 0, 0),
     mode = ViewportMode.Top }
 ) {

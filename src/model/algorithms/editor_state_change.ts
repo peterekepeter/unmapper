@@ -1,7 +1,5 @@
 import { Actor } from "../Actor";
 import { BrushModel } from "../BrushModel";
-import { BrushVertex } from "../BrushVertex";
-import { EditorError } from "../EditorError";
 import { EditorState, ViewportState } from "../EditorState";
 import { UnrealMap } from "../UnrealMap";
 

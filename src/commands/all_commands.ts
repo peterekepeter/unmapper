@@ -1,5 +1,5 @@
 
-import { ICommandInfoV2 } from '../controller/command_registry';
+import { ICommandInfoV2 } from "../controller/command";
 import { create_polygon_command } from './create_polygon';
 import { extrude_polygons_command } from './extrude_polygons';
 import { delete_selected_command } from './delete_selected';

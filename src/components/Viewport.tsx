@@ -3,7 +3,7 @@ import { IRenderer } from "../render/IRenderer";
 import { create_wireframe_renderer } from "../render/WireframeRenderer";
 import { Vector } from "../model/Vector";
 import React = require("react");
-import { createController, IAppController } from "../controller";
+import { create_controller, AppController } from "../controller/AppController";
 import { Rotation } from "../model/Rotation";
 import { Matrix3x3 } from "../model/Matrix3x3";
 import { ViewportMode } from "../model/ViewportMode";
@@ -20,7 +20,7 @@ export interface IViewportProps{
     viewport_index: number,
     width: number, 
     height: number, 
-    controller: IAppController,
+    controller: AppController,
     map: UnrealMap,
     viewport_state : ViewportState,
     vertex_mode : boolean
@@ -30,7 +30,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     viewport_index = 0,
     width = 500,
     height = 300,
-    controller = createController(),
+    controller = create_controller(),
     map = new UnrealMap(),
     viewport_state = {} as ViewportState,
     vertex_mode = false}) => {

@@ -10,8 +10,10 @@ interface IHistory<T>
     get_previous_state: () => T;
 }
 
-export function create_history<T>(get_current_state: () => T, set_current_state: (t:T) => void) : IHistory<T> {
+export function create_history<T>(options: { get_state: () => T, set_state: (t:T) => void }) : IHistory<T> {
     
+    const { get_state: get_current_state, set_state: set_current_state } = options;
+
     const past : T[] = [];
     let future : T[] = [];
 
