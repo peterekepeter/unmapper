@@ -3,8 +3,8 @@ import { create_history } from './history';
 import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry } from './command/command_registry';
 import { ICommandInfoV2 } from "./command/ICommandInfoV2";
-import { Interaction } from '../model/interactions/Interaction';
 import { UnrealMap } from '../model/UnrealMap';
+import { GeometryCache } from '../model/geometry/GeometryCache';
 
 export class AppController {
 
@@ -12,11 +12,18 @@ export class AppController {
     state_signal = createSignal<EditorState>(this.current_state);
     commands = create_command_registry();
     commands_shown_state = createSignal(false);
+    geometry_cache = new GeometryCache();
 
     history = create_history<UnrealMap>({
         get_state: () => this.current_state.map,
         set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state })
     });
+
+    constructor(){
+        this.state_signal.event(state => {
+            this.geometry_cache.actors = state.map.actors;
+        })
+    }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
         const next_state = command_info.exec(this.current_state, ...args)
@@ -57,11 +64,7 @@ export class AppController {
     public show_all_commands(): void {
         this.commands_shown_state.value = true;
     }
-
-    public update_interaction(interaction: Interaction): void {
-        this.preview_state_change({ ...this.current_state, interaction });
-    }
-
+    
 }
 
 export const create_controller = (): AppController => new AppController();

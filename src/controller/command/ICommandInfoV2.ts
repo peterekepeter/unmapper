@@ -1,4 +1,4 @@
-import { InteractionType } from "../../model/interactions/InteractionType";
+import { InteractionType } from "../interactions/InteractionType";
 import { ICommandV2 } from "./ICommand";
 
 

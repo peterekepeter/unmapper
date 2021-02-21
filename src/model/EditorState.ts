@@ -1,5 +1,4 @@
 import { Actor } from "./Actor";
-import { Interaction } from "./interactions/Interaction";
 import { Rotation } from "./Rotation";
 import { UnrealMap } from "./UnrealMap";
 import { Vector } from "./Vector";
@@ -25,7 +24,6 @@ export interface EditorState
     viewports: ViewportState[];
     history: IHistoryStateAccess;
     vertex_mode: boolean;
-    interaction: Interaction;
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
@@ -67,7 +65,6 @@ export function create_initial_editor_state() : EditorState{
                 rotation: Rotation.IDENTITY,
                 zoom_level: 0
             },
-        ],
-        interaction: Interaction.DEFAULT
+        ]
     }
 }

@@ -58,7 +58,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         }
         if (new_canvas !== canvas){
             set_canvas(new_canvas);
-            set_renderer(create_wireframe_renderer(new_canvas));
+            set_renderer(create_wireframe_renderer(new_canvas, controller.geometry_cache));
             return;
         }
         let needs_render = false;

@@ -3,7 +3,7 @@ import { change_selected_brushes } from "../model/algorithms/editor_state_change
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
 import { EditorError } from "../model/EditorError";
 import { EditorState } from "../model/EditorState";
-import { InteractionType } from "../model/interactions/InteractionType";
+import { InteractionType } from "../controller/interactions/InteractionType";
 import { Vector } from "../model/Vector";
 
 

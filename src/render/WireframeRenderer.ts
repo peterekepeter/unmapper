@@ -10,6 +10,9 @@ import { Matrix3x3 } from "../model/Matrix3x3";
 import { BrushModel } from "../model/BrushModel";
 import { EditorState } from "../model/EditorState";
 import { BoundingBox } from "../model/BoundingBox";
+import { GeometryCache } from "../model/geometry/GeometryCache";
+import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions";
+import { intersect_segment_with_plane } from "../model/geometry/intersect-functions";
 
 const backgroundColor = '#222';
 
@@ -74,19 +77,11 @@ function get_brush_wire_color(actor: Actor): string {
     }
 }
 
-interface ActorRenderMemo
-{
-    world_vertexes : Vector[]
-    bounding_box : BoundingBox
-}
-
-export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer {
+export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_cache : GeometryCache): IRenderer {
     const context = canvas.getContext("2d");
     let { width, height } = canvas;
     let deviceSize = Math.min(width, height);
     let showVertexes = false;
-    let actor_memo : ActorRenderMemo[] = [];
-    let prev_actor_list : Actor[] = null;
     let view_center : Vector = Vector.ZERO;
 
     let get_view_bounding_box: () => BoundingBox;
@@ -102,92 +97,44 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
 
     function render_map(map: UnrealMap) {
 
-        width = canvas.width;
-        height = canvas.height;
-        deviceSize = Math.min(width, height);
+        width = canvas.width
+        height = canvas.height
+        deviceSize = Math.min(width, height)
 
-        context.fillStyle = backgroundColor;
-        context.fillRect(0, 0, width, height);
+        context.fillStyle = backgroundColor
+        context.fillRect(0, 0, width, height)
 
         if (map == null) {
-            return;
+            return
         }
 
-        const view_bounding_box = get_view_bounding_box();
+        const view_bounding_box = get_view_bounding_box()
 
         for (let i=0; i<map.actors.length; i++) {
-            const actor = map.actors[i];
-            if (!actor.selected) { render_actor(actor, get_actor_memo(actor, i), view_bounding_box); }
+            const actor = map.actors[i]
+            if (!actor.selected) { render_actor(actor, i, view_bounding_box) }
         }
         if (showVertexes){
-            context.fillStyle = backgroundColor + '8';
-            context.fillRect(0, 0, width, height);
+            context.fillStyle = backgroundColor + '8'
+            context.fillRect(0, 0, width, height)
         }
         for (let i=0; i<map.actors.length; i++) {
-            const actor = map.actors[i];
-            if (actor.selected) { render_actor(actor, get_actor_memo(actor, i), view_bounding_box); }
+            const actor = map.actors[i]
+            if (actor.selected) { render_actor(actor, i, view_bounding_box) }
         }
-
-        prev_actor_list = map.actors;
     }
 
-    function get_actor_memo(actor: Actor, actor_index: number){
-        if (prev_actor_list && prev_actor_list[actor_index] === actor){
-            return actor_memo[actor_index];
-        }
-        const new_memo : ActorRenderMemo = {
-            world_vertexes: null,
-            bounding_box: null
-        };
-        actor_memo[actor_index] = new_memo;
-        return new_memo;
-    }
-
-    function get_actor_bounding_box(actor: Actor, memo: ActorRenderMemo){
-        if (memo.bounding_box){
-            return memo.bounding_box;
-        }
-        const vertexes = get_world_transformed_vertexes(actor, memo);
-        const box = BoundingBox.from_vectors_list(vertexes);
-        memo.bounding_box = box;
-        return box;
-    }
-
-    function get_world_transformed_vertexes(actor: Actor, memo: ActorRenderMemo){
-        if (memo.world_vertexes){
-            return memo.world_vertexes; // cached ;)
-        }
-        
-        const object_matrix = actor.postScale.toMatrix()
-            .multiply(actor.rotation.toMatrix())
-            .multiply(actor.mainScale.toMatrix());
-
-        const transformed = actor.brushModel.vertexes.map(
-            vertex => object_transform(object_matrix, vertex.position, actor.prePivot || Vector.ZERO, actor.location));
-           
-        memo.world_vertexes = transformed;
-        return transformed;
-    }
-    
-    function object_transform(matrix: Matrix3x3, vector : Vector, pivot: Vector, location: Vector) : Vector {
-        if (!pivot) pivot = Vector.ZERO;
-        if (!location) location = Vector.ZERO;
-        return matrix
-            .apply(vector.subtractVector(pivot))
-            .addVector(location);
-    }
-
-    function render_actor(actor: Actor, memo: ActorRenderMemo, view_bounding_box: BoundingBox) {
+    function render_actor(actor: Actor, index: number, view_bounding_box: BoundingBox) {
         if (actor.brushModel == null) {
             return;
         } 
 
-        const box = get_actor_bounding_box(actor, memo);
+        const box = geometry_cache.get_bounding_box(index);
         if (!view_bounding_box.intersects(box)){
             return;
         }
 
-        const transformed_vertexes = get_world_transformed_vertexes(actor, memo);
+        const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index);
 
         context.strokeStyle = get_brush_wire_color(actor);
         context.lineWidth = 1.5;
@@ -243,10 +190,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                 }
                 else if (out_vertex_a.x < 0)
                 {
-                    out_vertex_a = intersectSegmentWithPlane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1);
+                    out_vertex_a = intersect_segment_with_plane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1);
                 }
                 else if (out_vertex_b.x < 0){
-                    out_vertex_b = intersectSegmentWithPlane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1);
+                    out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1);
                 }
                 const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * deviceSize + width * .5;
                 const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * deviceSize + height * .5;
@@ -277,7 +224,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                 // need view transformed Z for clipping
                 let v0 = invalid1 ? vertexA : vertexB;
                 let v1 = invalid1 ? vertexB : vertexA;
-                let vi = intersectSegmentWithPlane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1);
+                let vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1);
                 if (vi != null){
                     const x0 = view_transform_x(v0), y0 = view_transform_y(v0);
                     const x1 = view_transform_x(vi), y1 = view_transform_y(vi);
@@ -426,7 +373,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
             const actor = map.actors[actor_index]; // reverse iterate to find topmost actor
             if (actor.brushModel != null) {
 
-                const vertexes = get_world_transformed_vertexes(actor, get_actor_memo(actor, actor_index));
+                const vertexes = geometry_cache.get_world_transformed_vertexes(actor_index);
 
                 for (const edge of actor.brushModel.edges) {
                     let p0 = vertexes[edge.vertexIndexA];
@@ -436,7 +383,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                     let x1 = view_transform_x(p1);
                     let y1 = view_transform_y(p1);
                     if (!isNaN(x0) && !isNaN(x1)) {
-                        let distance = distanceToLineSegment(canvasX, canvasY, x0, y0, x1, y1);
+                        let distance = distance_to_line_segment(canvasX, canvasY, x0, y0, x1, y1);
                         if (distance < bestDistance) {
                             bestMatch = actor;
                             bestDistance = distance;
@@ -460,15 +407,15 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
     {
         const MAX_DISTANCE = 8;
         let bestMatchActor: Actor = null;
-        let bestMatchVertex: number = -1;
+        let bestMatchVertex = -1;
         let bestDistance = Number.MAX_VALUE;
-        for (let actorIndex=map.actors.length-1; actorIndex >= 0; actorIndex--) {
-            const actor = map.actors[actorIndex]; // reverse iterate to find topmost actor
+        for (let actor_index=map.actors.length-1; actor_index >= 0; actor_index--) {
+            const actor = map.actors[actor_index]; // reverse iterate to find topmost actor
             if (!actor.selected || actor.brushModel == null){
                 continue; // skip actors which are not selected or don't have a brushModel
             }
 
-            const transformed_vertexes = get_world_transformed_vertexes(actor, get_actor_memo(actor, actorIndex));
+            const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
             const vertexes = actor.brushModel.vertexes;
 
             for (let vertex_index = vertexes.length-1; vertex_index >= 0; vertex_index--) {
@@ -476,7 +423,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
                 let x0 = view_transform_x(p0);
                 let y0 = view_transform_y(p0);
                 if (!isNaN(x0) && !isNaN(y0)) {
-                    let distance = distance2dToPoint(canvasX, canvasY, x0, y0);
+                    let distance = distance_2d_to_point(canvasX, canvasY, x0, y0);
                     if (distance < bestDistance) {
                         bestMatchActor = actor;
                         bestMatchVertex = vertex_index;
@@ -506,55 +453,4 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement): IRenderer 
         setShowVertexes: (state:boolean) => { showVertexes = state; } 
     }
     return s;
-}
-
-function distance2dToPoint(x0: number, y0: number, x1: number, y1: number){
-    const dx = x1 - x0
-    const dy = y1 - y0;
-    const distance = Math.sqrt(dx*dx + dy*dy);
-    return distance;
-}
-
-function distanceToPoint(from : Vector, to : Vector){
-    const dx = to.x-from.x;
-    const dy = to.y-from.y;
-    const dz = to.z-from.z;
-    const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    return distance;
-}
-
-function distanceToLineSegment(
-    px: number, py: number,
-    ax: number, ay: number,
-    bx: number, by: number): number {
-    let pax = px - ax, pay = py - ay;
-    let bax = bx - ax, bay = by - ay;
-    let h = Math.min(1.0, Math.max(0.0,
-        (pax * bax + pay * bay) / (bax * bax + bay * bay)));
-    let dx = pax - bax * h;
-    let dy = pay - bay * h;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-function intersectSegmentWithPlane(s0 : Vector, s1: Vector, planeNormal: Vector, planePoint: Vector, projectionBias = 0) : Vector | null {
-    const sdx = s1.x - s0.x, sdy = s1.y - s0.y, sdz = s1.z - s0.z;
-    const slength = Math.sqrt(sdx*sdx + sdy*sdy + sdz*sdz);
-    const sdirx = sdx / slength, sdiry = sdy / slength, sdirz = sdz / slength;
-    const sdirDotPlaneNormal = sdirx * planeNormal.x + sdiry * planeNormal.y + sdirz * planeNormal.z;
-    if (sdirDotPlaneNormal == 0)
-    {
-        // line is parallel to plane
-        return null;
-    }
-    const tx = planePoint.x - s0.x, ty = planePoint.y - s0.y, tz = planePoint.z - s0.z;
-    const pointDtoPlaneNormal = tx * planeNormal.x + ty * planeNormal.y + tz * planeNormal.z;
-    const distance = pointDtoPlaneNormal/sdirDotPlaneNormal;
-    if (distance < 0 || distance > slength)
-    {
-        // intersection is outside of segment
-        return null;
-    }
-    const pd = distance + projectionBias;
-    const ix = s0.x + sdirx * pd, iy = s0.y + sdiry * pd, iz = s0.z + sdirz * pd;
-    return new Vector(ix,iy,iz);
 }
