@@ -27,15 +27,15 @@ function main() {
         description: "Redo Edit",
         implementation: controller.history.forward,
         shortcut: 'ctrl + y'
-    }]);
+    }])
 
     const shortcutBindings : { [key:string] : ICommand } = {
-        'ctrl + z' : controller.history.back,
-        'ctrl + y' : controller.history.forward,
-        'ctrl + shift + z' : controller.history.back,
-        'ctrl + shift + y' : controller.history.forward,
-        'f1' : controller.show_all_commands,
-        'space' : controller.show_all_commands
+        'ctrl + z' : () => controller.history.back(),
+        'ctrl + y' : () => controller.history.forward(),
+        'ctrl + shift + z' : () => controller.history.back(),
+        'ctrl + shift + y' : () => controller.history.forward(),
+        'f1' : () => controller.show_all_commands(),
+        'space' : () => controller.show_all_commands()
     }
 
     install_clipboard_integration(window.document, controller);
@@ -44,13 +44,13 @@ function main() {
         keyboard.bind_command_shortcut({ 
             shortcut: key, 
             exec: (state) => { 
-                shortcutBindings[key]();
-                return state;
+                shortcutBindings[key]()
+                return state
             }
-        });
+        })
     }
 
-    keyboard.bind_command_executor(controller.execute);
+    keyboard.bind_command_executor(cmd => controller.execute(cmd))
     
     for (const command of controller.commands.get_all_commands_v2()){
         keyboard.bind_command_shortcut(command);
