@@ -155,30 +155,34 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function onPointerUp(event: React.PointerEvent<HTMLCanvasElement>) {
-        canvas.releasePointerCapture(event.pointerId);
+        canvas.releasePointerCapture(event.pointerId)
         if (usePointerLock && document.exitPointerLock) {
-            document.exitPointerLock();
+            document.exitPointerLock()
         }
         if (!didMouseMove) {
-            const canvasX = event.pageX - canvas.offsetLeft;
-            const canvasY = event.pageY - canvas.offsetTop;
-            if (vertex_mode){
-                const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY);
-                if (event.ctrlKey){
-                    controller.execute(select_toggle_vertex_command, actor, vertexIndex);
-                } else {
-                    controller.execute(select_vertex_command, actor, vertexIndex);
-                }
+            onMouseClick(event)
+        }
+        setMouseDown(false)
+    }
+
+    function onMouseClick(event: React.PointerEvent<HTMLCanvasElement>){
+        const canvasX = event.pageX - canvas.offsetLeft
+        const canvasY = event.pageY - canvas.offsetTop
+        if (vertex_mode){
+            const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY)
+            if (event.ctrlKey){
+                controller.execute(select_toggle_vertex_command, actor, vertexIndex)
             } else {
-                const actor = renderer.findNearestActor(map, canvasX, canvasY);
-                if (event.ctrlKey) {
-                    controller.execute(toggle_actor_selected_command, actor);
-                } else {
-                    controller.execute(make_actor_selection_command, actor);
-                }
+                controller.execute(select_vertex_command, actor, vertexIndex)
+            }
+        } else {
+            const actor = renderer.findNearestActor(map, canvasX, canvasY)
+            if (event.ctrlKey) {
+                controller.execute(toggle_actor_selected_command, actor)
+            } else {
+                controller.execute(make_actor_selection_command, actor)
             }
         }
-        setMouseDown(false);
     }
 
     function onWheel(event: React.WheelEvent){

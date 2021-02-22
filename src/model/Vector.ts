@@ -59,8 +59,13 @@ export class Vector {
         return new Vector(x - this.x, y - this.y, z - this.z);
     }
 
+    /** @deprecated */
     subtractVector(v: Vector){
         return this.subtract(v.x, v.y, v.z);
+    }
+
+    subtract_vector(v: Vector): Vector {
+        return this.subtract(v.x, v.y, v.z)
     }
 
     scale(s: number) {
