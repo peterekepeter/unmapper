@@ -68,7 +68,6 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         }
         if (last_render_viewport !== viewport_state){
             set_last_render_viewport(viewport_state);
-            console.log('vp change', viewport_state);
             needs_render = true;
         }
         if (last_vertex_mode !== vertex_mode){
@@ -129,63 +128,49 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     return <canvas
         width={width}
         height={height}
-        onWheel={onWheel}
-        onContextMenu={onContextMenu}
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerMove={onPointerMove}
+        onWheel={handle_wheel}
+        onContextMenu={handle_context_menu}
+        onPointerDown={handle_pointer_down}
+        onPointerUp={handle_pointer_up}
+        onPointerMove={handle_pointer_move}
         ref={canvas => canvas_ref(canvas)}
         style={{
             maxWidth: '100%',
             maxHeight: '100%'
-        }} />;
+        }} />
 
-    function onContextMenu(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
-        event.stopPropagation();
-        event.preventDefault();
+    function handle_context_menu(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+        event.stopPropagation()
+        event.preventDefault()
     }
 
-    function onPointerDown(event: React.PointerEvent<HTMLCanvasElement>) {
-        canvas.setPointerCapture(event.pointerId);
+    function handle_pointer_down(event: React.PointerEvent<HTMLCanvasElement>) {
+        canvas.setPointerCapture(event.pointerId)
         if (usePointerLock && canvas.requestPointerLock) {
-            canvas.requestPointerLock();
+            canvas.requestPointerLock()
         }
-        setMouseDown(true);
-        setDidMouseMove(false);
+        setMouseDown(true)
+        setDidMouseMove(false)
     }
 
-    function onPointerUp(event: React.PointerEvent<HTMLCanvasElement>) {
+    function handle_pointer_up(event: React.PointerEvent<HTMLCanvasElement>) {
         canvas.releasePointerCapture(event.pointerId)
         if (usePointerLock && document.exitPointerLock) {
             document.exitPointerLock()
         }
         if (!didMouseMove) {
-            onMouseClick(event)
+            mouse_click(event)
         }
         setMouseDown(false)
     }
 
-    function onMouseClick(event: React.PointerEvent<HTMLCanvasElement>){
-        const canvasX = event.pageX - canvas.offsetLeft
-        const canvasY = event.pageY - canvas.offsetTop
-        if (vertex_mode){
-            const [actor, vertexIndex] = renderer.findNearestVertex(map, canvasX, canvasY)
-            if (event.ctrlKey){
-                controller.execute(select_toggle_vertex_command, actor, vertexIndex)
-            } else {
-                controller.execute(select_vertex_command, actor, vertexIndex)
-            }
-        } else {
-            const actor = renderer.findNearestActor(map, canvasX, canvasY)
-            if (event.ctrlKey) {
-                controller.execute(toggle_actor_selected_command, actor)
-            } else {
-                controller.execute(make_actor_selection_command, actor)
-            }
-        }
+    function mouse_click(event: React.PointerEvent<HTMLCanvasElement>){
+        const canvas_x = event.pageX - canvas.offsetLeft
+        const canvas_y = event.pageY - canvas.offsetTop
+        controller.interaction.pointer_click(canvas_x, canvas_y, renderer, event.ctrlKey)
     }
 
-    function onWheel(event: React.WheelEvent){
+    function handle_wheel(event: React.WheelEvent){
         let new_zoom_level = viewport_state.zoom_level;
         if (event.deltaY > 0){
             new_zoom_level--;
@@ -198,11 +183,13 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         return false;
     }
 
-    function onPointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
-
-
+    function handle_pointer_move(event: React.PointerEvent<HTMLCanvasElement>) {
+        const canvas_x = event.pageX - canvas.offsetLeft
+        const canvas_y = event.pageY - canvas.offsetTop
+    
         if (!isMouseDown) {
-            return;
+            controller.interaction.pointer_move(canvas_x, canvas_y, renderer);
+            return
         }
         let dx = event.movementX;
         let dy = event.movementY;

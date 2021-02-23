@@ -5,6 +5,7 @@ import { create_command_registry } from './command/command_registry';
 import { ICommandInfoV2 } from "./command/ICommandInfoV2";
 import { UnrealMap } from '../model/UnrealMap';
 import { GeometryCache } from '../model/geometry/GeometryCache';
+import { InteractionController } from './interactions/InteractionController';
 
 export class AppController {
 
@@ -13,6 +14,7 @@ export class AppController {
     commands = create_command_registry();
     commands_shown_state = createSignal(false);
     geometry_cache = new GeometryCache();
+    interaction = new InteractionController(this);
 
     history = create_history<UnrealMap>({
         get_state: () => this.current_state.map,

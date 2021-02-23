@@ -152,6 +152,28 @@ function validate_state(state: EditorState){
     expect(state.vertex_mode === true || state.vertex_mode === false).toBeTruthy();
     expect(state.map.actors).not.toBe(null);
     expect(state.map.actors.length).not.toBe(null);
+    for (const actor of state.map.actors){
+        if (actor.brushModel){
+            validate_brush(actor.brushModel)
+        }
+    }
+}
+
+function validate_brush(brush: BrushModel){
+    const vertex_count = brush.vertexes.length
+    const edge_count = brush.edges.length
+    for (const poly of brush.polygons){
+        for (const vid of poly.vertexes){
+            expect(vid).toBeLessThan(vertex_count)
+        }
+        for (const eid of poly.edges){
+            expect(eid).toBeLessThan(edge_count)
+        }
+    }
+    for (const edge of brush.edges){
+        expect(edge.vertexIndexA).toBeLessThan(vertex_count)
+        expect(edge.vertexIndexB).toBeLessThan(vertex_count)
+    }
 }
 
 function format_label(command : ICommandInfoV2){

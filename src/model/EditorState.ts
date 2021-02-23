@@ -1,3 +1,4 @@
+import { ICommandInfoV2 } from "../controller/command";
 import { Actor } from "./Actor";
 import { Rotation } from "./Rotation";
 import { UnrealMap } from "./UnrealMap";
@@ -24,6 +25,8 @@ export interface EditorState
     viewports: ViewportState[];
     history: IHistoryStateAccess;
     vertex_mode: boolean;
+    command: ICommandInfoV2;
+    command_args: unknown[];
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
@@ -65,6 +68,8 @@ export function create_initial_editor_state() : EditorState{
                 rotation: Rotation.IDENTITY,
                 zoom_level: 0
             },
-        ]
+        ],
+        command: null,
+        command_args: [],
     }
 }
