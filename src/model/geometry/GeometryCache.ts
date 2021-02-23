@@ -12,7 +12,7 @@ export class GeometryCache
         for (let i=0; i<actors.length; i++){
             const actor = actors[i]
             const actor_cache = this.actor_caches[i]
-            if (!actor_cache || actor_cache.is_for(actor)){
+            if (!actor_cache || !actor_cache.is_for(actor)){
                 this.actor_caches[i] = new ActorGeometryCache(actor)
             }
         } 
