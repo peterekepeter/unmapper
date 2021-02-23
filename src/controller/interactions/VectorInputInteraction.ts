@@ -1,6 +1,8 @@
 import { Vector } from "../../model/Vector";
+import { IInteraction } from "./IInteraction";
+import { IInteractionRenderState } from "./IInteractionRenderState";
 
-export class VectorInputInteraction
+export class VectorInputInteraction implements IInteraction<Vector>
 {
     private pointer_from: Vector = Vector.ZERO;
     private pointer_to: Vector = Vector.ZERO;
@@ -55,7 +57,3 @@ export class VectorInputInteraction
 
 }
 
-interface IInteractionRenderState {
-    line_from?: Vector
-    line_to?: Vector
-}
