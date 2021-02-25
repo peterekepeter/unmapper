@@ -88,6 +88,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     let view_transform_x: (vector: Vector) => number;
     let view_transform_y: (vector: Vector) => number;
     let view_transform: (in_vector: Vector) => Vector;
+    let canvas_to_world_location: (canvas_x: number, canvas_y: number) => Vector
     let view_rotation = Matrix3x3.IDENTITY;
 
 
@@ -237,7 +238,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    setTopMode(1 / 2400);
+    set_top_mode(1 / 2400);
 
     function setPerspectiveMode(fieldOfView: number): void {
         get_view_bounding_box = () => {
@@ -302,6 +303,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 ? Number.NaN
                 : (-z / x) * deviceSize + height * .5;
         }
+        canvas_to_world_location = (x,y) => {
+            return Vector.ZERO
+        }
     }
 
     function setCenterTo(location: Vector): void {
@@ -314,7 +318,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             .rotateDegreesZ(-rotation.yaw);
     }
 
-    function setTopMode(scale: number): void { 
+    function set_top_mode(scale: number): void { 
         get_view_bounding_box = () => {
             const x_size = width / 2 / deviceSize / scale;
             const y_size = height / 2 / deviceSize / scale;
@@ -328,6 +332,12 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             (vector.x - view_center.x) * deviceSize * scale + width / 2;
         view_transform_y = vector =>
             (vector.y - view_center.y) * deviceSize * scale + height / 2;
+        canvas_to_world_location = (x,y) => 
+            new Vector(
+                view_center.x + (y - height/2) / deviceSize / scale,
+                view_center.y - (x - width/2) / deviceSize / scale,
+                view_center.z)
+        
     }
 
     function setFrontMode(scale: number): void {
@@ -344,6 +354,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             (vector.x - view_center.x) * deviceSize * scale + width / 2;
         view_transform_y = vector =>
             (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
+        canvas_to_world_location = (x,y) => new Vector(
+            view_center.x,
+            view_center.y - (x - width/2) / deviceSize / scale,
+            view_center.z - (y - height/2) / deviceSize / scale)
     }
 
     function setSideMode(scale: number): void {
@@ -359,6 +373,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             (vector.y - view_center.y) * deviceSize * scale + width / 2;
         view_transform_y = vector =>
             (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
+        canvas_to_world_location = (x,y) => new Vector(
+            view_center.x + (x - width/2) / deviceSize / scale,
+            view_center.y,
+            view_center.z - (y - height/2) / deviceSize / scale)
     }
 
     function findNearestActor(
@@ -446,10 +464,11 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         setFrontMode: setFrontMode,
         setPerspectiveMode: setPerspectiveMode,
         setSideMode: setSideMode,
-        setTopMode: setTopMode,
+        setTopMode: set_top_mode,
         setPerspectiveRotation: setPerspectiveRotation,
         findNearestActor: findNearestActor,
         findNearestVertex: findNearestVertex,
+        get_pointer_world_location: (x,y) => canvas_to_world_location(x,y),
         setShowVertexes: (state:boolean) => { showVertexes = state; } 
     }
     return s;

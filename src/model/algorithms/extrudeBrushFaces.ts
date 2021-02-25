@@ -8,31 +8,33 @@ export function extrude_brush_faces(brush: BrushModel, faces: number[], arg: num
     if (faces.length == 0) {
         return brush;
     }
-    let distance: number = null;
-    let vector: Vector = null;
+    let distance: number = null
+    let vector: Vector = null
     if (typeof arg === 'number'){
-        distance = arg;
+        distance = arg
         if (distance === 0){
-            return brush;
+            return brush
         }
     } else {
-        vector = arg;
+        vector = arg
         if (vector.equals(Vector.ZERO)){
-            return brush;
+            return brush
         }
     }
     if (faces.length == 0 || distance === 0) {
-        return brush;
+        return brush
     }
-    let new_brush = brush.shallowCopy();
-    new_brush.vertexes = [...new_brush.vertexes];
-    new_brush.polygons = [...new_brush.polygons];
-    new_brush.edges = [...new_brush.edges];
+    let new_brush = brush.shallowCopy()
+    new_brush.vertexes = [...new_brush.vertexes]
+    new_brush.polygons = [...new_brush.polygons]
+    new_brush.edges = [...new_brush.edges]
     for (const faceIndex of faces){
-        new_brush = extrude_face_distance(new_brush, faceIndex, distance);
+        new_brush = vector == null   
+            ? extrude_face_distance(new_brush, faceIndex, distance)
+            : extrude_face_vector(new_brush, faceIndex, vector)
     }
     new_brush.rebuild_all_poly_edges()
-    return new_brush;
+    return new_brush
 }
 
 function extrude_face_distance(mutable_brush: BrushModel, face_index: number, extrude_distance: number) : BrushModel {

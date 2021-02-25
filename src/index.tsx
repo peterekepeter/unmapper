@@ -50,10 +50,10 @@ function main() {
         })
     }
 
-    keyboard.bind_command_executor(cmd => controller.execute(cmd))
+    keyboard.bind_command_executor(cmd => controller.interactively_execute(cmd))
     
     for (const command of controller.commands.get_all_commands_v2()){
-        keyboard.bind_command_shortcut(command);
+        keyboard.bind_command_shortcut(command)
     }
     
     controller.execute(import_from_string_command, dummyData2);

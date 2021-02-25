@@ -6,6 +6,7 @@ import { Actor } from "../../model/Actor";
 import { BrushModel } from "../../model/BrushModel";
 import { Vector } from "../../model/Vector";
 import { createBrushPolygon } from "../../model/algorithms/createBrushPolygon";
+import { get_default_args } from "../../controller/command/command_args";
 
 /**
  * all commands must pass a few tests to make sure they don't wreck the whole system
@@ -106,43 +107,30 @@ function command_test_case(command:ICommandInfoV2, state: EditorState, args:unkn
 
 
 function* iterate_args_test_cases(command: ICommandInfoV2): Iterable<[unknown[], string]>{
-    const args = get_default_args(command);
-    yield [args, 'default args'];
+    const args = get_default_args(command)
+    yield [args, 'default args']
     if (!command.args){
         return;
     }
     for (let i=0; i<command.args.length; i++){
-        const arg = command.args[i];
+        const arg = command.args[i]
         if (!arg.example_values){
             continue;
         }
-        const default_value = args[i];
+        const default_value = args[i]
         for (let j=0; j<arg.example_values.length; j++){
             const example_value = arg.example_values[j];
             if (example_value != default_value) {
-                args[i] = example_value;
+                args[i] = example_value
                 yield [args, `${arg.name??i}:${JSON.stringify(example_value)}`];
             }
         }
-        args[i] = default_value;
+        args[i] = default_value
     }
-}
-
-function get_default_args(command: ICommandInfoV2){
-    if (!command.args){
-        return [];
-    }
-    return command.args.map((arg, i) => get_default_arg(command, i));
-}
-
-function get_default_arg(command: ICommandInfoV2, index: number){
-    const arg = command.args[index];
-    return arg.default_value ?? 
-        (arg.example_values && arg.example_values.length > 0 ? arg.example_values[0] : undefined);
 }
 
 function serialize(state: EditorState): string {
-    return JSON.stringify(state, undefined, 2);
+    return JSON.stringify(state, undefined, 2)
 }
 
 function validate_state(state: EditorState){
@@ -180,6 +168,6 @@ function format_label(command : ICommandInfoV2){
     if (command.shortcut){
         return `${command.description} (${command.shortcut})`
     } else {
-        return command.description;
+        return command.description
     }
 }

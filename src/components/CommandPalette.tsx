@@ -93,7 +93,7 @@ export const CommandPalette = ({ controller = create_controller() }) => {
         const cmds = getMatchingCommands(controller.commands, value);
         const cmd = cmds[selectedIndex];
         if (cmd){
-            controller.execute(cmd);
+            controller.interactively_execute(cmd);
         }
         hide();
     }

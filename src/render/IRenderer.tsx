@@ -16,4 +16,5 @@ export interface IRenderer {
     render_v2 (state : EditorState) : void;
     findNearestActor(map: UnrealMap, canvasX: number, canvasY: number) : Actor;
     findNearestVertex(map: UnrealMap, canvasX: number, canvasY: number): [Actor, number];
+    get_pointer_world_location(canvas_x: number, canvas_y: number): Vector;
 }

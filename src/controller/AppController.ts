@@ -27,10 +27,14 @@ export class AppController {
         })
     }
 
+    interactively_execute(command_info: ICommandInfoV2): void {
+        this.interaction.interactively_execute(command_info);
+    }
+
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
         const next_state = command_info.exec(this.current_state, ...args)
         if (command_info.legacy_handling) {
-            return; // legacy commands update state_signal & history directly
+            return // legacy commands update state_signal & history directly
         }
         this.undoable_state_change(next_state);
     }
