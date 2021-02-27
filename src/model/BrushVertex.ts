@@ -3,10 +3,11 @@ import { Vector } from "./Vector";
 
 export class BrushVertex {
     position: Vector
-    selected: boolean = false;
+    selected = false;
 
-    constructor(position: Vector) {
-        this.position = position;
+    constructor(position: Vector, selected = false) {
+        this.position = position
+        this.selected = selected
     }
 
     shallowCopy(): BrushVertex {

@@ -11,6 +11,7 @@ import { triangulate_mesh_polygons_command } from './triangulate_mesh_polygons';
 import { uv_triplanar_map_command } from './uv_triplanar_map';
 import { flip_polygon_normal_command } from './flip_polygon_normal';
 import { toggle_editor_layout_command } from "./editor/toggle_editor_layout";
+import { move_command } from "./move";
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
@@ -27,4 +28,5 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     triangulate_mesh_polygons_command,
     uv_triplanar_map_command,
     toggle_editor_layout_command,
+    move_command,
 ]

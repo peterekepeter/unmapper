@@ -1,5 +1,6 @@
 import { Actor } from "../Actor";
 import { BrushModel } from "../BrushModel";
+import { BrushVertex } from "../BrushVertex";
 import { EditorState, ViewportState } from "../EditorState";
 import { UnrealMap } from "../UnrealMap";
 
@@ -34,14 +35,46 @@ export function select_actors_list(actors: Actor[], filter: (actor : Actor) => b
     return change ? new_actors : actors;
 }
 
+export const change_selected_vertexes = (
+    state: EditorState,
+    vertex_fn: (
+        vertex: BrushVertex,
+        brush: BrushModel,
+        actor: Actor) => BrushVertex
+): EditorState => change_selected_brushes(state, (b, a) => {
+    if (!b.vertexes.find(v => v.selected)){
+        return b // no vertex selected
+    }
+    const new_vertexes = []
+    let change = false
+    for (const vertex of b.vertexes){
+        const new_vertex = vertex.selected ? vertex_fn(vertex, b, a) : vertex
+        if (new_vertex == null){
+            throw new Error('unexpected null vertex')
+        }
+        new_vertexes.push(new_vertex)
+        if (vertex !== new_vertex) {
+            change = true
+        }
+    }
+    if (!change){
+        return b
+    }
+    else {
+        const new_brush = b.shallowCopy()
+        new_brush.vertexes = new_vertexes
+        return new_brush
+    }
+})
+
 export const change_selected_brushes = (
     state: EditorState,
-    brush_fn: (b: BrushModel) => BrushModel
+    brush_fn: (b: BrushModel, a:Actor) => BrushModel
 ) : EditorState => change_selected_actors(state, actor => {
     if (!actor.brushModel){
         return actor;
     }
-    const new_brush = brush_fn(actor.brushModel);
+    const new_brush = brush_fn(actor.brushModel, actor);
     if (!new_brush){
         throw new Error('unexpected null brush result');
     }
