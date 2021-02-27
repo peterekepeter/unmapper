@@ -1,5 +1,5 @@
-import { ICommandInfoV2 } from "../controller/command";
-import { EditorState } from "../model/EditorState";
+import { ICommandInfoV2 } from "../../controller/command";
+import { EditorState } from "../../model/EditorState";
 
 
 export const toggle_vertex_mode_command : ICommandInfoV2 = {

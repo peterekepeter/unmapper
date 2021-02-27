@@ -11,29 +11,30 @@ import { CommandPalette } from "./CommandPalette";
 
 export const Application = ({ controller = create_controller() }) => {
     return <>
-        <MainGrid controller={controller}/>
-        <CommandPalette controller={controller}/>
+        <MainGrid controller={controller} />
+        <CommandPalette controller={controller} />
     </>
 }
 
 export const MainGrid = ({ controller = create_controller() }) => {
 
-    const colors = useSignal(themeColors);
-    const [resizeCount, setResizeCount] = React.useState(0);
+    const state = useSignal(controller.state_signal)
+    const colors = useSignal(themeColors)
+    const [resizeCount, setResizeCount] = React.useState(0)
 
     React.useEffect(() => {
-        let timeout : any = null;
-        const handler = (event : UIEvent) => {
-            if (timeout != null){
+        let timeout: any = null;
+        const handler = (event: UIEvent) => {
+            if (timeout != null) {
                 clearTimeout(timeout);
             }
             // force layout recalc with 100ms debounce
             timeout = setTimeout(() => setResizeCount(resizeCount + 1), 100);
-            
+
         };
         window.addEventListener('resize', handler);
         return () => {
-            if (timeout){
+            if (timeout) {
                 clearTimeout(timeout);
                 timeout = null;
             }
@@ -41,34 +42,80 @@ export const MainGrid = ({ controller = create_controller() }) => {
         }
     })
 
-    return <div style={{
-        display:'grid', 
-        grid: '1fr 1fr / 0.5fr 1.5fr 1fr', 
-        overflow: 'hidden',
-        background:colors.background, 
-        color:colors.foreground,
-        width:'100%',
-        height:'100%'}}>
+    switch (state.editor_layout) {
+        case 0:
+        default: return <div style={{
+            display: 'grid',
+            grid: '1fr 1fr / 0.5fr 1.5fr 1fr',
+            overflow: 'hidden',
+            background: colors.background,
+            color: colors.foreground,
+            width: '100%',
+            height: '100%'
+        }}>
+            <ActorList controller={controller} />
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={1}
+                mode={ViewportMode.Front}
+                controller={controller} />
+            <PropertyEditor controller={controller} />
+            <ViewportPanel
+                viewport_index={2}
+                location={new Vector(-500, -300, 300)}
+                mode={ViewportMode.Perspective}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={3}
+                mode={ViewportMode.Side}
+                controller={controller} />
+        </div>
 
+        case 1: return <div style={{
+            display: 'grid',
+            grid: '1fr 1fr / 1.5fr 1fr',
+            overflow: 'hidden',
+            background: colors.background,
+            color: colors.foreground,
+            width: '100%',
+            height: '100%'
+        }}>
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={1}
+                mode={ViewportMode.Front}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={2}
+                location={new Vector(-500, -300, 300)}
+                mode={ViewportMode.Perspective}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={3}
+                mode={ViewportMode.Side}
+                controller={controller} />
+        </div>
 
-        <ActorList controller={controller}/>
-        <ViewportPanel 
-            viewport_index={0}
-            mode={ViewportMode.Top} 
-            controller={controller}/>
-        <ViewportPanel 
-            viewport_index={1}
-            mode={ViewportMode.Front} 
-            controller={controller}/>
-        <PropertyEditor controller={controller}/> 
-        <ViewportPanel 
-            viewport_index={2}
-            location={new Vector(-500,-300,300)}
-            mode={ViewportMode.Perspective} 
-            controller={controller}/>
-        <ViewportPanel 
-            viewport_index={3}
-            mode={ViewportMode.Side} 
-            controller={controller}/>
-    </div>;
+        case 2: return <div style={{
+            display: 'grid',
+            grid: '1fr / 1fr',
+            overflow: 'hidden',
+            background: colors.background,
+            color: colors.foreground,
+            width: '100%',
+            height: '100%'
+        }}>
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+        </div>
+
+    }
 }

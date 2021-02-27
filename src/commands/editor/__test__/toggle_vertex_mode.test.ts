@@ -1,4 +1,4 @@
-import { editor_state_from_actors } from "../../model/EditorState";
+import { editor_state_from_actors } from "../../../model/EditorState";
 import { toggle_vertex_mode_command as command } from "../toggle_vertex_mode";
 
 
