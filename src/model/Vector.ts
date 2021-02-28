@@ -70,6 +70,10 @@ export class Vector {
     scale(s: number): Vector {
         return new Vector(this.x * s, this.y * s, this.z * s)
     }
+    
+    scale_components(s: Vector): Vector {
+        return new Vector(this.x * s.x, this.y * s.y, this.z * s.z)
+    }
 
     dot(v: Vector): number {
         return Vector.dot_product(this, v)

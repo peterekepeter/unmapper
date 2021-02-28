@@ -41,6 +41,12 @@ export class Scale {
             && this.scale.equals(other.scale);
     }
 
+    transform_equals(other : Scale) : boolean {
+        return (this.sheerRate === 0 || this.sheerAxis === other.sheerAxis)
+            && this.sheerRate === other.sheerRate
+            && this.scale.equals(other.scale)
+    }
+
     isDefault() : boolean {
         return this.equals(Scale.DEFAULT_SCALE);
     }

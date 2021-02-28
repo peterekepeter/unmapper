@@ -123,6 +123,25 @@ export class Matrix3x3 {
         return this.m20 * x + this.m21 * y + this.m22 * z;
     }
 
+    is_scaling_matrix():boolean {
+        return this.m01 === 0 
+            && this.m02 === 0 
+            && this.m10 === 0 
+            && this.m12 === 0 
+            && this.m20 === 0
+            && this.m21 === 0
+    }
+
+    is_uniform_scaling_matrix():boolean {
+        return this.is_scaling_matrix() 
+            && this.m00 === this.m11 
+            && this.m11 === this.m22 
+    }
+
+    is_identity(): boolean {
+        return this.equals(Matrix3x3.IDENTITY)
+    }
+
     static multiply(a: Matrix3x3, b: Matrix3x3): Matrix3x3 {
         return new Matrix3x3(
             // row1

@@ -23,4 +23,32 @@ describe('Matrix', () => {
         expect(Matrix3x3.rotateDegreesX(180).apply(new Vector(0, 1, 0)))
             .toEqual(new Vector(0, -1, 0)))
 
+    test('Matrix3x3.IDENTITY is_identity', () => {
+        expect(Matrix3x3.IDENTITY.is_identity()).toBe(true)
+    })
+
+    test('rotation matrix is not is_identity', () => {
+        expect(Matrix3x3.rotateDegreesX(90).is_identity()).toBe(false)
+    })
+
+    test('rotation matrix not is_scaling_matrix', () => {
+        expect(Matrix3x3.rotateDegreesX(90).is_scaling_matrix()).toBe(false)
+    })
+
+    test('is_scaling_matrix', () => {
+        expect(new Matrix3x3(
+            1,0,0,
+            0,2,0,
+            0,0,3
+        ).is_scaling_matrix()).toBe(true)
+    })
+
+    test('is_uniform_scaling_matrix', () => {
+        expect(new Matrix3x3(
+            3,0,0,
+            0,3,0,
+            0,0,3
+        ).is_uniform_scaling_matrix()).toBe(true)
+    })
+    
 });

@@ -1,6 +1,6 @@
 import { ICommandInfoV2 } from "../controller/command"
 import { InteractionType } from "../controller/interactions/InteractionType"
-import { change_selected_actors, change_selected_brushes, change_selected_vertexes } from "../model/algorithms/editor_state_change"
+import { change_selected_actors, change_selected_vertexes } from "../model/algorithms/editor_state_change"
 import { BrushVertex } from "../model/BrushVertex"
 import { Vector } from "../model/Vector"
 

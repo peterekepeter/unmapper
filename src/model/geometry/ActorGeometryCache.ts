@@ -1,6 +1,7 @@
 import { Actor } from "../Actor";
 import { BoundingBox } from "../BoundingBox";
 import { Vector } from "../Vector";
+import { get_actor_to_world_transform } from "./actor-space-transform";
 
 export class ActorGeometryCache {
 
@@ -17,18 +18,9 @@ export class ActorGeometryCache {
             return this._cached_world_vertexes
         }
 
-        const { postScale, rotation, mainScale, brushModel } = this._actor
-        const pivot = this._actor.prePivot || Vector.ZERO
-        const location = this._actor.location || Vector.ZERO
-
-        const matrix = postScale.toMatrix()
-            .multiply(rotation.toMatrix())
-            .multiply(mainScale.toMatrix())
-
-        const vertexes = brushModel.vertexes.map(v => 
-            matrix.apply(v.position.subtractVector(pivot))
-            .addVector(location)
-        )
+        const brushModel = this._actor.brushModel
+        const fn = get_actor_to_world_transform(this._actor)
+        const vertexes = brushModel.vertexes.map(v => fn(v.position))
 
         this._cached_world_vertexes = vertexes
         return this._cached_world_vertexes
