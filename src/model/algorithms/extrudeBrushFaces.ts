@@ -4,6 +4,7 @@ import { createBrushPolygons } from "./createBrushPolygon";
 
 export function extrude_brush_faces(brush: BrushModel, faces: number[], extrude_vector: Vector) : BrushModel
 export function extrude_brush_faces(brush: BrushModel, faces: number[], distance: number) : BrushModel
+export function extrude_brush_faces(brush: BrushModel, faces: number[], arg: number | Vector) : BrushModel 
 export function extrude_brush_faces(brush: BrushModel, faces: number[], arg: number | Vector) : BrushModel {
     if (faces.length == 0) {
         return brush;
@@ -24,7 +25,7 @@ export function extrude_brush_faces(brush: BrushModel, faces: number[], arg: num
     if (faces.length == 0 || distance === 0) {
         return brush
     }
-    let new_brush = brush.shallowCopy()
+    let new_brush = brush.shallow_copy()
     new_brush.vertexes = [...new_brush.vertexes]
     new_brush.polygons = [...new_brush.polygons]
     new_brush.edges = [...new_brush.edges]

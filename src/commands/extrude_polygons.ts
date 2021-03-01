@@ -5,6 +5,7 @@ import { EditorError } from "../model/EditorError";
 import { EditorState } from "../model/EditorState";
 import { InteractionType } from "../controller/interactions/InteractionType";
 import { Vector } from "../model/Vector";
+import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform";
 
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
@@ -21,12 +22,16 @@ export const extrude_polygons_command : ICommandInfoV2 = {
     ]
 }
 
-function implementation(state: EditorState, distance = 32.0) : EditorState {
+function implementation(state: EditorState, extrusion: number | Vector = 32) : EditorState {
     if (!state.vertex_mode){
         throw new EditorError('only works in vertex mode');
     }
-    return change_selected_brushes(state, brush => {
-        const polygon_indexes = brush.getSelectedPolygonIndices();
-        return extrude_brush_faces(brush, polygon_indexes, distance);
-    });
+    return change_selected_brushes(state, (brush, actor) => {
+        if (typeof extrusion !== "number"){
+            const matrix = get_world_to_actor_rotation_scaling(actor)
+            extrusion = matrix.apply(extrusion)
+        }
+        const polygon_indexes = brush.getSelectedPolygonIndices()
+        return extrude_brush_faces(brush, polygon_indexes, extrusion)
+    })
 }

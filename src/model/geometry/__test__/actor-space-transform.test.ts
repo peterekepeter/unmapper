@@ -2,7 +2,7 @@ import { Actor } from "../../Actor"
 import { Rotation } from "../../Rotation";
 import { Scale } from "../../Scale";
 import { Vector } from "../../Vector"
-import { get_actor_to_world_transform, get_actor_to_world_transform_optimized, get_actor_to_world_transform_simple } from "../actor-space-transform"
+import { get_actor_to_world_transform, get_actor_to_world_transform_optimized, get_actor_to_world_transform_simple, get_world_to_actor_transform_simple } from "../actor-space-transform"
 
 
 describe('get_actor_to_world_transform', () => {
@@ -31,7 +31,7 @@ describe('get_actor_to_world_transform', () => {
         withLocation.location = new Vector(99, 22, 11)
 
         const withRotation = new Actor()
-        withRotation.rotation = new Rotation(90, 45, 10)
+        withRotation.rotation = new Rotation(90, 90, 90)
 
         const withPivotRotation = withRotation.shallow_copy()
         withPivotRotation.prePivot = new Vector(14, 543, 3)
@@ -81,9 +81,13 @@ describe('get_actor_to_world_transform', () => {
             describe(`for actor with ${key}`, () => {
                 const optimized_fn = get_actor_to_world_transform_optimized(actor)
                 const simple_fn = get_actor_to_world_transform_simple(actor)
+                const inv_simple_fn = get_world_to_actor_transform_simple(actor);
                 for (const vector of vectors) {
                     test(`optimization is stable for ${JSON.stringify(vector)}`, () => {
                         expect(optimized_fn(vector)).toEqual(simple_fn(vector))
+                    })
+                    test(`applying forward and reverse transform ${JSON.stringify(vector)}`, () => {
+                        expect(inv_simple_fn(simple_fn(vector))).toEqual(vector)
                     })
                 }
             })

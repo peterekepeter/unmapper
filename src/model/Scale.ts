@@ -30,9 +30,14 @@ export class Scale {
         }
     }
 
-    toMatrix() : Matrix3x3 {
+    to_matrix(): Matrix3x3 {
         // todo: implement sheer
-        return Matrix3x3.scale(this.scale.x, this.scale.y, this.scale.z);
+        return Matrix3x3.scale(this.scale.x, this.scale.y, this.scale.z)
+    }
+
+    to_inv_matrix(): Matrix3x3{
+        // todo: implement sheer
+        return Matrix3x3.scale(1/this.scale.x, 1/this.scale.y, 1/this.scale.z)
     }
 
     equals(other : Scale) : boolean {
@@ -49,6 +54,11 @@ export class Scale {
 
     isDefault() : boolean {
         return this.equals(Scale.DEFAULT_SCALE);
+    }
+
+    /** @deprecated use to_matrix */
+    toMatrix() : Matrix3x3 {
+        return this.to_matrix()
     }
 
 }

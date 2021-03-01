@@ -334,8 +334,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             (vector.y - view_center.y) * deviceSize * scale + height / 2;
         canvas_to_world_location = (x,y) => 
             new Vector(
-                view_center.x + (y - height/2) / deviceSize / scale,
-                view_center.y - (x - width/2) / deviceSize / scale,
+                view_center.x + (x - width/2) / deviceSize / scale,
+                view_center.y + (y - height/2) / deviceSize / scale,
                 view_center.z)
         
     }
@@ -355,8 +355,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         view_transform_y = vector =>
             (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
         canvas_to_world_location = (x,y) => new Vector(
-            view_center.x,
-            view_center.y - (x - width/2) / deviceSize / scale,
+            view_center.x + (x - width/2) / deviceSize / scale,
+            view_center.y,
             view_center.z - (y - height/2) / deviceSize / scale)
     }
 
@@ -374,8 +374,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         view_transform_y = vector =>
             (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
         canvas_to_world_location = (x,y) => new Vector(
-            view_center.x + (x - width/2) / deviceSize / scale,
-            view_center.y,
+            view_center.x,
+            view_center.y + (x - width/2) / deviceSize / scale,
             view_center.z - (y - height/2) / deviceSize / scale)
     }
 

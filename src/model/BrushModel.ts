@@ -6,15 +6,15 @@ import { Vector } from "./Vector";
 
 export class BrushModel
 {
-    name : string = '';
-    polygons : BrushPolygon[] = [];
-    edges: BrushEdge[] = [];
-    vertexes: BrushVertex[] = [];
+    name = ''
+    polygons : BrushPolygon[] = []
+    edges: BrushEdge[] = []
+    vertexes: BrushVertex[] = []
 
-    shallowCopy(){
-        const copy = new BrushModel();
-        Object.assign(copy, this);
-        return copy;
+    shallow_copy(): BrushModel {
+        const copy = new BrushModel()
+        Object.assign(copy, this)
+        return copy
     }
 
     /** returns vertex index, or -1 if not found*/
@@ -177,6 +177,13 @@ export class BrushModel
                 edge.polygons = edge.polygons.filter((_, index) => index !== edgePolyIndex);
             }
         }
+    }
+
+    /** @deprecated use shallow_copy() */
+    shallowCopy(): BrushModel{
+        const copy = new BrushModel()
+        Object.assign(copy, this)
+        return copy
     }
 }
 

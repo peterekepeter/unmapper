@@ -1,25 +1,51 @@
 import { Actor } from "../Actor"
 import { Matrix3x3 } from "../Matrix3x3"
-import { Rotation } from "../Rotation"
-import { Scale } from "../Scale"
 import { Vector } from "../Vector"
 
 
 export const get_actor_to_world_transform = get_actor_to_world_transform_optimized
 
+export const get_world_to_actor_transform = get_world_to_actor_transform_simple
+
+export function get_world_to_actor_rotation_scaling(actor: Actor): Matrix3x3 {
+
+    const { postScale, rotation, mainScale } = actor
+
+    return mainScale.to_inv_matrix()
+        .multiply(rotation.to_inv_matrix())
+        .multiply(postScale.to_inv_matrix())
+}
+
+export function get_actor_to_world_rotation_scaling(actor: Actor): Matrix3x3 {
+
+    const { postScale, rotation, mainScale } = actor
+
+    return postScale.to_matrix()
+        .multiply(rotation.to_matrix())
+        .multiply(mainScale.to_matrix())
+}
+
+export function get_world_to_actor_transform_simple(
+    actor: Actor
+): (v: Vector) => Vector {
+
+    const pivot = actor.prePivot || Vector.ZERO
+    const location = actor.location || Vector.ZERO
+
+    const matrix = get_world_to_actor_rotation_scaling(actor)
+
+    return v => matrix.apply(v.subtract_vector(location))
+        .add_vector(pivot)
+}
 
 export function get_actor_to_world_transform_simple(
     actor: Actor
 ): (v: Vector) => Vector {
 
-    const { postScale, rotation, mainScale } = actor
+    const matrix = get_actor_to_world_rotation_scaling(actor)
     const pivot = actor.prePivot || Vector.ZERO
     const location = actor.location || Vector.ZERO
 
-    const matrix = postScale.toMatrix()
-        .multiply(rotation.toMatrix())
-        .multiply(mainScale.toMatrix())
-    
     return v => matrix.apply(v.subtract_vector(pivot))
         .add_vector(location)
 }
@@ -28,23 +54,9 @@ export function get_actor_to_world_transform_optimized(
     actor: Actor
 ): (v: Vector) => Vector {
 
-    const { postScale, rotation, mainScale } = actor
+    const matrix = get_actor_to_world_rotation_scaling(actor)
     const pivot = actor.prePivot || Vector.ZERO
     const location = actor.location || Vector.ZERO
-
-    let matrix = Matrix3x3.IDENTITY
-
-    if (!postScale.transform_equals(Scale.DEFAULT_SCALE)) {
-        matrix = matrix.multiply(postScale.toMatrix())
-    }
-
-    if (!rotation.equals(Rotation.IDENTITY)) {
-        matrix = matrix.multiply(rotation.toMatrix())
-    }
-
-    if (!mainScale.transform_equals(Scale.DEFAULT_SCALE)) {
-        matrix = matrix.multiply(mainScale.toMatrix())
-    }
 
     // optimization
     {
