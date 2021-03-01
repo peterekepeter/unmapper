@@ -38,7 +38,7 @@ export class VectorInputInteraction implements IInteraction<Vector>
 
     get render_state(): IInteractionRenderState
     {
-        if (this.pointer_from && this.pointer_to){
+        if (this.state === "to"){
             return {
                 line_from: this.pointer_from,
                 line_to: this.pointer_to

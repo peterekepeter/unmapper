@@ -6,6 +6,7 @@ import { ICommandInfoV2 } from "./command/ICommandInfoV2";
 import { UnrealMap } from '../model/UnrealMap';
 import { GeometryCache } from '../model/geometry/GeometryCache';
 import { InteractionController } from './interactions/InteractionController';
+import { IInteractionRenderState } from './interactions/IInteractionRenderState';
 
 export class AppController {
 
@@ -21,7 +22,7 @@ export class AppController {
         set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state })
     });
 
-    constructor(){
+    constructor() {
         this.state_signal.event(state => {
             this.geometry_cache.actors = state.map.actors;
         })
@@ -36,7 +37,8 @@ export class AppController {
         if (command_info.legacy_handling) {
             return // legacy commands update state_signal & history directly
         }
-        this.undoable_state_change(next_state);
+        next_state.interaction_render_state = null
+        this.undoable_state_change(next_state)
     }
 
     preview(command_info: ICommandInfoV2, ...args: unknown[]): void {
@@ -44,6 +46,16 @@ export class AppController {
             return // legacy commands cannot be previewed
         }
         const next_state = command_info.exec(this.current_state, ...args)
+        this.preview_state_change(next_state)
+    }
+
+    preview_command_with_interaction(
+        interaction_render_state: IInteractionRenderState,
+        command_info: ICommandInfoV2,
+        args: unknown[]
+    ): void {
+        const next_state = command_info.exec(this.current_state, ...args)
+        next_state.interaction_render_state = interaction_render_state
         this.preview_state_change(next_state)
     }
 
@@ -70,7 +82,7 @@ export class AppController {
     public show_all_commands(): void {
         this.commands_shown_state.value = true;
     }
-    
+
 }
 
 export const create_controller = (): AppController => new AppController();

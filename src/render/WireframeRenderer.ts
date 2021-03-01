@@ -13,6 +13,7 @@ import { BoundingBox } from "../model/BoundingBox";
 import { GeometryCache } from "../model/geometry/GeometryCache";
 import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions";
 import { intersect_segment_with_plane } from "../model/geometry/intersect-functions";
+import { IInteractionRenderState } from "../controller/interactions/IInteractionRenderState";
 
 const backgroundColor = '#222';
 
@@ -93,7 +94,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
 
     function render(state : EditorState) : void {
-        render_map(state.map);
+        render_map(state.map)
+        render_iteraction(state.interaction_render_state);
     }  
 
     function render_map(map: UnrealMap) {
@@ -238,6 +240,30 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
+    function render_iteraction(state: IInteractionRenderState){
+        if (!state || !state.line_from || !state.line_to){
+            return
+        }
+
+        const vertexA = state.line_from
+        const vertexB = state.line_to
+
+        const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA)
+        const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
+        const invalid0 = isNaN(x0) || isNaN(y0)
+        const invalid1 = isNaN(x1) || isNaN(y1)
+
+        context.strokeStyle = '#fff'
+
+        if (!invalid0 && !invalid1)
+        {
+            context.beginPath()
+            context.moveTo(x0,y0)
+            context.lineTo(x1,y1)
+            context.stroke()
+        }
+    }
+
     set_top_mode(1 / 2400);
 
     function setPerspectiveMode(fieldOfView: number): void {
@@ -340,7 +366,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         
     }
 
-    function setFrontMode(scale: number): void {
+    function set_front_mode(scale: number): void {
         get_view_bounding_box = () => {
             const x_size = width / 2 / deviceSize / scale;
             const z_size = height / 2 / deviceSize / scale;
@@ -360,7 +386,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             view_center.z - (y - height/2) / deviceSize / scale)
     }
 
-    function setSideMode(scale: number): void {
+    function set_side_mode(scale: number): void {
         get_view_bounding_box = () => {
             const y_size = width / 2 / deviceSize / scale;
             const z_size = height / 2 / deviceSize / scale;
@@ -457,17 +483,52 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         return [bestMatchActor, bestMatchVertex];
     }
 
+    function find_nearest_snapping_point(
+        map: UnrealMap,
+        canvasX: number,
+        canvasY: number):[
+            Vector, number
+        ]
+    {
+        let bestMatchLocation : Vector = null
+        let bestDistance = Number.MAX_VALUE
+        for (let actor_index=map.actors.length-1; actor_index >= 0; actor_index--) {
+            const actor = map.actors[actor_index] // reverse iterate to find topmost actor
+            if (actor.brushModel == null){
+                continue // skip actors don't have a brushModel
+            }
+
+            const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
+            const vertexes = actor.brushModel.vertexes
+
+            for (let vertex_index = vertexes.length-1; vertex_index >= 0; vertex_index--) {
+                const p0 = transformed_vertexes[vertex_index]
+                const x0 = view_transform_x(p0)
+                const y0 = view_transform_y(p0)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    const distance = distance_2d_to_point(canvasX, canvasY, x0, y0);
+                    if (distance < bestDistance) {
+                        bestMatchLocation = p0
+                        bestDistance = distance
+                    }
+                }
+            }
+        }
+        return [bestMatchLocation, bestDistance]
+    }
+
     const s: IRenderer = {
         render: render_map,
         render_v2: render,
-        setCenterTo: setCenterTo,
-        setFrontMode: setFrontMode,
-        setPerspectiveMode: setPerspectiveMode,
-        setSideMode: setSideMode,
+        setCenterTo,
+        setFrontMode: set_front_mode,
+        setPerspectiveMode,
+        setSideMode: set_side_mode,
         setTopMode: set_top_mode,
-        setPerspectiveRotation: setPerspectiveRotation,
+        setPerspectiveRotation,
         findNearestActor: findNearestActor,
         findNearestVertex: findNearestVertex,
+        find_nearest_snapping_point,
         get_pointer_world_location: (x,y) => canvas_to_world_location(x,y),
         setShowVertexes: (state:boolean) => { showVertexes = state; } 
     }

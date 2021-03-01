@@ -116,7 +116,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             }
             // re-render
             const before_time = Date.now();
-            target.render(map);
+            target.render_v2(controller.state_signal.value)
             const delta_time = Date.now() - before_time;
             // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', viewport_state.center_location);
         }

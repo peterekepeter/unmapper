@@ -2,6 +2,7 @@ import { make_actor_selection_command } from "../../commands/selection/make_acto
 import { select_toggle_vertex_command } from "../../commands/selection/select_toggle_vertex"
 import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
+import { get_actor_to_world_transform } from "../../model/geometry/actor-space-transform"
 import { Vector } from "../../model/Vector"
 import { IRenderer } from "../../render/IRenderer"
 import { AppController } from "../AppController"
@@ -32,7 +33,7 @@ export class InteractionController {
         if (!this.command_info) {
             return // no command to exec
         }
-        if (this.interaction?.finished){
+        if (this.interaction?.finished) {
             // finalize completed interaction
             this.args[this.arg_index] = this.interaction.result
             this.interaction = null
@@ -57,6 +58,8 @@ export class InteractionController {
         if (!this.interaction) {
             this.default_interaction(canvas_x, canvas_y, renderer, ctrl)
         } else {
+            const vector = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
+            this.interaction.set_pointer_world_location(vector)
             this.interaction.pointer_click()
             this.try_complete_execution()
             console.log('interaction click', this.interaction)
@@ -85,13 +88,27 @@ export class InteractionController {
     }
 
     pointer_move(canvas_x: number, canvas_y: number, renderer: IRenderer): void {
-        if (this.interaction){
-            const vector: Vector = renderer.get_pointer_world_location(canvas_x, canvas_y)
+        if (this.interaction) {
+            const vector = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
             this.interaction.set_pointer_world_location(vector)
             this.args[this.arg_index] = this.interaction.result
-            this.controller.preview(this.command_info, ...this.args)
+
+            this.controller.preview_command_with_interaction(
+                this.interaction.render_state, this.command_info, this.args)
         }
 
+    }
+
+    get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: IRenderer): Vector {
+        // no snap for now
+        // const state = this.controller.state_signal.value
+        // const [vector, distance]
+        //     = renderer.find_nearest_snapping_point(state.map, canvas_y, canvas_y)
+        // if (vector && distance < 8){
+        //     console.log('snap!', 'canvas_x', canvas_x, 'canvas_y', canvas_y, vector, distance)
+        //     return vector
+        // }
+        return renderer.get_pointer_world_location(canvas_x, canvas_y)
     }
 
 }

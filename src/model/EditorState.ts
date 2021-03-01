@@ -1,4 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command";
+import { IInteractionRenderState } from "../controller/interactions/IInteractionRenderState";
 import { Actor } from "./Actor";
 import { Rotation } from "./Rotation";
 import { UnrealMap } from "./UnrealMap";
@@ -26,6 +27,7 @@ export interface EditorState
     history: IHistoryStateAccess;
     vertex_mode: boolean;
     editor_layout: number,
+    interaction_render_state?: IInteractionRenderState,
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
@@ -68,6 +70,7 @@ export function create_initial_editor_state() : EditorState{
                 zoom_level: 0
             },
         ],
-        editor_layout: 0
+        editor_layout: 0,
+        interaction_render_state: null
     }
 }
