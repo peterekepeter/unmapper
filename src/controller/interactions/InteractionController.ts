@@ -9,6 +9,7 @@ import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { create_interaction } from "./create-interaction"
 import { IInteraction } from "./IInteraction"
+import { IInteractionRenderState as InteractionRenderState } from "./IInteractionRenderState"
 
 export class InteractionController {
 
@@ -58,7 +59,7 @@ export class InteractionController {
         if (!this.interaction) {
             this.default_interaction(canvas_x, canvas_y, renderer, ctrl)
         } else {
-            const vector = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
+            const [vector, is_snap] = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
             this.interaction.set_pointer_world_location(vector)
             this.interaction.pointer_click()
             this.try_complete_execution()
@@ -89,26 +90,30 @@ export class InteractionController {
 
     pointer_move(canvas_x: number, canvas_y: number, renderer: IRenderer): void {
         if (this.interaction) {
-            const vector = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
+            const [vector, is_snap] = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
             this.interaction.set_pointer_world_location(vector)
             this.args[this.arg_index] = this.interaction.result
+            const interaction_render_state : InteractionRenderState = { 
+                ...this.interaction.render_state, 
+                snap_location: is_snap ? vector : null 
+            }
 
             this.controller.preview_command_with_interaction(
-                this.interaction.render_state, this.command_info, this.args)
+                interaction_render_state, this.command_info, this.args)
         }
 
     }
 
-    get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: IRenderer): Vector {
-        // no snap for now
-        // const state = this.controller.state_signal.value
-        // const [vector, distance]
-        //     = renderer.find_nearest_snapping_point(state.map, canvas_y, canvas_y)
-        // if (vector && distance < 8){
-        //     console.log('snap!', 'canvas_x', canvas_x, 'canvas_y', canvas_y, vector, distance)
-        //     return vector
-        // }
-        return renderer.get_pointer_world_location(canvas_x, canvas_y)
+    get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: IRenderer): [Vector, boolean] {
+
+        const state = this.controller.state_signal.value
+        const [vector, distance]
+            = renderer.find_nearest_snapping_point(state.map, canvas_x, canvas_y)
+        if (vector && distance < 16){
+            console.log('snap!', 'canvas_x', canvas_x, 'canvas_y', canvas_y, vector, distance)
+            return [vector, true]
+        }
+        return [renderer.get_pointer_world_location(canvas_x, canvas_y), false]
     }
 
 }

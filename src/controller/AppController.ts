@@ -37,7 +37,6 @@ export class AppController {
         if (command_info.legacy_handling) {
             return // legacy commands update state_signal & history directly
         }
-        next_state.interaction_render_state = null
         this.undoable_state_change(next_state)
     }
 
@@ -54,8 +53,8 @@ export class AppController {
         command_info: ICommandInfoV2,
         args: unknown[]
     ): void {
-        const next_state = command_info.exec(this.current_state, ...args)
-        next_state.interaction_render_state = interaction_render_state
+        let next_state = command_info.exec(this.current_state, ...args)
+        next_state = { ...next_state, interaction_render_state }
         this.preview_state_change(next_state)
     }
 

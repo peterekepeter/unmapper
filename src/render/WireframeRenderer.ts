@@ -241,26 +241,41 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     }
 
     function render_iteraction(state: IInteractionRenderState){
-        if (!state || !state.line_from || !state.line_to){
+        if (!state){
             return
         }
 
-        const vertexA = state.line_from
-        const vertexB = state.line_to
+        if (state.line_from && state.line_to){
+            const vertexA = state.line_from
+            const vertexB = state.line_to
+    
+            const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA)
+            const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
+            const invalid0 = isNaN(x0) || isNaN(y0)
+            const invalid1 = isNaN(x1) || isNaN(y1)
+    
+            context.strokeStyle = '#fff'
+    
+            if (!invalid0 && !invalid1)
+            {
+                context.beginPath()
+                context.moveTo(x0,y0)
+                context.lineTo(x1,y1)
+                context.stroke()
+            }
+        }
 
-        const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA)
-        const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
-        const invalid0 = isNaN(x0) || isNaN(y0)
-        const invalid1 = isNaN(x1) || isNaN(y1)
+        if (state.snap_location){
+            const x = view_transform_x(state.snap_location)
+            const y = view_transform_y(state.snap_location)
 
-        context.strokeStyle = '#fff'
-
-        if (!invalid0 && !invalid1)
-        {
-            context.beginPath()
-            context.moveTo(x0,y0)
-            context.lineTo(x1,y1)
-            context.stroke()
+            context.strokeStyle = '#fff'
+            
+            if (!isNaN(x) && !isNaN(y)){
+                context.beginPath()
+                context.rect(x-2,y-2,5,5)
+                context.stroke()
+            }
         }
     }
 
@@ -485,8 +500,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     function find_nearest_snapping_point(
         map: UnrealMap,
-        canvasX: number,
-        canvasY: number):[
+        canvas_x: number,
+        canvas_y: number):[
             Vector, number
         ]
     {
@@ -498,17 +513,16 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 continue // skip actors don't have a brushModel
             }
 
-            const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
-            const vertexes = actor.brushModel.vertexes
+            const world_vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
 
-            for (let vertex_index = vertexes.length-1; vertex_index >= 0; vertex_index--) {
-                const p0 = transformed_vertexes[vertex_index]
-                const x0 = view_transform_x(p0)
-                const y0 = view_transform_y(p0)
+            for (const vertex of world_vertexes) {
+                const x0 = view_transform_x(vertex)
+                const y0 = view_transform_y(vertex)
                 if (!isNaN(x0) && !isNaN(y0)) {
-                    const distance = distance_2d_to_point(canvasX, canvasY, x0, y0);
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     if (distance < bestDistance) {
-                        bestMatchLocation = p0
+                        console.log('better match', canvas_x, canvas_y, x0, y0)
+                        bestMatchLocation = vertex
                         bestDistance = distance
                     }
                 }
