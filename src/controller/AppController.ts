@@ -10,7 +10,9 @@ import { IInteractionRenderState } from './interactions/IInteractionRenderState'
 
 export class AppController {
 
-    current_state: EditorState = create_initial_editor_state();
+    /** lastest non-preview state */
+    current_state: EditorState = create_initial_editor_state(); 
+    /** latest shown state */
     state_signal = createSignal<EditorState>(this.current_state);
     commands = create_command_registry();
     commands_shown_state = createSignal(false);
@@ -29,7 +31,7 @@ export class AppController {
     }
 
     interactively_execute(command_info: ICommandInfoV2): void {
-        this.interaction.interactively_execute(command_info);
+        this.interaction.interactively_execute(command_info)
     }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
@@ -65,13 +67,13 @@ export class AppController {
         if (this.state_signal.value.map !== next_state.map) {
             this.history.push() // map state change triggers history push
         }
-        this.current_state = next_state
-        this.state_signal.value = next_state
+        this.direct_state_change(next_state)
     }
 
     private direct_state_change(next_state: EditorState) {
+        console.log('updating current_state')
         this.current_state = next_state
-        this.state_signal.value = next_state
+        this.preview_state_change(next_state)
     }
 
     private preview_state_change(next_state: EditorState) {

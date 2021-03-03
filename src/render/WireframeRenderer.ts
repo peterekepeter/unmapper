@@ -501,7 +501,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     function find_nearest_snapping_point(
         map: UnrealMap,
         canvas_x: number,
-        canvas_y: number):[
+        canvas_y: number,
+        custom_geometry_cache: GeometryCache):[
             Vector, number
         ]
     {
@@ -513,7 +514,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 continue // skip actors don't have a brushModel
             }
 
-            const world_vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
+            const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
 
             for (const vertex of world_vertexes) {
                 const x0 = view_transform_x(vertex)
@@ -521,7 +522,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 if (!isNaN(x0) && !isNaN(y0)) {
                     const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     if (distance < bestDistance) {
-                        console.log('better match', canvas_x, canvas_y, x0, y0)
                         bestMatchLocation = vertex
                         bestDistance = distance
                     }
@@ -540,8 +540,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         setSideMode: set_side_mode,
         setTopMode: set_top_mode,
         setPerspectiveRotation,
-        findNearestActor: findNearestActor,
-        findNearestVertex: findNearestVertex,
+        findNearestActor,
+        findNearestVertex,
         find_nearest_snapping_point,
         get_pointer_world_location: (x,y) => canvas_to_world_location(x,y),
         setShowVertexes: (state:boolean) => { showVertexes = state; } 

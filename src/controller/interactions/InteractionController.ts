@@ -3,6 +3,7 @@ import { select_toggle_vertex_command } from "../../commands/selection/select_to
 import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
 import { get_actor_to_world_transform } from "../../model/geometry/actor-space-transform"
+import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { Vector } from "../../model/Vector"
 import { IRenderer } from "../../render/IRenderer"
 import { AppController } from "../AppController"
@@ -17,6 +18,8 @@ export class InteractionController {
     args: unknown[];
     arg_index = 0;
     interaction: IInteraction;
+
+    private _interaction_geometry_cache = new GeometryCache()
 
     constructor(private controller: AppController) {
 
@@ -44,14 +47,12 @@ export class InteractionController {
             // execute the command
             this.controller.execute(this.command_info, ...this.args)
             this.command_info = null
-            console.log('completed command interaction', ...this.args)
             return
         }
         // need more args
         if (this.interaction == null) {
             const type = this.command_info.args[this.arg_index].interaction_type
             this.interaction = create_interaction(type)
-            console.log('initalized interaction', this.interaction)
         }
     }
 
@@ -106,11 +107,15 @@ export class InteractionController {
 
     get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: IRenderer): [Vector, boolean] {
 
-        const state = this.controller.state_signal.value
+        const state = this.controller.current_state
+        
+        // interaction uses a custom geometry cache, so geometry queries are made against the same state
+        // instead of making them with the preview state
+        this._interaction_geometry_cache.actors = state.map.actors
+
         const [vector, distance]
-            = renderer.find_nearest_snapping_point(state.map, canvas_x, canvas_y)
+            = renderer.find_nearest_snapping_point(state.map, canvas_x, canvas_y, this._interaction_geometry_cache)
         if (vector && distance < 16){
-            console.log('snap!', 'canvas_x', canvas_x, 'canvas_y', canvas_y, vector, distance)
             return [vector, true]
         }
         return [renderer.get_pointer_world_location(canvas_x, canvas_y), false]
