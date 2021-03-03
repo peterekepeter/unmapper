@@ -33,6 +33,7 @@
         "object-shorthand": "warn",
         "prefer-const": "warn",
         "no-useless-rename": "warn",
-        "react/prop-types": "off"
+        "react/prop-types": "off",
+        "no-console": "warn"
     }
 }
