@@ -95,7 +95,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     function render(state : EditorState) : void {
         render_map(state.map)
-        render_iteraction(state.interaction_render_state);
+        render_interaction(state.interaction_render_state)
     }  
 
     function render_map(map: UnrealMap) {
@@ -240,7 +240,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function render_iteraction(state: IInteractionRenderState){
+    function 
+    render_interaction(state: IInteractionRenderState){
         if (!state){
             return
         }
@@ -254,14 +255,26 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             const invalid0 = isNaN(x0) || isNaN(y0)
             const invalid1 = isNaN(x1) || isNaN(y1)
     
-            context.strokeStyle = '#fff'
-    
             if (!invalid0 && !invalid1)
             {
+                context.strokeStyle = '#fff'
+                const dx = x1-x0, dy = y1-y0
+                const len = Math.sqrt(dx*dx + dy*dy)
+                const nx = dx/len, ny = dy/len
+                const rx = ny, ry = -nx
                 context.beginPath()
+                // line
                 context.moveTo(x0,y0)
                 context.lineTo(x1,y1)
+                // tail
+                context.moveTo(x0 - rx*2, y0 - ry*2)
+                context.lineTo(x0 + rx*2, y0 + ry*2)
+                // arrowhead
+                context.moveTo(x1 + 6*(-rx-nx), y1 + 6*(-ry-ny))
+                context.lineTo(x1, y1)
+                context.lineTo(x1 + 6*(+rx-nx), y1 + 6*(+ry-ny))
                 context.stroke()
+
             }
         }
 
@@ -269,9 +282,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             const x = view_transform_x(state.snap_location)
             const y = view_transform_y(state.snap_location)
 
-            context.strokeStyle = '#fff'
             
             if (!isNaN(x) && !isNaN(y)){
+                context.strokeStyle = '#fff'
                 context.beginPath()
                 context.rect(x-2,y-2,5,5)
                 context.stroke()
