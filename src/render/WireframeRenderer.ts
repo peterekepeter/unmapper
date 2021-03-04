@@ -13,7 +13,8 @@ import { BoundingBox } from "../model/BoundingBox";
 import { GeometryCache } from "../model/geometry/GeometryCache";
 import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions";
 import { intersect_segment_with_plane } from "../model/geometry/intersect-functions";
-import { IInteractionRenderState } from "../controller/interactions/IInteractionRenderState";
+import { InteractionRenderState } from "../controller/interactions/InteractionRenderState";
+import { ViewportMode } from "../model/ViewportMode";
 
 const backgroundColor = '#222';
 
@@ -91,6 +92,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     let view_transform: (in_vector: Vector) => Vector;
     let canvas_to_world_location: (canvas_x: number, canvas_y: number) => Vector
     let view_rotation = Matrix3x3.IDENTITY;
+    let view_mode = ViewportMode.Top;
 
 
     function render(state : EditorState) : void {
@@ -241,7 +243,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     }
 
     function 
-    render_interaction(state: IInteractionRenderState){
+    render_interaction(state: InteractionRenderState){
         if (!state){
             return
         }
@@ -294,7 +296,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     set_top_mode(1 / 2400);
 
-    function setPerspectiveMode(fieldOfView: number): void {
+    function set_perspective_mode(field_of_view: number): void {
+
+        view_mode = ViewportMode.Perspective
+
         get_view_bounding_box = () => {
             const forward = view_rotation.apply(Vector.FORWARD);
 
@@ -373,6 +378,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     }
 
     function set_top_mode(scale: number): void { 
+        view_mode = ViewportMode.Top
         get_view_bounding_box = () => {
             const x_size = width / 2 / deviceSize / scale;
             const y_size = height / 2 / deviceSize / scale;
@@ -395,9 +401,30 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     }
 
     function set_front_mode(scale: number): void {
+        view_mode = ViewportMode.Front
         get_view_bounding_box = () => {
-            const x_size = width / 2 / deviceSize / scale;
-            const z_size = height / 2 / deviceSize / scale;
+            const y_size = width / 2 / deviceSize / scale
+            const z_size = height / 2 / deviceSize / scale
+            return new BoundingBox({
+                min_y: view_center.y - y_size, max_y: view_center.y + y_size,
+                min_z: view_center.z - z_size, max_z: view_center.z + z_size
+            })
+        }
+        view_transform_x = vector =>
+            (vector.y - view_center.y) * deviceSize * scale + width / 2;
+        view_transform_y = vector =>
+            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
+        canvas_to_world_location = (x,y) => new Vector(
+            view_center.x,
+            view_center.y + (x - width/2) / deviceSize / scale,
+            view_center.z - (y - height/2) / deviceSize / scale)
+    }
+
+    function set_side_mode(scale: number): void {
+        view_mode = ViewportMode.Side
+        get_view_bounding_box = () => {
+            const x_size = width / 2 / deviceSize / scale
+            const z_size = height / 2 / deviceSize / scale
             return new BoundingBox({
                 min_x: view_center.x - x_size, max_x: view_center.x + x_size,
                 min_z: view_center.z - z_size, max_z: view_center.z + z_size
@@ -411,25 +438,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         canvas_to_world_location = (x,y) => new Vector(
             view_center.x + (x - width/2) / deviceSize / scale,
             view_center.y,
-            view_center.z - (y - height/2) / deviceSize / scale)
-    }
-
-    function set_side_mode(scale: number): void {
-        get_view_bounding_box = () => {
-            const y_size = width / 2 / deviceSize / scale;
-            const z_size = height / 2 / deviceSize / scale;
-            return new BoundingBox({
-                min_y: view_center.y - y_size, max_y: view_center.y + y_size,
-                min_z: view_center.z - z_size, max_z: view_center.z + z_size
-            })
-        }
-        view_transform_x = vector =>
-            (vector.y - view_center.y) * deviceSize * scale + width / 2;
-        view_transform_y = vector =>
-            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
-        canvas_to_world_location = (x,y) => new Vector(
-            view_center.x,
-            view_center.y + (x - width/2) / deviceSize / scale,
             view_center.z - (y - height/2) / deviceSize / scale)
     }
 
@@ -549,9 +557,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         render_v2: render,
         setCenterTo,
         setFrontMode: set_front_mode,
-        setPerspectiveMode,
+        setPerspectiveMode: set_perspective_mode,
         setSideMode: set_side_mode,
         setTopMode: set_top_mode,
+        get_view_mode: () => view_mode,
         setPerspectiveRotation,
         findNearestActor,
         findNearestVertex,

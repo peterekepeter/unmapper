@@ -2,22 +2,21 @@ import { make_actor_selection_command } from "../../commands/selection/make_acto
 import { select_toggle_vertex_command } from "../../commands/selection/select_toggle_vertex"
 import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
-import { get_actor_to_world_transform } from "../../model/geometry/actor-space-transform"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { Vector } from "../../model/Vector"
 import { IRenderer } from "../../render/IRenderer"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { create_interaction } from "./create-interaction"
-import { IInteraction } from "./IInteraction"
-import { IInteractionRenderState as InteractionRenderState } from "./IInteractionRenderState"
+import { Interaction } from "./Interaction"
+import {  InteractionRenderState } from "./InteractionRenderState"
 
 export class InteractionController {
 
     command_info: ICommandInfoV2;
     args: unknown[];
     arg_index = 0;
-    interaction: IInteraction;
+    interaction: Interaction;
 
     private _interaction_geometry_cache = new GeometryCache()
 
@@ -61,7 +60,7 @@ export class InteractionController {
             this.default_interaction(canvas_x, canvas_y, renderer, ctrl)
         } else {
             const [vector, is_snap] = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
-            this.interaction.set_pointer_world_location(vector)
+            this.interaction.set_pointer_world_location(vector, renderer.get_view_mode())
             this.interaction.pointer_click()
             this.try_complete_execution()
             console.log('interaction click', this.interaction)
@@ -92,7 +91,7 @@ export class InteractionController {
     pointer_move(canvas_x: number, canvas_y: number, renderer: IRenderer): void {
         if (this.interaction) {
             const [vector, is_snap] = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
-            this.interaction.set_pointer_world_location(vector)
+            this.interaction.set_pointer_world_location(vector, renderer.get_view_mode())
             this.args[this.arg_index] = this.interaction.result
             const interaction_render_state : InteractionRenderState = { 
                 ...this.interaction.render_state, 

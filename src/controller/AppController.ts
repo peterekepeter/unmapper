@@ -6,7 +6,7 @@ import { ICommandInfoV2 } from "./command/ICommandInfoV2";
 import { UnrealMap } from '../model/UnrealMap';
 import { GeometryCache } from '../model/geometry/GeometryCache';
 import { InteractionController } from './interactions/InteractionController';
-import { IInteractionRenderState } from './interactions/IInteractionRenderState';
+import { InteractionRenderState } from './interactions/InteractionRenderState';
 
 export class AppController {
 
@@ -51,7 +51,7 @@ export class AppController {
     }
 
     preview_command_with_interaction(
-        interaction_render_state: IInteractionRenderState,
+        interaction_render_state: InteractionRenderState,
         command_info: ICommandInfoV2,
         args: unknown[]
     ): void {

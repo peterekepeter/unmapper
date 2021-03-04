@@ -1,20 +1,16 @@
-import { FunctionComponent, useState } from "react";
-import { IRenderer } from "../render/IRenderer";
-import { create_wireframe_renderer } from "../render/WireframeRenderer";
-import { Vector } from "../model/Vector";
-import React = require("react");
-import { create_controller, AppController } from "../controller/AppController";
-import { Rotation } from "../model/Rotation";
-import { Matrix3x3 } from "../model/Matrix3x3";
-import { ViewportMode } from "../model/ViewportMode";
-import { UnrealMap } from "../model/UnrealMap";
-import { ViewportState } from "../model/EditorState";
-import { toggle_actor_selected_command } from "../commands/selection/toggle_actor_selected";
-import { make_actor_selection_command } from "../commands/selection/make_actor_selection";
-import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation";
-import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom";
-import { select_toggle_vertex_command } from "../commands/selection/select_toggle_vertex";
-import { select_vertex_command } from "../commands/selection/select_vertex";
+import { FunctionComponent, useState } from "react"
+import { IRenderer } from "../render/IRenderer"
+import { create_wireframe_renderer } from "../render/WireframeRenderer"
+import { Vector } from "../model/Vector"
+import React = require("react")
+import { create_controller, AppController } from "../controller/AppController"
+import { Rotation } from "../model/Rotation"
+import { Matrix3x3 } from "../model/Matrix3x3"
+import { ViewportMode } from "../model/ViewportMode"
+import { UnrealMap } from "../model/UnrealMap"
+import { ViewportState } from "../model/EditorState"
+import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
+import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -101,22 +97,22 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             target.setCenterTo(viewport_state.center_location);
             switch (view_mode) {
                 case ViewportMode.Perspective:
-                    target.setPerspectiveRotation(viewport_state.rotation);
-                    target.setPerspectiveMode(perspectiveFov);
+                    target.setPerspectiveRotation(viewport_state.rotation)
+                    target.setPerspectiveMode(perspectiveFov)
                     break;
                 case ViewportMode.Top:
-                    target.setTopMode(scale);
+                    target.setTopMode(scale)
                     break;
                 case ViewportMode.Front:
-                    target.setFrontMode(scale);
+                    target.setFrontMode(scale)
                     break;
                 case ViewportMode.Side:
-                    target.setSideMode(scale);
+                    target.setSideMode(scale)
                     break;
             }
             // re-render
             const before_time = Date.now();
-            target.render_v2(controller.state_signal.value)
+            target.render_v2(controller.state_signal.value);
             const delta_time = Date.now() - before_time;
             // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', viewport_state.center_location);
         }
@@ -249,20 +245,20 @@ function nextViewState(
                 const forward = matrix.apply(Vector.UP);
                 const right = matrix.apply(Vector.RIGHT);
                 nextLocation = location
-                    .addVector(Vector.UP.scale(normY * perspectiveMoveSpeed))
-                    .addVector(right.scale(-normX * perspectiveMoveSpeed));
+                    .add_vector(Vector.UP.scale(normY * perspectiveMoveSpeed))
+                    .add_vector(right.scale(-normX * perspectiveMoveSpeed));
             }
 
             break;
         case ViewportMode.Top:
-            nextLocation = location.add(scaledX, scaledY, 0);
-            break;
+            nextLocation = location.add_numbers(scaledX, scaledY, 0)
+            break
         case ViewportMode.Front:
-            nextLocation = location.add(scaledX, 0, -scaledY);
-            break;
+            nextLocation = location.add_numbers(0, scaledX, -scaledY)
+            break
         case ViewportMode.Side:
-            nextLocation = location.add(0, scaledX, -scaledY);
-            break;
+            nextLocation = location.add_numbers(scaledX, 0, -scaledY)
+            break
     }
     return [nextRotation, nextLocation];
 }
