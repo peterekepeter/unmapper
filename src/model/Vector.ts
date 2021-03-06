@@ -147,6 +147,27 @@ export class Vector {
             && this.z === vector.z
     }
 
+    toString(): string {
+        if (this.equals(Vector.ZERO)){
+            return "<zero vector>"
+        }
+        const result = []
+        let sep = '{ '
+        if (this.x !== 0) { 
+            result.push(sep, "x:", this.x) 
+            sep = ", "
+        }
+        if (this.y !== 0) { 
+            result.push(sep, "y:", this.y) 
+            sep = ", "
+        }
+        if (this.z !== 0) { 
+            result.push(sep, "z:", this.z)
+        }
+        result.push(' }')
+        return result.join('')
+    }
+
     /** @deprecated use add_numbers instead */
     add(x: number, y: number, z: number): Vector {
         return new Vector(this.x + x, this.y + y, this.z + z)

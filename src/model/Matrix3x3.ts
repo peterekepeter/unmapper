@@ -1,5 +1,5 @@
 import { Vector } from "./Vector";
-import { sinDegrees, cosDegrees } from "./ExtendedMath";
+import { sin_degrees, cos_degrees } from "./ExtendedMath";
 
 export class Matrix3x3 {
 
@@ -31,25 +31,27 @@ export class Matrix3x3 {
             this.getTransformedX(vector.x, vector.y, vector.z),
             this.getTransformedY(vector.x, vector.y, vector.z),
             this.getTransformedZ(vector.x, vector.y, vector.z)
-        );
+        )
     }
 
-    multiply(matrix: Matrix3x3) {
-        return Matrix3x3.multiply(this, matrix);
+    add(matrix: Matrix3x3): Matrix3x3 {
+        return Matrix3x3.add(this, matrix)
+    }
+
+    multiply(matrix: Matrix3x3): Matrix3x3 {
+        return Matrix3x3.multiply(this, matrix)
     }
 
     equals(matrix: Matrix3x3): boolean {
         return Matrix3x3.equals(this, matrix);
     }
 
-    uniformScale(s: number) {
-        return s === 1 ? this :
-            this.multiply(Matrix3x3.uniformScale(s));
-    }
-
-    scale(sx: number, sy: number, sz: number) {
-        return sx === 1 && sy === 1 && sz === 1 ? this :
-            this.multiply(Matrix3x3.scale(sx, sy, sz));
+    scale(s: number): Matrix3x3 {
+        return s === 1 ? this : new Matrix3x3(
+            s*this.m00, s*this.m01, s*this.m02,
+            s*this.m10, s*this.m11, s*this.m12,
+            s*this.m20, s*this.m21, s*this.m22
+        )
     }
 
     rotateDegreesX(degrees: number) {
@@ -82,8 +84,8 @@ export class Matrix3x3 {
     }
 
     static rotateDegreesX(degrees: number) {
-        const s = sinDegrees(degrees);
-        const c = cosDegrees(degrees);
+        const s = sin_degrees(degrees);
+        const c = cos_degrees(degrees);
         const z = -s;
         return new Matrix3x3(
             1, 0, 0,
@@ -92,8 +94,8 @@ export class Matrix3x3 {
     }
 
     static rotateDegreesY(degrees: number) {
-        const s = sinDegrees(degrees);
-        const c = cosDegrees(degrees);
+        const s = sin_degrees(degrees);
+        const c = cos_degrees(degrees);
         const z = -s;
         return new Matrix3x3(
             c, 0, z,
@@ -102,8 +104,8 @@ export class Matrix3x3 {
     }
 
     static rotateDegreesZ(degrees: number) {
-        const s = sinDegrees(degrees);
-        const c = cosDegrees(degrees);
+        const s = sin_degrees(degrees);
+        const c = cos_degrees(degrees);
         const z = -s;
         return new Matrix3x3(
             c, z, 0,
@@ -142,6 +144,14 @@ export class Matrix3x3 {
         return this.equals(Matrix3x3.IDENTITY)
     }
 
+    static add(a: Matrix3x3, b: Matrix3x3): Matrix3x3 {
+        return new Matrix3x3(
+            a.m00 + b.m00, a.m01 + b.m01, a.m02 + b.m02,
+            a.m10 + b.m10, a.m11 + b.m11, a.m12 + b.m12,
+            a.m20 + b.m20, a.m21 + b.m21, a.m22 + b.m22,
+        )
+    }
+
     static multiply(a: Matrix3x3, b: Matrix3x3): Matrix3x3 {
         return new Matrix3x3(
             // row1
@@ -158,7 +168,6 @@ export class Matrix3x3 {
             a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22,
         )
     }
-
     static equals(a: Matrix3x3, b: Matrix3x3): boolean {
         return a.m00 === b.m00 && a.m01 === b.m01 && a.m02 === b.m02
             && a.m10 === b.m10 && a.m11 === b.m11 && a.m12 === b.m12

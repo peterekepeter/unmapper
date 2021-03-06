@@ -1,9 +1,9 @@
-import { Actor } from "../Actor";
-import { BoundingBox } from "../BoundingBox";
-import { BrushModel } from "../BrushModel";
-import { BrushVertex } from "../BrushVertex";
-import { Vector } from "../Vector";
-import { GeometryCache } from "./GeometryCache";
+import { Actor } from "../../Actor";
+import { BoundingBox } from "../../BoundingBox";
+import { BrushModel } from "../../BrushModel";
+import { BrushVertex } from "../../BrushVertex";
+import { Vector } from "../../Vector";
+import { GeometryCache } from "../GeometryCache";
 
 
 test('returns correct bounding box', () => {

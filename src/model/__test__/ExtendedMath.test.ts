@@ -1,4 +1,4 @@
-import { fmod, clamp, sinDegrees, cosDegrees } from "../ExtendedMath";
+import { fmod, clamp, sin_degrees, cos_degrees } from "../ExtendedMath"
 
 
 describe('ExtendedMath', () => {
@@ -33,10 +33,10 @@ describe('ExtendedMath', () => {
     })
 
     // high precision approximations from wolfram alpha:
-    const sin60 = 0.866025403784438646763723170752936183471402626905190314027;
-    const sin45 = 0.707106781186547524400844362104849039284835937688474036588;
-    const sin22dot5 = 0.382683432365089771728459984030398866761344562485627041433;
-    const sin11dot25 = 0.195090322016128267848284868477022240927691617751954807754;
+    const sin60 = 0.866025403784438646763723170752936183471402626905190314027
+    const sin45 = 0.707106781186547524400844362104849039284835937688474036588
+    const sin22dot5 = 0.382683432365089771728459984030398866761344562485627041433
+    const sin11dot25 = 0.195090322016128267848284868477022240927691617751954807754
 
     // ensure precision at commonly used angles
     describe('sinDegrees', () => {
@@ -62,7 +62,7 @@ describe('ExtendedMath', () => {
         ]
         .forEach(([degrees, result]) =>
             test(`sinDegrees(${degrees}) is ${result}`, () =>
-                expect(sinDegrees(degrees)).toEqual(result)));
+                expect(sin_degrees(degrees)).toEqual(result)))
     })
 
     describe('cosDegrees', () => {
@@ -77,7 +77,7 @@ describe('ExtendedMath', () => {
         ]
         .forEach(([degrees, result]) =>
             test(`cosDegrees(${degrees}) is ${result}`, () =>
-                expect(cosDegrees(degrees)).toEqual(result)));
+                expect(cos_degrees(degrees)).toEqual(result)))
     })
 
 });
