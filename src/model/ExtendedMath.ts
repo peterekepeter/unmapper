@@ -39,6 +39,9 @@ function sin_degrees_quarter(x: number): number {
     if (x === 45) return 0.707106781186547524400844362104849039284835937688474036588
     if (x === 60) return 0.866025403784438646763723170752936183471402626905190314027
     if (x >= 90) return 1
-    return Math.sin(x * Math.PI / 180)
+    return Math.sin(x * Math.PI / DEGREES_HALF_TURN)
 }
 
+export function acos_degrees(a: number): number { 
+    return Math.acos(a) / Math.PI * DEGREES_HALF_TURN
+}

@@ -1,3 +1,5 @@
+import { acos_degrees } from "./ExtendedMath"
+
 /** 
  * Representation of a vector in 3D space 
  * @todo moving to snake_case
@@ -64,7 +66,7 @@ export class Vector {
     }
 
     subtract_vector(v: Vector): Vector {
-        return this.subtract(v.x, v.y, v.z)
+        return this.subtract_numbers(v.x, v.y, v.z)
     }
 
     scale(s: number): Vector {
@@ -147,6 +149,15 @@ export class Vector {
             && this.z === vector.z
     }
 
+    static angle_between_any(a: Vector, b: Vector): number {
+        return Vector.angle_between_normalized(a.normalize(),b.normalize())
+    }
+
+    static angle_between_normalized(unit_a: Vector, unit_b: Vector): number {
+        const cos_a = Vector.dot_product(unit_a,unit_b)
+        return acos_degrees(cos_a)
+    }
+
     toString(): string {
         if (this.equals(Vector.ZERO)){
             return "<zero vector>"
@@ -173,25 +184,6 @@ export class Vector {
         return new Vector(this.x + x, this.y + y, this.z + z)
     }
 
-    /** @deprecated use subtract_numbers instead */
-    subtract(x: number, y: number, z: number): Vector {
-        return new Vector(this.x - x, this.y - y, this.z - z)
-    }
-
-    /** @deprecated use dot_product_numbers */
-    static dotProductNumbers(
-        ax: number, ay: number, az: number,
-        bx: number, by: number, bz: number): number {
-        return ax * bx + ay * by + az * bz
-    }
-
-    /** @deprecated use subtract_vector */
-    static dotProduct(a: Vector, b: Vector): number {
-        return this.dot_product_numbers(
-            a.x, a.y, a.z,
-            b.x, b.y, b.z)
-    }
-
     /** @deprecated use add_vector */
     addVector(v: Vector): Vector {
         return this.add_numbers(v.x, v.y, v.z)
@@ -200,16 +192,6 @@ export class Vector {
     /** @deprecated use subtract_vector */
     subtractVector(v: Vector): Vector {
         return this.subtract_numbers(v.x, v.y, v.z)
-    }
-
-    /** @deprecated use cross_product_numbers */
-    static crossProductNumbers(
-        a1: number, a2: number, a3: number,
-        b1: number, b2: number, b3: number): Vector {
-        return new Vector(
-            a2 * b3 - a3 * b2,
-            a1 * b3 - a3 * b1,
-            a1 * b2 - a2 * b1)
     }
 
     /** @deprecated use cross_product */
@@ -226,12 +208,7 @@ export class Vector {
     vectorToVector(other:Vector) : Vector {
         return other.subtract_vector(this)
     }
-
-    /** @deprecated use vectror_to */
-    vectorTo(x: number, y: number, z:number) : Vector {
-        return this.reverse_subtract(x,y,z)
-    }
-
+    
     /** @deprecated use distance_to */
     distanceTo(other: Vector): number {
         const dx = other.x - this.x
