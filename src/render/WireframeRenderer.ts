@@ -283,14 +283,28 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         if (state.snap_location){
             const x = view_transform_x(state.snap_location)
             const y = view_transform_y(state.snap_location)
-
             
             if (!isNaN(x) && !isNaN(y)){
                 context.strokeStyle = '#fff'
                 context.beginPath()
                 context.rect(x-2,y-2,5,5)
                 context.stroke()
+
+                if (state.line_to){
+                    const vertexB = state.line_to
+                    const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
+                    if (!isNaN(x1) && !isNaN(y1))
+                    {
+                        context.setLineDash([3, 5])
+                        context.beginPath()
+                        context.moveTo(x,y)
+                        context.lineTo(x1, y1)
+                        context.stroke()
+                        context.setLineDash([])
+                    }
+                }
             }
+
         }
     }
 
