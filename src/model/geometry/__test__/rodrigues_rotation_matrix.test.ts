@@ -1,5 +1,5 @@
 import { Vector } from "../../Vector"
-import { rodrigues_rotation_matrix } from "../vector-rotation"
+import { rodrigues_rotation_matrix } from "../rodrigues_rotation_matrix"
 
 const rotation_cases = [
     { 

@@ -149,15 +149,6 @@ export class Vector {
             && this.z === vector.z
     }
 
-    static angle_between_any(a: Vector, b: Vector): number {
-        return Vector.angle_between_normalized(a.normalize(),b.normalize())
-    }
-
-    static angle_between_normalized(unit_a: Vector, unit_b: Vector): number {
-        const cos_a = Vector.dot_product(unit_a,unit_b)
-        return acos_degrees(cos_a)
-    }
-
     toString(): string {
         if (this.equals(Vector.ZERO)){
             return "<zero vector>"
@@ -208,7 +199,7 @@ export class Vector {
     vectorToVector(other:Vector) : Vector {
         return other.subtract_vector(this)
     }
-    
+
     /** @deprecated use distance_to */
     distanceTo(other: Vector): number {
         const dx = other.x - this.x

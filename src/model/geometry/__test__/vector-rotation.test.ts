@@ -1,5 +1,5 @@
 import { Vector } from "../../Vector"
-import {  vector_to_vector_rotation_matrix } from "../vector-rotation"
+import { angle_between_unit_vectors, vector_to_vector_rotation_matrix } from "../vector-rotation"
 
 
 const vector_to_vector_cases = [
@@ -49,4 +49,20 @@ vector_to_vector_cases.forEach(({ from, to, cases }) => {
             expect(matrix.apply(i)).toEqual(out)
         }))
     })
+})
+
+
+describe('angle_between_unit_vectors', () => {
+
+    const angle_fn = angle_between_unit_vectors
+
+    test('between forward, up is 90', () => 
+        expect(angle_fn(Vector.FORWARD, Vector.UP)).toBe(90))
+    
+    test('between forward, backward  is 180', () => 
+        expect(angle_fn(Vector.FORWARD, Vector.BACKWARD)).toBe(180))
+    
+    test('between 45', () => 
+        expect(angle_fn(new Vector(1,0,0), new Vector(1,1,0).normalize())).toBeCloseTo(45, 10))
+
 })

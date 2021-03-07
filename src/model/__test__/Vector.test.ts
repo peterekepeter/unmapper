@@ -87,14 +87,5 @@ describe('Vector', () => {
     test('vectorToVector on x axis', () => 
         expect(new Vector(1,0,0).vector_to_vector(new Vector(4,0,0))).toEqual(new Vector(3,0,0)))
 
-    test('angle between forward, up', () => 
-        expect(Vector.angle_between_normalized(Vector.FORWARD, Vector.UP)).toBe(90))
-
-    test('angle between forward, backward', () => 
-        expect(Vector.angle_between_normalized(Vector.FORWARD, Vector.BACKWARD)).toBe(180))
-
-    test('angle between 45', () => 
-        expect(Vector.angle_between_any(new Vector(1,0,0), new Vector(1,1,0))).toBeCloseTo(45, 10))
-
 })
     
