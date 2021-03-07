@@ -1,6 +1,7 @@
 import { Vector } from "../../model/Vector";
 import { ViewportMode } from "../../model/ViewportMode";
 import { Interaction } from "./Interaction";
+import { ViewportVectorAdjustment } from "./interaction-helpers";
 import { InteractionRenderState } from "./InteractionRenderState";
 
 export class VectorInputInteraction implements Interaction<Vector>
@@ -16,8 +17,8 @@ export class VectorInputInteraction implements Interaction<Vector>
                 this.pointer_from = location
                 break
             case "to":
-                this.pointer_to = location
-                this._adjust_pointer_to_based_on_view_mode(view_mode)
+                this.pointer_to = new ViewportVectorAdjustment(this.pointer_from, view_mode)
+                    .adjust(location)
                 this._result = this.pointer_to.subtract_vector(this.pointer_from)
                 break
         }
@@ -54,24 +55,6 @@ export class VectorInputInteraction implements Interaction<Vector>
 
     get finished(): boolean {
         return this.state === "done"
-    }
-
-    private _adjust_pointer_to_based_on_view_mode(view_mode: ViewportMode) {
-        const from = this.pointer_from
-        const to = this.pointer_to
-        switch (view_mode) {
-            case ViewportMode.Top:
-                this.pointer_to = new Vector(to.x, to.y, from.z)
-                break
-            case ViewportMode.Front:
-                this.pointer_to = new Vector(from.x, to.y, to.z)
-                break
-            case ViewportMode.Side:
-                this.pointer_to = new Vector(to.x, from.y, to.z)
-                break
-            case ViewportMode.Perspective:
-                break
-        }
     }
 
 }

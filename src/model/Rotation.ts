@@ -46,7 +46,7 @@ export class Rotation {
     }
 
     public apply(vector: Vector): Vector {
-        return this.toMatrix().apply(vector);
+        return this.to_matrix().apply(vector);
     }
 
     private _wrap_comp(value : number) : number {
