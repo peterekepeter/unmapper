@@ -45,3 +45,7 @@ function sin_degrees_quarter(x: number): number {
 export function acos_degrees(a: number): number { 
     return Math.acos(a) / Math.PI * DEGREES_HALF_TURN
 }
+
+export function atan_degrees(y: number, x: number): number {
+    return Math.atan2(y, x) / Math.PI * DEGREES_HALF_TURN
+}
