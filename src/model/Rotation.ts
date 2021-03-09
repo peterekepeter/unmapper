@@ -31,6 +31,10 @@ export class Rotation {
         return new Rotation(this.pitch + pitch, this.yaw + yaw, this.roll + roll)
     }
 
+    public add_rotation(rotation: Rotation): Rotation {
+        return this.add(rotation.pitch, rotation.yaw, rotation.roll)
+    }
+
     public to_matrix() : Matrix3x3 {
         return Matrix3x3.IDENTITY
             .rotateDegreesZ(this.yaw)
