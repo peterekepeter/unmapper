@@ -22,9 +22,17 @@ export class BrushPolygon
         this.vertexes.push(vertexIndex);
     }
 
+    shallow_copy(){
+        const copy = new BrushPolygon();
+        Object.assign(copy, this);
+        return copy;
+    }
+
+    /** @deprecated use shallow_copy */
     shallowCopy(){
         const copy = new BrushPolygon();
         Object.assign(copy, this);
         return copy;
     }
+
 }
