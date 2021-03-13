@@ -551,6 +551,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
             const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
 
+            // snap to vertexes
             for (const vertex of world_vertexes) {
                 const x0 = view_transform_x(vertex)
                 const y0 = view_transform_y(vertex)
@@ -558,6 +559,59 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                     const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     if (distance < bestDistance) {
                         bestMatchLocation = vertex
+                        bestDistance = distance
+                    }
+                }
+            }
+
+            // snap edge midpoint
+            for (const edge of actor.brushModel.edges){
+                const a = world_vertexes[edge.vertexIndexA]
+                const b = world_vertexes[edge.vertexIndexB]
+                const midpoint = a.add_vector(b).scale(0.5)
+                const x0 = view_transform_x(midpoint)
+                const y0 = view_transform_y(midpoint)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    distance += 2 // HACK: deprioritizes midpoint snap
+                    if (distance < bestDistance) {
+                        bestMatchLocation = midpoint
+                        bestDistance = distance
+                    }
+                }
+            }
+
+            // snap to edges
+            for (const edge of actor.brushModel.edges){
+                const a = world_vertexes[edge.vertexIndexA]
+                const b = world_vertexes[edge.vertexIndexB]
+                const ax = view_transform_x(a)
+                const ay = view_transform_y(a)
+                const bx = view_transform_x(b)
+                const by = view_transform_y(b)
+                if (!isNaN(ax) && !isNaN(bx)){
+                    let distance = distance_to_line_segment(canvas_x, canvas_y, ax, ay, bx, by)
+                    distance += 4 // HACK: deprioritizes edge snap
+                    if (distance < bestDistance){
+                        const distance_to_a = distance_2d_to_point(canvas_x, canvas_y, ax, ay)
+                        const distance_to_b = distance_2d_to_point(canvas_x, canvas_y, bx, by)
+                        const whole = distance_to_a + distance_to_b
+                        bestMatchLocation = a.scale(distance_to_b).add_vector(b.scale(distance_to_a)).scale(1/whole)
+                        bestDistance = distance
+                    }
+                }
+            }
+
+            // snap polygon median
+            for (const polygon of actor.brushModel.polygons){
+                const median = polygon.median
+                const x0 = view_transform_x(median)
+                const y0 = view_transform_y(median)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    distance += 2 // HACK: deprioritizes polygon median snap
+                    if (distance < bestDistance) {
+                        bestMatchLocation = median
                         bestDistance = distance
                     }
                 }
