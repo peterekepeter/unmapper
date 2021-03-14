@@ -1,8 +1,9 @@
-import { PivotRotation } from "../../model/PivotRotation"
-import { Rotation } from "../../model/Rotation"
-import { Vector } from "../../model/Vector"
-import { ViewportMode } from "../../model/ViewportMode"
-import { RotationInputInteraction as RotationInteraction } from "./RotationInputInteraction"
+import { PivotRotation } from "../../../model/PivotRotation"
+import { Rotation } from "../../../model/Rotation"
+import { Vector } from "../../../model/Vector"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { RotationInteraction } from "../RotationInteraction"
+
 
 let interaction : RotationInteraction
 

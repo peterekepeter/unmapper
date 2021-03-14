@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { InteractionType } from "../controller/interactions/InteractionType"
+import { RotationInteraction } from "../controller/interactions/RotationInteraction"
 import { change_selected_actors, change_selected_brushes } from "../model/algorithms/editor_state_change"
 import { BrushVertex } from "../model/BrushVertex"
 import { get_actor_to_world_transform, get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
@@ -12,7 +12,7 @@ export const rotate_command: ICommandInfoV2 = {
     shortcut: 'r',
     args: [
         {
-            interaction_type: InteractionType.RotationInput,
+            interaction_factory: RotationInteraction.factory,
             example_values: [new PivotRotation(new Vector(1, 1, 1), new Rotation(90, 0, 0))]
         }
     ],

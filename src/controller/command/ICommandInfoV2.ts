@@ -1,5 +1,5 @@
-import { InteractionType } from "../interactions/InteractionType";
-import { ICommandV2 } from "./ICommand";
+import { Interaction } from "../interactions/Interaction"
+import { ICommandV2 } from "./ICommand"
 
 
 export interface ICommandInfoV2 {
@@ -10,7 +10,7 @@ export interface ICommandInfoV2 {
     legacy_handling?: boolean;
     args?: {
         name?: string;
-        interaction_type?: InteractionType;
+        interaction_factory?: () => Interaction;
         example_values?: unknown[];
         default_value?: unknown;
     }[]

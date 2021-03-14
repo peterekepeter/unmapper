@@ -7,7 +7,6 @@ import { Vector } from "../../model/Vector"
 import { IRenderer } from "../../render/IRenderer"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
-import { create_interaction } from "./create-interaction"
 import { Interaction } from "./Interaction"
 import {  InteractionRenderState } from "./InteractionRenderState"
 
@@ -50,8 +49,8 @@ export class InteractionController {
         }
         // need more args
         if (this.interaction == null) {
-            const type = this.command_info.args[this.arg_index].interaction_type
-            this.interaction = create_interaction(type)
+            const factory = this.command_info.args[this.arg_index].interaction_factory
+            this.interaction = factory()
         }
     }
 

@@ -4,7 +4,7 @@ import { FromToInteraction } from "./FromToInteraction";
 import { Interaction } from "./Interaction"
 import { InteractionRenderState } from "./InteractionRenderState"
 
-export class VectorInputInteraction implements Interaction<Vector>
+export class VectorInteraction implements Interaction<Vector>
 {
     from_to = new FromToInteraction();
 
@@ -31,5 +31,7 @@ export class VectorInputInteraction implements Interaction<Vector>
         }
         return result.to.subtract_vector(result.from)
     }
+    
+    static factory = (): Interaction => new VectorInteraction();
 }
 

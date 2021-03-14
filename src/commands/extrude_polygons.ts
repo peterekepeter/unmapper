@@ -3,9 +3,9 @@ import { change_selected_brushes } from "../model/algorithms/editor_state_change
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
 import { EditorError } from "../model/EditorError";
 import { EditorState } from "../model/EditorState";
-import { InteractionType } from "../controller/interactions/InteractionType";
 import { Vector } from "../model/Vector";
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform";
+import { VectorInteraction } from "../controller/interactions/VectorInteraction";
 
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
@@ -14,7 +14,7 @@ export const extrude_polygons_command : ICommandInfoV2 = {
     exec: implementation,
     args: [
         {
-            interaction_type: InteractionType.VectorOrScalarInput,
+            interaction_factory: () => new VectorInteraction(),
             name: "extrusion",
             example_values: [32, new Vector(32,0,0)],
             default_value: 32

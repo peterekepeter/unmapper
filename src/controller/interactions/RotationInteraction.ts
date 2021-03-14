@@ -8,7 +8,7 @@ import { Interaction } from "./Interaction"
 import { ViewportVectorAdjustment } from "./interaction-helpers"
 import { InteractionRenderState } from "./InteractionRenderState"
 
-export class RotationInputInteraction implements Interaction<PivotRotation>
+export class RotationInteraction implements Interaction<PivotRotation>
 {
     private state: 'center' | 'from' | 'to' | 'done' = 'center';
     pivot: Vector;
@@ -67,5 +67,7 @@ export class RotationInputInteraction implements Interaction<PivotRotation>
         const rotation = decompose_matrix_rotation(rotation_matrix)[0]
         this.result = new PivotRotation(this.pivot, rotation)
     }
+
+    static factory = () : Interaction => new RotationInteraction()
 
 }

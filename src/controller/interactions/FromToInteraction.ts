@@ -67,5 +67,7 @@ export class FromToInteraction implements Interaction<FromTo>
         return this.state === "done"
     }
 
+    static factory = (): Interaction => new FromToInteraction()
+
 }
 

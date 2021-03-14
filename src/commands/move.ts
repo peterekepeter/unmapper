@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { InteractionType } from "../controller/interactions/InteractionType"
+import { VectorInteraction } from "../controller/interactions/VectorInteraction"
 import { change_selected_actors, change_selected_brushes } from "../model/algorithms/editor_state_change"
 import { BrushVertex } from "../model/BrushVertex"
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
@@ -10,7 +10,7 @@ export const move_command: ICommandInfoV2 = {
     shortcut: 'g',
     args: [
         {
-            interaction_type: InteractionType.VectorInput,
+            interaction_factory: VectorInteraction.factory,
             example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ]
         }
     ],

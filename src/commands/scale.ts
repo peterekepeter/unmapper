@@ -1,8 +1,8 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { FromTo } from "../controller/interactions/FromToInteraction"
-import { InteractionType } from "../controller/interactions/InteractionType"
+import { FromTo, FromToInteraction } from "../controller/interactions/FromToInteraction"
+import { LocationInteraction } from "../controller/interactions/LocationInteraction"
 import { change_selected_vertexes } from "../model/algorithms/change_selected_vertexes"
-import { change_actors, change_selected_actors, change_selected_brushes } from "../model/algorithms/editor_state_change"
+import { change_selected_actors, change_selected_brushes } from "../model/algorithms/editor_state_change"
 import { get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
 import { Vector } from "../model/Vector"
 
@@ -13,11 +13,11 @@ export const scale_command: ICommandInfoV2 = {
         {
             name: "Pivot",
             default_value: Vector.ZERO,
-            interaction_type: InteractionType.LocationInput
+            interaction_factory: LocationInteraction.factory
         },
         {
             name: "Scale from to",
-            interaction_type: InteractionType.FromToInteraction,
+            interaction_factory: FromToInteraction.factory,
             example_values: [
                 new FromTo(new Vector(1, 0, 0), new Vector(2, 0, 0)), // upscale
                 new FromTo(new Vector(2, 0, 0), new Vector(1, 0, 0)), // downscale
