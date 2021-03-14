@@ -57,9 +57,7 @@ export function ViewportPanel({
                 viewport_index={viewport_index}
                 width={viewportWidth} height={viewportHeight}
                 controller={controller}
-                vertex_mode={state.vertex_mode}
-                map={state.map}
-                viewport_state={state.viewports[viewport_index]}></Viewport>
+                state={state}></Viewport>
         </div>
     </div>
 }

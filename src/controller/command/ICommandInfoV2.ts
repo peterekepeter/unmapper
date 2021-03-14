@@ -8,12 +8,10 @@ export interface ICommandInfoV2 {
     shortcut?: string;
     /** old commands don't return new state */
     legacy_handling?: boolean;
-    args?: [
-        {
-            name?: string;
-            interaction_type?: InteractionType;
-            example_values?: unknown[];
-            default_value?: unknown;
-        }
-    ];
+    args?: {
+        name?: string;
+        interaction_type?: InteractionType;
+        example_values?: unknown[];
+        default_value?: unknown;
+    }[]
 }

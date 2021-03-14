@@ -15,6 +15,7 @@ import { move_command } from "./move"
 import { rotate_command } from "./rotate"
 import { apply_transform_command } from "./apply_transform"
 import { uv_random_map_command } from "./uv_random_map"
+import { scale_command } from "./scale"
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
@@ -33,6 +34,7 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     toggle_editor_layout_command,
     move_command,
     rotate_command,
+    scale_command,
     apply_transform_command,
     uv_random_map_command
 ]

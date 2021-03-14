@@ -8,18 +8,17 @@ import { Rotation } from "../model/Rotation"
 import { Matrix3x3 } from "../model/Matrix3x3"
 import { ViewportMode } from "../model/ViewportMode"
 import { UnrealMap } from "../model/UnrealMap"
-import { ViewportState } from "../model/EditorState"
+import { create_initial_editor_state, EditorState, ViewportState } from "../model/EditorState"
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
 import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom"
+import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 
 export interface IViewportProps{
     viewport_index: number,
     width: number, 
     height: number, 
     controller: AppController,
-    map: UnrealMap,
-    viewport_state : ViewportState,
-    vertex_mode : boolean
+    state: EditorState
 }
 
 export const Viewport : FunctionComponent<IViewportProps> = ({
@@ -27,10 +26,11 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     width = 500,
     height = 300,
     controller = create_controller(),
-    map = new UnrealMap(),
-    viewport_state = {} as ViewportState,
-    vertex_mode = false}) => {
+    state = create_initial_editor_state()}) => {
         
+    const viewport_state = state.viewports[viewport_index]
+    const map = state.map
+    const vertex_mode = state.vertex_mode
 
     const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 
@@ -42,44 +42,49 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     const [didMouseMove, setDidMouseMove] = useState(false);
 
     const [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
+    const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null);
     const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
     const [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
     const [last_width, set_last_width] = useState<number>(null);
     const [last_height, set_last_height] = useState<number>(null);
 
     function canvas_ref(new_canvas: HTMLCanvasElement) {
-        if (new_canvas == null)
-        {
-            return;
+        if (new_canvas == null){
+            return
         }
         if (new_canvas !== canvas){
-            set_canvas(new_canvas);
-            set_renderer(create_wireframe_renderer(new_canvas, controller.geometry_cache));
-            return;
+            set_canvas(new_canvas)
+            set_renderer(create_wireframe_renderer(new_canvas, controller.geometry_cache))
+            return
         }
-        let needs_render = false;
+        // TODO: messy, compare prev state with next state innstead of having it split
+        let needs_render = false
         if (last_render_map !== map){
-            set_last_render_map(map);
-            needs_render = true;
+            set_last_render_map(map)
+            needs_render = true
         }
         if (last_render_viewport !== viewport_state){
-            set_last_render_viewport(viewport_state);
-            needs_render = true;
+            set_last_render_viewport(viewport_state)
+            needs_render = true
+        }
+        if (last_interaction !== state.interaction_render_state){
+            set_last_interaction(last_interaction)
+            needs_render = true
         }
         if (last_vertex_mode !== vertex_mode){
-            set_last_vertex_mode(vertex_mode);
-            needs_render = true;
+            set_last_vertex_mode(vertex_mode)
+            needs_render = true
         }
         if (last_width !== width){
-            set_last_width(width);
-            needs_render = true;
+            set_last_width(width)
+            needs_render = true
         }
         if (last_height !== height){
-            set_last_height(height);
-            needs_render = true;
+            set_last_height(height)
+            needs_render = true
         }
         if (needs_render){
-            renderUpdate(renderer);
+            renderUpdate(renderer)
         }
     }
 

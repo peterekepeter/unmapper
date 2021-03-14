@@ -35,7 +35,10 @@ export class AppController {
     }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
-        const next_state = command_info.exec(this.current_state, ...args)
+        let next_state = command_info.exec(this.current_state, ...args)
+        if (next_state.interaction_render_state) {
+            next_state = { ...next_state, interaction_render_state: null }
+        }
         if (command_info.legacy_handling) {
             return // legacy commands update state_signal & history directly
         }
@@ -46,7 +49,11 @@ export class AppController {
         if (command_info.legacy_handling) {
             return // legacy commands cannot be previewed
         }
-        const next_state = command_info.exec(this.current_state, ...args)
+        let next_state = command_info.exec(this.current_state, ...args)
+        if (next_state.interaction_render_state) {
+            next_state = { ...next_state, interaction_render_state: null }
+        }
+        next_state.interaction_render_state = null
         this.preview_state_change(next_state)
     }
 
@@ -71,7 +78,6 @@ export class AppController {
     }
 
     private direct_state_change(next_state: EditorState) {
-        console.log('updating current_state')
         this.current_state = next_state
         this.preview_state_change(next_state)
     }

@@ -63,7 +63,6 @@ export class InteractionController {
             this.interaction.set_pointer_world_location(vector, renderer.get_view_mode())
             this.interaction.pointer_click()
             this.try_complete_execution()
-            console.log('interaction click', this.interaction)
         }
     }
 
