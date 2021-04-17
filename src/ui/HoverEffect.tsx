@@ -4,7 +4,7 @@ export const hoverStyleDefaultCSS : React.CSSProperties = {
 }
 
 export const hoverStyleCSS : React.CSSProperties = {
-    opacity: .5,
+    opacity: .75,
     cursor: 'pointer'
 }
 

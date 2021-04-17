@@ -137,7 +137,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         ref={canvas => canvas_ref(canvas)}
         style={{
             maxWidth: '100%',
-            maxHeight: '100%'
+            maxHeight: '100%',
+            position: "relative"
         }} />
 
     function handle_context_menu(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
@@ -166,8 +167,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function mouse_click(event: React.PointerEvent<HTMLCanvasElement>){
-        const canvas_x = event.pageX - canvas.offsetLeft
-        const canvas_y = event.pageY - canvas.offsetTop
+        const [canvas_x, canvas_y] = get_canvas_coords(event)
         controller.interaction.pointer_click(canvas_x, canvas_y, renderer, event.ctrlKey)
     }
 
@@ -185,8 +185,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function handle_pointer_move(event: React.PointerEvent<HTMLCanvasElement>) {
-        const canvas_x = event.pageX - canvas.offsetLeft
-        const canvas_y = event.pageY - canvas.offsetTop
+        const [canvas_x, canvas_y] = get_canvas_coords(event)
     
         if (!isMouseDown) {
             controller.interaction.pointer_move(canvas_x, canvas_y, renderer);
@@ -207,7 +206,15 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation);
     }
 
+    function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
+        const rects = canvas.getClientRects()
+        const canvas_x = event.pageX - rects[0].x
+        const canvas_y = event.pageY - rects[0].y
+        return [canvas_x, canvas_y]
+    }
+
 }
+
 
 function nextViewState(
     location: Vector,
