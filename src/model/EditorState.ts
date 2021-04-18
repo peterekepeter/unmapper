@@ -58,8 +58,8 @@ export function create_initial_editor_state() : EditorState{
             },
             {
                 mode: ViewportMode.Perspective,
-                center_location: new Vector(-500,-300,300),
-                rotation: Rotation.IDENTITY,
+                center_location: new Vector(-800,-450,500).scale(2),
+                rotation: new Rotation(-30,30,0),
                 zoom_level: 0
             },
             {

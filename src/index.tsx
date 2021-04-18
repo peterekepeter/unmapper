@@ -1,14 +1,14 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as React from "react"
+import * as ReactDOM from "react-dom"
 
-import { Application } from "./components/Application";
-import { dummyData2 } from "./dummyAppData";
-import * as keyboard from './controller/keyboard';
-import { ICommand } from "./controller/command/ICommand";
-import { install_clipboard_integration } from "./controller/clipboard";
-import { get_all_commands_v2 } from "./commands/all_commands";
-import { import_from_string_command } from "./commands/import_from_string";
-import { AppController } from "./controller/AppController";
+import { Application } from "./components/Application"
+import * as keyboard from './controller/keyboard'
+import { ICommand } from "./controller/command/ICommand"
+import { install_clipboard_integration } from "./controller/clipboard"
+import { get_all_commands_v2 } from "./commands/all_commands"
+import { import_from_string_command } from "./commands/import_from_string"
+import { AppController } from "./controller/AppController"
+import { initial_level_string } from "./initial"
 
 
 function main() {
@@ -56,9 +56,9 @@ function main() {
         keyboard.bind_command_shortcut(command)
     }
     
-    controller.execute(import_from_string_command, dummyData2);
-    setWindowTitle("Work in progress experimental stuff");
-    initializeReact(document.body, controller);
+    controller.execute(import_from_string_command, initial_level_string)
+    setWindowTitle("Work in progress experimental stuff")
+    initializeReact(document.body, controller)
 }
 
 function initializeReact(
