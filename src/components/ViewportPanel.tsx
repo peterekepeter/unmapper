@@ -60,11 +60,6 @@ export function ViewportPanel({
                 value={state.viewports[viewport_index].mode}
                 options={ALL_VIEWPORT_MODES}
                 on_change={mode => set_mode(mode)}></DropDown>
-            {/* <UiText>{generateTitle(state.viewports[viewport_index].mode)}</UiText>
-            <UiButton onClick={()=> set_mode(ViewportMode.Top)}>Top</UiButton>
-            <UiButton onClick={()=> set_mode(ViewportMode.Front)}>Front</UiButton>
-            <UiButton onClick={()=> set_mode(ViewportMode.Side)}>Side</UiButton>
-            <UiButton onClick={()=> set_mode(ViewportMode.Perspective)}>Perspective</UiButton> */}
         </div>
     </div>
 }

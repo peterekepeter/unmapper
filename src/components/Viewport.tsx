@@ -1,12 +1,12 @@
 import { FunctionComponent, useState } from "react"
-import { IRenderer } from "../render/IRenderer"
+import { Renderer } from "../render/IRenderer"
 import { create_wireframe_renderer } from "../render/WireframeRenderer"
 import { Vector } from "../model/Vector"
 import React = require("react")
 import { create_controller, AppController } from "../controller/AppController"
 import { Rotation } from "../model/Rotation"
 import { Matrix3x3 } from "../model/Matrix3x3"
-import { ViewportMode } from "../model/ViewportMode"
+import { ViewportMode, viewport_mode_rotateable } from "../model/ViewportMode"
 import { UnrealMap } from "../model/UnrealMap"
 import { create_initial_editor_state, EditorState, ViewportState } from "../model/EditorState"
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
@@ -34,7 +34,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
     const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 
-    const [renderer, set_renderer] = useState<IRenderer>(null);
+    const [renderer, set_renderer] = useState<Renderer>(null);
 
     const view_mode = viewport_state.mode;
 
@@ -94,26 +94,31 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         return scale;
     }
 
-    function renderUpdate(target: IRenderer) {
+    function renderUpdate(target: Renderer) {
         if (target != null) {
-            const perspectiveFov = 90;
-            const scale = get_ortoho_scale();
-            target.setShowVertexes(vertex_mode);
-            target.setCenterTo(viewport_state.center_location);
+            const perspectiveFov = 90
+            const scale = get_ortoho_scale()
+            target.set_show_vertexes(vertex_mode)
+            target.set_center_to(viewport_state.center_location)
             switch (view_mode) {
                 case ViewportMode.Perspective:
-                    target.setPerspectiveRotation(viewport_state.rotation)
-                    target.setPerspectiveMode(perspectiveFov)
-                    break;
+                    target.set_perspective_rotation(viewport_state.rotation)
+                    target.set_perspective_mode(perspectiveFov)
+                    break
                 case ViewportMode.Top:
-                    target.setTopMode(scale)
-                    break;
+                    target.set_top_mode(scale)
+                    break
                 case ViewportMode.Front:
-                    target.setFrontMode(scale)
-                    break;
+                    target.set_front_mode(scale)
+                    break
                 case ViewportMode.Side:
-                    target.setSideMode(scale)
-                    break;
+                    target.set_side_mode(scale)
+                    break
+                case ViewportMode.UV:
+                    target.set_uv_mode(scale)
+                    break
+                default:
+                    throw new Error('not handled '+view_mode);
             }
             // re-render
             const before_time = Date.now();

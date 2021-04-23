@@ -4,7 +4,7 @@ import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { Vector } from "../../model/Vector"
-import { IRenderer } from "../../render/IRenderer"
+import { Renderer } from "../../render/IRenderer"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { Interaction } from "./Interaction"
@@ -54,7 +54,7 @@ export class InteractionController {
         }
     }
 
-    pointer_click(canvas_x: number, canvas_y: number, renderer: IRenderer, ctrl: boolean): void {
+    pointer_click(canvas_x: number, canvas_y: number, renderer: Renderer, ctrl: boolean): void {
         if (!this.interaction) {
             this.default_interaction(canvas_x, canvas_y, renderer, ctrl)
         } else {
@@ -65,19 +65,19 @@ export class InteractionController {
         }
     }
 
-    default_interaction(canvas_x: number, canvas_y: number, renderer: IRenderer, ctrl: boolean): void {
+    default_interaction(canvas_x: number, canvas_y: number, renderer: Renderer, ctrl: boolean): void {
         const controller = this.controller
         const state = controller.state_signal.value
         const vertex_mode = state.vertex_mode
         if (vertex_mode) {
-            const [actor, vertexIndex] = renderer.findNearestVertex(state.map, canvas_x, canvas_y)
+            const [actor, vertexIndex] = renderer.find_nearest_vertex(state.map, canvas_x, canvas_y)
             if (ctrl) {
                 controller.execute(select_toggle_vertex_command, actor, vertexIndex)
             } else {
                 controller.execute(select_vertex_command, actor, vertexIndex)
             }
         } else {
-            const actor = renderer.findNearestActor(state.map, canvas_x, canvas_y)
+            const actor = renderer.find_nearest_actor(state.map, canvas_x, canvas_y)
             if (ctrl) {
                 controller.execute(toggle_actor_selected_command, actor)
             } else {
@@ -86,7 +86,7 @@ export class InteractionController {
         }
     }
 
-    pointer_move(canvas_x: number, canvas_y: number, renderer: IRenderer): void {
+    pointer_move(canvas_x: number, canvas_y: number, renderer: Renderer): void {
         if (this.interaction) {
             const [vector, is_snap] = this.get_pointer_world_position(canvas_x, canvas_y, renderer)
             this.interaction.set_pointer_world_location(vector, renderer.get_view_mode())
@@ -102,7 +102,7 @@ export class InteractionController {
 
     }
 
-    get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: IRenderer): [Vector, boolean] {
+    get_pointer_world_position(canvas_x: number, canvas_y: number, renderer: Renderer): [Vector, boolean] {
 
         const state = this.controller.current_state
         

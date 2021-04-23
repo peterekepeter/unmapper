@@ -1,6 +1,6 @@
 import { UnrealMap } from "../model/UnrealMap";
 import { Actor } from "../model/Actor";
-import { IRenderer } from "./IRenderer";
+import { Renderer } from "./IRenderer";
 import { Vector } from "../model/Vector";
 import { CsgOperation } from "../model/CsgOperation";
 import { PolyFlags } from "../model/PolyFlags";
@@ -41,24 +41,24 @@ const vertexColor = colors.activeBrush;
 const vertexSelectedColor = "#fff";
 
 const selectedColors: IBrushColors = {
-    activeBrush: makeSelectedColor(colors.activeBrush),
-    addBrush: makeSelectedColor(colors.addBrush),
-    semiSolidBrush: makeSelectedColor(colors.semiSolidBrush),
-    nonSolidBrush: makeSelectedColor(colors.nonSolidBrush),
-    subtractBrush: makeSelectedColor(colors.subtractBrush),
-    invalidBrush: makeSelectedColor(colors.invalidBrush),
+    activeBrush: make_selected_color(colors.activeBrush),
+    addBrush: make_selected_color(colors.addBrush),
+    semiSolidBrush: make_selected_color(colors.semiSolidBrush),
+    nonSolidBrush: make_selected_color(colors.nonSolidBrush),
+    subtractBrush: make_selected_color(colors.subtractBrush),
+    invalidBrush: make_selected_color(colors.invalidBrush),
 }
 
 function get_color_based_on_poly_count(count : number){
     switch(count){
-        case 0: return "#666";
-        case 1: return "#8c4";
-        case 2: return "#c12";
-        default: return "#c19";
+        case 0: return "#666"
+        case 1: return "#8c4"
+        case 2: return "#c12"
+        default: return "#c19"
     }
 }
 
-function makeSelectedColor(cstr: string) {
+function make_selected_color(cstr: string) {
     const colorSelected = Color.WHITE;
     return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex();
 }
@@ -79,7 +79,7 @@ function get_brush_wire_color(actor: Actor): string {
     }
 }
 
-export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_cache : GeometryCache): IRenderer {
+export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_cache : GeometryCache): Renderer {
     const context = canvas.getContext("2d");
     let { width, height } = canvas;
     let deviceSize = Math.min(width, height);
@@ -115,17 +115,26 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
         const view_bounding_box = get_view_bounding_box()
 
-        for (let i=0; i<map.actors.length; i++) {
-            const actor = map.actors[i]
-            if (!actor.selected) { render_actor(actor, i, view_bounding_box) }
-        }
-        if (showVertexes){
-            context.fillStyle = backgroundColor + '8'
-            context.fillRect(0, 0, width, height)
-        }
-        for (let i=0; i<map.actors.length; i++) {
-            const actor = map.actors[i]
-            if (actor.selected) { render_actor(actor, i, view_bounding_box) }
+        if (view_mode !== ViewportMode.UV)
+        {
+            for (let i=0; i<map.actors.length; i++) {
+                const actor = map.actors[i]
+                if (!actor.selected) { render_actor(actor, i, view_bounding_box) }
+            }
+            if (showVertexes){
+                context.fillStyle = backgroundColor + '8'
+                context.fillRect(0, 0, width, height)
+            }
+            for (let i=0; i<map.actors.length; i++) {
+                const actor = map.actors[i]
+                if (actor.selected) { render_actor(actor, i, view_bounding_box) }
+            }
+        } 
+        else {
+            for (let i=0; i<map.actors.length; i++) {
+                const actor = map.actors[i]
+                if (actor.selected) { render_actor_uv(actor, i, view_bounding_box) }
+            }
         }
     }
 
@@ -137,6 +146,27 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         const box = geometry_cache.get_bounding_box(index);
         if (!view_bounding_box.intersects(box)){
             return;
+        }
+
+        const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index);
+
+        context.strokeStyle = get_brush_wire_color(actor);
+        context.lineWidth = 1.5;
+
+        render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
+        if (showVertexes && actor.selected){
+            render_vertexes(actor.brushModel, transformed_vertexes);
+        }
+    }
+
+    function render_actor_uv(actor: Actor, index: number, view_bounding_box: BoundingBox) {
+        if (actor.brushModel == null) {
+            return
+        } 
+
+        const box = geometry_cache.get_bounding_box(index)
+        if (!view_bounding_box.intersects(box)){
+            return
         }
 
         const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index);
@@ -414,6 +444,28 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         
     }
 
+    function set_uv_mode(scale: number): void{
+        view_mode = ViewportMode.UV
+        get_view_bounding_box = () => {
+            const x_size = width / 2 / deviceSize / scale
+            const y_size = height / 2 / deviceSize / scale
+            return new BoundingBox({
+                min_x: view_center.x - x_size, max_x: view_center.x + x_size,
+                min_y: view_center.y - y_size, max_y: view_center.y + y_size
+            })
+        }
+        view_transform = null,
+        view_transform_x = vector =>
+            (vector.x - view_center.x) * deviceSize * scale + width / 2;
+        view_transform_y = vector =>
+            (vector.y - view_center.y) * deviceSize * scale + height / 2;
+        canvas_to_world_location = (x,y) => 
+            new Vector(
+                view_center.x + (x - width/2) / deviceSize / scale,
+                view_center.y + (y - height/2) / deviceSize / scale,
+                view_center.z)
+    }
+
     function set_front_mode(scale: number): void {
         view_mode = ViewportMode.Front
         get_view_bounding_box = () => {
@@ -620,21 +672,22 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         return [bestMatchLocation, bestDistance]
     }
 
-    const s: IRenderer = {
+    const s: Renderer = {
         render: render_map,
         render_v2: render,
-        setCenterTo,
-        setFrontMode: set_front_mode,
-        setPerspectiveMode: set_perspective_mode,
-        setSideMode: set_side_mode,
-        setTopMode: set_top_mode,
+        set_center_to: setCenterTo,
+        set_front_mode,
+        set_perspective_mode,
+        set_side_mode,
+        set_top_mode,
+        set_uv_mode,
         get_view_mode: () => view_mode,
-        setPerspectiveRotation,
-        findNearestActor,
-        findNearestVertex,
+        set_perspective_rotation: setPerspectiveRotation,
+        find_nearest_actor: findNearestActor,
+        find_nearest_vertex: findNearestVertex,
         find_nearest_snapping_point,
         get_pointer_world_location: (x,y) => canvas_to_world_location(x,y),
-        setShowVertexes: (state:boolean) => { showVertexes = state; } 
+        set_show_vertexes: (state:boolean) => { showVertexes = state; } 
     }
     return s;
 }
