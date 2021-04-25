@@ -15,6 +15,7 @@ import { distance_2d_to_point, distance_to_line_segment } from "../model/geometr
 import { intersect_segment_with_plane } from "../model/geometry/intersect-functions";
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState";
 import { ViewportMode } from "../model/ViewportMode";
+import { get_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv";
 
 const backgroundColor = '#222';
 
@@ -164,20 +165,98 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         } 
 
-        const box = geometry_cache.get_bounding_box(index)
-        if (!view_bounding_box.intersects(box)){
-            return
+        // const box = geometry_cache.get_bounding_box(index)
+        // if (!view_bounding_box.intersects(box)){
+        //     return
+        // }
+
+        // const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index);
+        const uv_color = "#4c2"
+        context.strokeStyle = uv_color
+        context.lineWidth = 1.5
+
+        const model = actor.brushModel
+
+        for (let i=0; i<model.polygons.length; i++){
+            const uvs = get_brush_polygon_vertex_uvs(model, i)
+            let last = uvs[uvs.length-1]
+            for (const current of uvs){
+                
+                const x0 = view_transform_x(last), y0 = view_transform_y(last);
+                const x1 = view_transform_x(current), y1 = view_transform_y(current);
+                const invalid0 = isNaN(x0) || isNaN(y0)
+                const invalid1 = isNaN(x1) || isNaN(y1)
+
+                
+                if (!invalid0 && !invalid1)
+                {
+                    context.beginPath()
+                    context.moveTo(x0,y0)
+                    context.lineTo(x1,y1)
+                    context.stroke()
+                }
+
+                last = current
+            }
         }
 
-        const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index);
+        // render not selected vertexes
+        for (let i=0; i<model.polygons.length; i++){
+            const poly = model.polygons[i]
+            const uvs = get_brush_polygon_vertex_uvs(model, i)
+            for (let j=0; j<uvs.length; j++){
+                const current_uv = uvs[j];
+                const current_vertex = model.vertexes[poly.vertexes[j]]
+                const is_selected = current_vertex.selected
 
-        context.strokeStyle = get_brush_wire_color(actor);
-        context.lineWidth = 1.5;
+                if (is_selected){
+                    continue
+                }
 
-        render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
-        if (showVertexes && actor.selected){
-            render_vertexes(actor.brushModel, transformed_vertexes);
+                const x = view_transform_x(current_uv)
+                const y = view_transform_y(current_uv)
+    
+                if (!isNaN(x) && !isNaN(y))
+                {
+                    context.fillStyle = is_selected ? vertexSelectedColor : uv_color
+                    context.beginPath()
+                    context.arc(x,y,3,0,Math.PI*2)
+                    context.fill()
+                }
+            }
         }
+
+        // render selected vertexes
+        for (let i=0; i<model.polygons.length; i++){
+            const poly = model.polygons[i]
+            const uvs = get_brush_polygon_vertex_uvs(model, i)
+            for (let j=0; j<uvs.length; j++){
+                const current_uv = uvs[j];
+                const current_vertex = model.vertexes[poly.vertexes[j]]
+                const is_selected = current_vertex.selected
+                
+                if (!is_selected){
+                    continue
+                }
+
+                const x = view_transform_x(current_uv)
+                const y = view_transform_y(current_uv)
+    
+                if (!isNaN(x) && !isNaN(y))
+                {
+                    context.fillStyle = is_selected ? vertexSelectedColor : uv_color
+                    context.beginPath()
+                    context.arc(x,y,3,0,Math.PI*2)
+                    context.fill()
+                }
+            }
+        }
+
+
+        // render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes);
+        // if (showVertexes && actor.selected){
+        //     render_vertexes(actor.brushModel, transformed_vertexes);
+        // }
     }
 
     function render_vertexes(brush: BrushModel, transformed_vertexes: Vector[]){
