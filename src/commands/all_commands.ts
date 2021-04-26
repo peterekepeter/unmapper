@@ -16,6 +16,7 @@ import { rotate_command } from "./rotate"
 import { apply_transform_command } from "./apply_transform"
 import { uv_random_map_command } from "./uv_random_map"
 import { scale_command } from "./scale"
+import { reset_initial_state, set_initial_state } from "./set_initial_state"
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
@@ -36,5 +37,7 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     rotate_command,
     scale_command,
     apply_transform_command,
-    uv_random_map_command
+    uv_random_map_command,
+    set_initial_state,
+    reset_initial_state
 ]

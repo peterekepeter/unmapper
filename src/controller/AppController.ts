@@ -1,4 +1,4 @@
-import { createSignal } from 'reactive-signals';
+import { createSignal, ISignal } from 'reactive-signals';
 import { create_history } from './history';
 import { create_initial_editor_state, EditorState } from '../model/EditorState';
 import { create_command_registry } from './command/command_registry';
@@ -11,9 +11,10 @@ import { InteractionRenderState } from './interactions/InteractionRenderState';
 export class AppController {
 
     /** lastest non-preview state */
-    current_state: EditorState = create_initial_editor_state(); 
+    current_state: EditorState;
     /** latest shown state */
-    state_signal = createSignal<EditorState>(this.current_state);
+    state_signal: ISignal<EditorState> = createSignal<EditorState>();
+
     commands = create_command_registry();
     commands_shown_state = createSignal(false);
     geometry_cache = new GeometryCache();
@@ -24,10 +25,12 @@ export class AppController {
         set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state })
     });
 
-    constructor() {
+    constructor(initial_state?: EditorState) {
         this.state_signal.event(state => {
-            this.geometry_cache.actors = state.map.actors;
+            this.geometry_cache.actors = state.map.actors
         })
+        this.current_state = initial_state ?? create_initial_editor_state()
+        this.state_signal.value = this.current_state
     }
 
     interactively_execute(command_info: ICommandInfoV2): void {

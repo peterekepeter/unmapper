@@ -6,15 +6,15 @@ import * as keyboard from './controller/keyboard'
 import { ICommand } from "./controller/command/ICommand"
 import { install_clipboard_integration } from "./controller/clipboard"
 import { get_all_commands_v2 } from "./commands/all_commands"
-import { import_from_string_command } from "./commands/import_from_string"
 import { AppController } from "./controller/AppController"
-import { initial_level_string } from "./initial"
+import { get_initial_level_state } from "./initial_state"
 
 
 function main() {
 
-    const controller = new AppController();
-    keyboard.addEventListener(window);
+    const initial_state = get_initial_level_state()
+    const controller = new AppController(initial_state)
+    keyboard.addEventListener(window)
 
     controller.commands.register_commands_v2(get_all_commands_v2())
     
@@ -56,7 +56,6 @@ function main() {
         keyboard.bind_command_shortcut(command)
     }
     
-    controller.execute(import_from_string_command, initial_level_string)
     setWindowTitle("Work in progress experimental stuff")
     initializeReact(document.body, controller)
 }
