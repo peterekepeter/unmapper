@@ -1,6 +1,7 @@
 
 import { BoundingBox } from "../../model/BoundingBox"
 import { Matrix3x3 } from "../../model/Matrix3x3"
+import { Rotation } from "../../model/Rotation";
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
 
@@ -9,16 +10,23 @@ export class PerspectiveViewTransform implements ViewTransform {
 
     width: number;
     height: number;
-    deviceSize: number;
+    device_size: number;
     scale: number;
     view_center: Vector;
-    view_rotation: Matrix3x3;
-    
+
+    private rotation_matrix: Matrix3x3;
+
+    set view_rotation(rotation: Rotation) {
+        this.rotation_matrix = Matrix3x3
+            .rotateDegreesY(-rotation.pitch)
+            .rotateDegreesZ(-rotation.yaw)
+    }
+
     constructor(public field_of_view = 90){
     }
 
     get_view_bounding_box(): BoundingBox {
-        const forward = this.view_rotation.apply(Vector.FORWARD)
+        const forward = this.rotation_matrix.apply(Vector.FORWARD)
 
         let max_squared = 0
         let axis = 0
@@ -58,31 +66,31 @@ export class PerspectiveViewTransform implements ViewTransform {
         const y = vector.y - this.view_center.y
         const z = vector.z - this.view_center.z
         return new Vector(
-            this.view_rotation.getTransformedX(x, y, z),
-            this.view_rotation.getTransformedY(x, y, z),
-            this.view_rotation.getTransformedZ(x, y, z))
+            this.rotation_matrix.getTransformedX(x, y, z),
+            this.rotation_matrix.getTransformedY(x, y, z),
+            this.rotation_matrix.getTransformedZ(x, y, z))
     }
 
     view_transform_x(v: Vector): number {
         const w_x = v.x - this.view_center.x
         const w_y = v.y - this.view_center.y
         const w_z = v.z - this.view_center.z
-        const x = this.view_rotation.getTransformedX(w_x, w_y, w_z)
-        const y = this.view_rotation.getTransformedY(w_x, w_y, w_z)
+        const x = this.rotation_matrix.getTransformedX(w_x, w_y, w_z)
+        const y = this.rotation_matrix.getTransformedY(w_x, w_y, w_z)
         return x < 0
             ? Number.NaN
-            : (y / x) * this.deviceSize + this.width * .5
+            : (y / x) * this.device_size + this.width * .5
     }
 
     view_transform_y(v: Vector): number {
         const w_x = v.x - this.view_center.x
         const w_y = v.y - this.view_center.y
         const w_z = v.z - this.view_center.z
-        const x = this.view_rotation.getTransformedX(w_x, w_y, w_z)
-        const z = this.view_rotation.getTransformedZ(w_x, w_y, w_z)
+        const x = this.rotation_matrix.getTransformedX(w_x, w_y, w_z)
+        const z = this.rotation_matrix.getTransformedZ(w_x, w_y, w_z)
         return x < 0
             ? Number.NaN
-            : (-z / x) * this.deviceSize + this.height * .5
+            : (-z / x) * this.device_size + this.height * .5
     }
 
     canvas_to_world_location(canvas_x: number, canvas_y: number): Vector {

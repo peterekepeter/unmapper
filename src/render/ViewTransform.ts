@@ -1,15 +1,16 @@
-import { BoundingBox } from "../model/BoundingBox";
-import { Matrix3x3 } from "../model/Matrix3x3";
-import { Vector } from "../model/Vector";
+import { BoundingBox } from "../model/BoundingBox"
+import { Rotation } from "../model/Rotation"
+import { Vector } from "../model/Vector"
 
 
 export interface ViewTransform{
     can_3d_transform: boolean;
     view_center: Vector;
-    deviceSize: number;
+    device_size: number;
+    scale: number;
     width: number;
     height: number; 
-    view_rotation: Matrix3x3;
+    view_rotation: Rotation;
     
     get_view_bounding_box(): BoundingBox;
     view_transform(vector: Vector): Vector;

@@ -89,28 +89,23 @@ function get_brush_wire_color(actor: Actor): string {
 export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_cache: GeometryCache): Renderer {
     const context = canvas.getContext("2d")
     let { width, height } = canvas
-    let deviceSize = Math.min(width, height)
+    let device_size = Math.min(width, height)
     let showVertexes = false
-    let view_center: Vector = Vector.ZERO
     let render_transform: ViewTransform = null
 
-    let view_rotation = Matrix3x3.IDENTITY
     let view_mode = ViewportMode.Top
 
     const viewport_queries = new ViewportQueries(geometry_cache)
 
     function render(state: EditorState): void {
-        update_render_transform_props()
         render_map(state.map)
         render_interaction(state.interaction_render_state)
     }
 
     function render_map(map: UnrealMap) {
-
-        update_render_transform_props()
         width = canvas.width
         height = canvas.height
-        deviceSize = Math.min(width, height)
+        device_size = Math.min(width, height)
 
         context.fillStyle = backgroundColor
         context.fillRect(0, 0, width, height)
@@ -159,15 +154,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             }
         }
     }
-
-    function update_render_transform_props() {
-        render_transform.deviceSize = deviceSize
-        render_transform.width = width
-        render_transform.height = height
-        render_transform.view_center = view_center
-        render_transform.view_rotation = view_rotation
-    }
-
 
     function render_actor(actor: Actor, index: number, view_bounding_box: BoundingBox) {
         if (actor.brushModel == null) {
@@ -307,10 +293,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 else if (out_vertex_b.x < 0) {
                     out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1)
                 }
-                const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * deviceSize + width * .5
-                const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * deviceSize + height * .5
-                const screen_b_x = (out_vertex_b.y / out_vertex_b.x) * deviceSize + width * .5
-                const screen_b_y = (-out_vertex_b.z / out_vertex_b.x) * deviceSize + height * .5
+                const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * device_size + width * .5
+                const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * device_size + height * .5
+                const screen_b_x = (out_vertex_b.y / out_vertex_b.x) * device_size + width * .5
+                const screen_b_y = (-out_vertex_b.z / out_vertex_b.x) * device_size + height * .5
                 context.beginPath()
                 context.moveTo(screen_a_x, screen_a_y)
                 context.lineTo(screen_b_x, screen_b_y)
@@ -414,59 +400,20 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    set_top_mode(1 / 2400)
-
-    function setCenterTo(location: Vector): void {
-        view_center = location
+    function set_view_mode(mode: ViewportMode): void {
+        view_mode = mode
     }
 
-    function set_perspective_rotation(rotation: Rotation): void {
-        view_rotation = Matrix3x3
-            .rotateDegreesY(-rotation.pitch)
-            .rotateDegreesZ(-rotation.yaw)
-    }
-
-    function set_perspective_mode(field_of_view: number): void {
-        view_mode = ViewportMode.Perspective
-        render_transform = new PerspectiveViewTransform(field_of_view)
-        update_render_transform_props()
-    }
-
-    function set_top_mode(scale: number): void {
-        view_mode = ViewportMode.Top
-        render_transform = new TopViewTransform(scale)
-        update_render_transform_props()
-    }
-
-    function set_uv_mode(scale: number): void {
-        view_mode = ViewportMode.UV
-        render_transform = new TopViewTransform(scale)
-        update_render_transform_props()
-    }
-
-    function set_front_mode(scale: number): void {
-        view_mode = ViewportMode.Front
-        render_transform = new FrontViewTransform(scale)
-        update_render_transform_props()
-    }
-
-    function set_side_mode(scale: number): void {
-        view_mode = ViewportMode.Side
-        render_transform = new SideViewTransform(scale)
-        update_render_transform_props()
+    function set_view_transform(transform: ViewTransform): void {   
+        render_transform = transform
     }
 
     const s: Renderer = {
+        set_view_transform,
         render: render_map,
         render_v2: render,
-        set_center_to: setCenterTo,
-        set_front_mode,
-        set_perspective_mode,
-        set_side_mode,
-        set_top_mode,
-        set_uv_mode,
+        set_view_mode,
         get_view_mode: () => view_mode,
-        set_perspective_rotation,
         find_nearest_actor: (map: UnrealMap, x: number, y: number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_Actor(map, x, y) },
         find_nearest_vertex: (map: UnrealMap, x: number, y:number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_vertex(map, x,y) },
         find_nearest_snapping_point: (map: UnrealMap, x: number, y: number, cgc: GeometryCache) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_snapping_point(map, x, y, cgc) },

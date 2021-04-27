@@ -1,21 +1,16 @@
-import { UnrealMap } from "../model/UnrealMap";
-import { Vector } from "../model/Vector";
-import { Actor } from "../model/Actor";
-import { Rotation } from "../model/Rotation";
-import { EditorState } from "../model/EditorState";
-import { GeometryCache } from "../model/geometry/GeometryCache";
-import { ViewportMode } from "../model/ViewportMode";
+import { UnrealMap } from "../model/UnrealMap"
+import { Vector } from "../model/Vector"
+import { Actor } from "../model/Actor"
+import { EditorState } from "../model/EditorState"
+import { GeometryCache } from "../model/geometry/GeometryCache"
+import { ViewportMode } from "../model/ViewportMode"
+import { ViewTransform } from "./ViewTransform"
 
 export interface Renderer {
+    set_view_transform(view_transform: ViewTransform): void;
+    set_view_mode(mode : ViewportMode) : void;
+    get_view_mode(): ViewportMode;
     set_show_vertexes(state: boolean) : void;
-    set_center_to(location : Vector) : void;
-    set_perspective_rotation(rotation : Rotation) : void;
-    set_perspective_mode(fieldOfView : number) : void;
-    set_top_mode(scale : number) : void;
-    set_front_mode(scale : number) : void;
-    set_side_mode(scale : number) : void;
-    set_uv_mode(scale : number) : void;
-    get_view_mode() : ViewportMode;
     /** @deprecated use render_v2 */
     render (unrealMap : UnrealMap) : void;
     render_v2 (state : EditorState) : void;

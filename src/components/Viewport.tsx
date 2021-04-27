@@ -12,6 +12,8 @@ import { create_initial_editor_state, EditorState, ViewportState } from "../mode
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
 import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom"
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
+import { ViewTransform } from "../render/ViewTransform"
+import { create_view_transform } from "../render/transform/create_view_transform"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -47,6 +49,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     const [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
     const [last_width, set_last_width] = useState<number>(null);
     const [last_height, set_last_height] = useState<number>(null);
+    const [last_view_mode, set_last_view_mode] = useState<ViewportMode>(null);
+    const [view_transform, set_view_transform] = useState<ViewTransform>(create_view_transform(view_mode));
 
     function canvas_ref(new_canvas: HTMLCanvasElement) {
         if (new_canvas == null){
@@ -83,9 +87,15 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             set_last_height(height)
             needs_render = true
         }
+        if (last_view_mode !== view_mode){
+            set_last_view_mode(view_mode)
+            set_view_transform(create_view_transform(view_mode))
+            needs_render = true
+        }
         if (needs_render){
             renderUpdate(renderer)
         }
+    
     }
 
     function get_ortoho_scale(){
@@ -98,32 +108,19 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         if (target != null) {
             const perspectiveFov = 90
             const scale = get_ortoho_scale()
+            target.set_view_mode(view_mode)
             target.set_show_vertexes(vertex_mode)
-            target.set_center_to(viewport_state.center_location)
-            switch (view_mode) {
-                case ViewportMode.Perspective:
-                    target.set_perspective_rotation(viewport_state.rotation)
-                    target.set_perspective_mode(perspectiveFov)
-                    break
-                case ViewportMode.Top:
-                    target.set_top_mode(scale)
-                    break
-                case ViewportMode.Front:
-                    target.set_front_mode(scale)
-                    break
-                case ViewportMode.Side:
-                    target.set_side_mode(scale)
-                    break
-                case ViewportMode.UV:
-                    target.set_uv_mode(scale)
-                    break
-                default:
-                    throw new Error('not handled '+view_mode);
-            }
+            view_transform.width = canvas.width
+            view_transform.height = canvas.height
+            view_transform.device_size = Math.min(canvas.width, canvas.height)
+            view_transform.view_rotation = viewport_state.rotation
+            view_transform.view_center = viewport_state.center_location
+            view_transform.scale = scale
+            target.set_view_transform(view_transform)
             // re-render
-            const before_time = Date.now();
-            target.render_v2(controller.state_signal.value);
-            const delta_time = Date.now() - before_time;
+            const before_time = Date.now()
+            target.render_v2(controller.state_signal.value)
+            const delta_time = Date.now() - before_time
             // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', viewport_state.center_location);
         }
     }
@@ -140,9 +137,11 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         onPointerUp={handle_pointer_up}
         onPointerMove={handle_pointer_move}
         ref={canvas => canvas_ref(canvas)}
-        style={{
-            maxWidth: '100%',
-            maxHeight: '100%',
+        style={ canvas && canvas.height < canvas.width ? {
+            height: '100%',
+            position: "relative"
+        } : {
+            width: '100%',
             position: "relative"
         }} />
 
@@ -203,11 +202,11 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             dy *= -1;
         }
         const ortohoScale = get_ortoho_scale();
-        const deviceSize = Math.min(width, height);
-        const scale = ortohoScale * deviceSize;
+        const device_size = Math.min(width, height);
+        const scale = ortohoScale * device_size;
         setDidMouseMove(true);
         const [next_rotation, nextLocation] =
-            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, deviceSize, ortohoScale);
+            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortohoScale);
         controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation);
     }
 
