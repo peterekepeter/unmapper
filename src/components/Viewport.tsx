@@ -267,6 +267,7 @@ function nextViewState(
             }
 
             break;
+        case ViewportMode.UV:
         case ViewportMode.Top:
             nextLocation = location.add_numbers(scaledX, scaledY, 0)
             break

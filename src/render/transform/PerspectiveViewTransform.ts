@@ -2,10 +2,10 @@
 import { BoundingBox } from "../../model/BoundingBox"
 import { Matrix3x3 } from "../../model/Matrix3x3"
 import { Vector } from "../../model/Vector"
-import { RenderTransform } from "../RenderTransform"
+import { ViewTransform } from "../ViewTransform"
 
 
-export class PerspectiveRenderTransform implements RenderTransform {
+export class PerspectiveViewTransform implements ViewTransform {
 
     width: number;
     height: number;

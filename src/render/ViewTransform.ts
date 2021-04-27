@@ -3,7 +3,7 @@ import { Matrix3x3 } from "../model/Matrix3x3";
 import { Vector } from "../model/Vector";
 
 
-export interface RenderTransform{
+export interface ViewTransform{
     can_3d_transform: boolean;
     view_center: Vector;
     deviceSize: number;
