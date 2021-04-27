@@ -16,6 +16,11 @@ import { intersect_segment_with_plane } from "../model/geometry/intersect-functi
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState";
 import { ViewportMode } from "../model/ViewportMode";
 import { get_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv";
+import { PerspectiveRenderTransform } from "./transform/PerspectiveRenderTransform";
+import { RenderTransform } from "./RenderTransform";
+import { TopRenderTransform } from "./transform/TopRenderTransform";
+import { FrontRenderTransform } from "./transform/FrontRenderTransform";
+import { SideRenderTransform } from "./transform/SideRenderTransform";
 
 const backgroundColor = '#222';
 
@@ -87,23 +92,20 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     let deviceSize = Math.min(width, height);
     let showVertexes = false;
     let view_center : Vector = Vector.ZERO;
+    let render_transform: RenderTransform = null
 
-    let get_view_bounding_box: () => BoundingBox;
-    let view_transform_x: (vector: Vector) => number;
-    let view_transform_y: (vector: Vector) => number;
-    let view_transform: (in_vector: Vector) => Vector;
-    let canvas_to_world_location: (canvas_x: number, canvas_y: number) => Vector
     let view_rotation = Matrix3x3.IDENTITY;
     let view_mode = ViewportMode.Top;
-
-
+    
     function render(state : EditorState) : void {
+        update_render_transform_props()
         render_map(state.map)
         render_interaction(state.interaction_render_state)
     }  
 
     function render_map(map: UnrealMap) {
 
+        update_render_transform_props()
         width = canvas.width
         height = canvas.height
         deviceSize = Math.min(width, height)
@@ -115,7 +117,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         }
 
-        const view_bounding_box = get_view_bounding_box()
+        const view_bounding_box = render_transform.get_view_bounding_box()
 
         if (view_mode !== ViewportMode.UV)
         {
@@ -157,6 +159,15 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
+    function update_render_transform_props(){
+        render_transform.deviceSize = deviceSize
+        render_transform.width = width
+        render_transform.height = height
+        render_transform.view_center = view_center
+        render_transform.view_rotation = view_rotation
+    }
+
+
     function render_actor(actor: Actor, index: number, view_bounding_box: BoundingBox) {
         if (actor.brushModel == null) {
             return;
@@ -185,8 +196,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             let last = uvs[uvs.length-1]
             for (const current of uvs){
                 
-                const x0 = view_transform_x(last), y0 = view_transform_y(last);
-                const x1 = view_transform_x(current), y1 = view_transform_y(current);
+                const x0 = render_transform.view_transform_x(last)
+                const y0 = render_transform.view_transform_y(last)
+                const x1 = render_transform.view_transform_x(current)
+                const y1 = render_transform.view_transform_y(current)
                 const invalid0 = isNaN(x0) || isNaN(y0)
                 const invalid1 = isNaN(x1) || isNaN(y1)
 
@@ -215,8 +228,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 
                 if (current_vertex.selected) { continue }
 
-                const x = view_transform_x(current_uv)
-                const y = view_transform_y(current_uv)
+                const x = render_transform.view_transform_x(current_uv)
+                const y = render_transform.view_transform_y(current_uv)
                 if (isNaN(x) || isNaN(y)) { continue }
 
                 context.beginPath()
@@ -236,8 +249,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 
                 if (!current_vertex.selected) { continue }
 
-                const x = view_transform_x(current_uv)
-                const y = view_transform_y(current_uv)
+                const x = render_transform.view_transform_x(current_uv)
+                const y = render_transform.view_transform_y(current_uv)
                 if (isNaN(x) || isNaN(y)) { continue }
 
                 context.beginPath()
@@ -251,8 +264,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         for (let i=0; i<brush.vertexes.length; i++){
             const is_selected = brush.vertexes[i].selected;
             const point = transformed_vertexes[i];
-            const x = view_transform_x(point);
-            const y = view_transform_y(point);
+            const x = render_transform.view_transform_x(point);
+            const y = render_transform.view_transform_y(point);
 
             if (!isNaN(x) && !isNaN(y))
             {
@@ -284,9 +297,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length);
             }
 
-            if (view_transform != null){
-                let out_vertex_a = view_transform(vertexA);
-                let out_vertex_b = view_transform(vertexB);
+            if (render_transform.can_3d_transform){
+                let out_vertex_a = render_transform.view_transform(vertexA);
+                let out_vertex_b = render_transform.view_transform(vertexB);
                 if (out_vertex_a.x < 0 && out_vertex_b.x < 0){
                     continue;
                 }
@@ -308,10 +321,12 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 continue;
             }
 
-            const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA);
-            const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB);
-            const invalid0 = isNaN(x0) || isNaN(y0);
-            const invalid1 = isNaN(x1) || isNaN(y1);
+            const x0 = render_transform.view_transform_x(vertexA)
+            const y0 = render_transform.view_transform_y(vertexA)
+            const x1 = render_transform.view_transform_x(vertexB)
+            const y1 = render_transform.view_transform_y(vertexB)
+            const invalid0 = isNaN(x0) || isNaN(y0)
+            const invalid1 = isNaN(x1) || isNaN(y1)
 
             
             if (!invalid0 && !invalid1)
@@ -324,12 +339,14 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             else if(!invalid0 && invalid1 || invalid0 && !invalid1)
             {
                 // need view transformed Z for clipping
-                let v0 = invalid1 ? vertexA : vertexB;
-                let v1 = invalid1 ? vertexB : vertexA;
-                let vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1);
+                const v0 = invalid1 ? vertexA : vertexB;
+                const v1 = invalid1 ? vertexB : vertexA;
+                const vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1);
                 if (vi != null){
-                    const x0 = view_transform_x(v0), y0 = view_transform_y(v0);
-                    const x1 = view_transform_x(vi), y1 = view_transform_y(vi);
+                    const x0 = render_transform.view_transform_x(v0)
+                    const y0 = render_transform.view_transform_y(v0)
+                    const x1 = render_transform.view_transform_x(vi)
+                    const y1 = render_transform.view_transform_y(vi)
                     context.beginPath();
                     context.moveTo(x0,y0);
                     context.lineTo(x1,y1);
@@ -349,8 +366,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             const vertexA = state.line_from
             const vertexB = state.line_to
     
-            const x0 = view_transform_x(vertexA), y0 = view_transform_y(vertexA)
-            const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
+            const x0 = render_transform.view_transform_x(vertexA), y0 = render_transform.view_transform_y(vertexA)
+            const x1 = render_transform.view_transform_x(vertexB), y1 = render_transform.view_transform_y(vertexB)
             const invalid0 = isNaN(x0) || isNaN(y0)
             const invalid1 = isNaN(x1) || isNaN(y1)
     
@@ -378,8 +395,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
 
         if (state.snap_location){
-            const x = view_transform_x(state.snap_location)
-            const y = view_transform_y(state.snap_location)
+            const x = render_transform.view_transform_x(state.snap_location)
+            const y = render_transform.view_transform_y(state.snap_location)
             
             if (!isNaN(x) && !isNaN(y)){
                 context.strokeStyle = '#fff'
@@ -389,7 +406,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
                 if (state.line_to){
                     const vertexB = state.line_to
-                    const x1 = view_transform_x(vertexB), y1 = view_transform_y(vertexB)
+                    const x1 = render_transform.view_transform_x(vertexB), y1 = render_transform.view_transform_y(vertexB)
                     if (!isNaN(x1) && !isNaN(y1))
                     {
                         context.setLineDash([3, 5])
@@ -407,77 +424,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     set_top_mode(1 / 2400);
 
-    function set_perspective_mode(field_of_view: number): void {
-
-        view_mode = ViewportMode.Perspective
-
-        get_view_bounding_box = () => {
-            const forward = view_rotation.apply(Vector.FORWARD);
-
-            let max_squared = 0;
-            let axis = 0;
-            for (let i=0; i<3; i++){
-                let component = forward.get_component(i);
-                let squared = component * component;
-                if (squared > max_squared){
-                    max_squared = squared;
-                    axis = i;
-                }
-            }
-
-            let negative = forward.get_component(axis) < 0;
-
-            switch (axis){
-                case 0 :
-                    return negative 
-                        ? new BoundingBox({ max_x: view_center.x })
-                        : new BoundingBox({ min_x: view_center.x })
-                case 1 :
-                    return negative 
-                        ? new BoundingBox({ min_y: view_center.y })
-                        : new BoundingBox({ max_y: view_center.y })
-                case 2 :
-                    return negative 
-                        ? new BoundingBox({ max_z: view_center.z })
-                        : new BoundingBox({ min_z: view_center.z })
-                default: 
-                    throw new Error('implementation error');
-            }
-        }
-        view_transform = (i) => {
-            const x = i.x - view_center.x;
-            const y = i.y - view_center.y;
-            const z = i.z - view_center.z;
-            return new Vector(
-                view_rotation.getTransformedX(x, y, z),
-                view_rotation.getTransformedY(x, y, z),
-                view_rotation.getTransformedZ(x, y, z))
-        }
-        view_transform_x = v => {
-            const w_x = v.x - view_center.x;
-            const w_y = v.y - view_center.y;
-            const w_z = v.z - view_center.z;
-            const x = view_rotation.getTransformedX(w_x, w_y, w_z);
-            const y = view_rotation.getTransformedY(w_x, w_y, w_z);
-            return x < 0
-                ? Number.NaN
-                : (y / x) * deviceSize + width * .5;
-        }
-        view_transform_y = v => {
-            const w_x = v.x - view_center.x;
-            const w_y = v.y - view_center.y;
-            const w_z = v.z - view_center.z;
-            const x = view_rotation.getTransformedX(w_x, w_y, w_z);
-            const z = view_rotation.getTransformedZ(w_x, w_y, w_z);
-            return x < 0
-                ? Number.NaN
-                : (-z / x) * deviceSize + height * .5;
-        }
-        canvas_to_world_location = (x,y) => {
-            return Vector.ZERO
-        }
-    }
-
     function setCenterTo(location: Vector): void {
         view_center = location;
     }
@@ -488,90 +434,29 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             .rotateDegreesZ(-rotation.yaw);
     }
 
+    function set_perspective_mode(field_of_view: number): void {
+        view_mode = ViewportMode.Perspective
+        render_transform = new PerspectiveRenderTransform(field_of_view)
+    }
+
     function set_top_mode(scale: number): void { 
         view_mode = ViewportMode.Top
-        get_view_bounding_box = () => {
-            const x_size = width / 2 / deviceSize / scale;
-            const y_size = height / 2 / deviceSize / scale;
-            return new BoundingBox({
-                min_x: view_center.x - x_size, max_x: view_center.x + x_size,
-                min_y: view_center.y - y_size, max_y: view_center.y + y_size
-            })
-        }
-        view_transform = null,
-        view_transform_x = vector =>
-            (vector.x - view_center.x) * deviceSize * scale + width / 2;
-        view_transform_y = vector =>
-            (vector.y - view_center.y) * deviceSize * scale + height / 2;
-        canvas_to_world_location = (x,y) => 
-            new Vector(
-                view_center.x + (x - width/2) / deviceSize / scale,
-                view_center.y + (y - height/2) / deviceSize / scale,
-                view_center.z)
-        
+        render_transform = new TopRenderTransform(scale)
     }
 
     function set_uv_mode(scale: number): void{
         view_mode = ViewportMode.UV
-        get_view_bounding_box = () => {
-            const x_size = width / 2 / deviceSize / scale
-            const y_size = height / 2 / deviceSize / scale
-            return new BoundingBox({
-                min_x: view_center.x - x_size, max_x: view_center.x + x_size,
-                min_y: view_center.y - y_size, max_y: view_center.y + y_size
-            })
-        }
-        view_transform = null,
-        view_transform_x = vector =>
-            (vector.x - view_center.x) * deviceSize * scale + width / 2;
-        view_transform_y = vector =>
-            (vector.y - view_center.y) * deviceSize * scale + height / 2;
-        canvas_to_world_location = (x,y) => 
-            new Vector(
-                view_center.x + (x - width/2) / deviceSize / scale,
-                view_center.y + (y - height/2) / deviceSize / scale,
-                view_center.z)
+        render_transform = new TopRenderTransform(scale)
     }
 
     function set_front_mode(scale: number): void {
         view_mode = ViewportMode.Front
-        get_view_bounding_box = () => {
-            const y_size = width / 2 / deviceSize / scale
-            const z_size = height / 2 / deviceSize / scale
-            return new BoundingBox({
-                min_y: view_center.y - y_size, max_y: view_center.y + y_size,
-                min_z: view_center.z - z_size, max_z: view_center.z + z_size
-            })
-        }
-        view_transform_x = vector =>
-            (vector.y - view_center.y) * deviceSize * scale + width / 2;
-        view_transform_y = vector =>
-            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
-        canvas_to_world_location = (x,y) => new Vector(
-            view_center.x,
-            view_center.y + (x - width/2) / deviceSize / scale,
-            view_center.z - (y - height/2) / deviceSize / scale)
+        render_transform = new FrontRenderTransform(scale)
     }
 
     function set_side_mode(scale: number): void {
         view_mode = ViewportMode.Side
-        get_view_bounding_box = () => {
-            const x_size = width / 2 / deviceSize / scale
-            const z_size = height / 2 / deviceSize / scale
-            return new BoundingBox({
-                min_x: view_center.x - x_size, max_x: view_center.x + x_size,
-                min_z: view_center.z - z_size, max_z: view_center.z + z_size
-            })
-        }
-        view_transform = null,
-        view_transform_x = vector =>
-            (vector.x - view_center.x) * deviceSize * scale + width / 2;
-        view_transform_y = vector =>
-            (vector.z - view_center.z) * -1 * deviceSize * scale + height / 2;
-        canvas_to_world_location = (x,y) => new Vector(
-            view_center.x + (x - width/2) / deviceSize / scale,
-            view_center.y,
-            view_center.z - (y - height/2) / deviceSize / scale)
+        render_transform = new SideRenderTransform(scale)
     }
 
     function findNearestActor(
@@ -590,11 +475,11 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
                 for (const edge of actor.brushModel.edges) {
                     let p0 = vertexes[edge.vertexIndexA];
-                    let x0 = view_transform_x(p0);
-                    let y0 = view_transform_y(p0);
+                    let x0 = render_transform.view_transform_x(p0);
+                    let y0 = render_transform.view_transform_y(p0);
                     const p1 = vertexes[edge.vertexIndexB];
-                    let x1 = view_transform_x(p1);
-                    let y1 = view_transform_y(p1);
+                    let x1 = render_transform.view_transform_x(p1);
+                    let y1 = render_transform.view_transform_y(p1);
                     if (!isNaN(x0) && !isNaN(x1)) {
                         let distance = distance_to_line_segment(canvasX, canvasY, x0, y0, x1, y1);
                         if (distance < bestDistance) {
@@ -633,8 +518,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
             for (let vertex_index = vertexes.length-1; vertex_index >= 0; vertex_index--) {
                 let p0 = transformed_vertexes[vertex_index];
-                let x0 = view_transform_x(p0);
-                let y0 = view_transform_y(p0);
+                let x0 = render_transform.view_transform_x(p0);
+                let y0 = render_transform.view_transform_y(p0);
                 if (!isNaN(x0) && !isNaN(y0)) {
                     let distance = distance_2d_to_point(canvasX, canvasY, x0, y0);
                     if (distance < bestDistance) {
@@ -672,8 +557,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
             // snap to vertexes
             for (const vertex of world_vertexes) {
-                const x0 = view_transform_x(vertex)
-                const y0 = view_transform_y(vertex)
+                const x0 = render_transform.view_transform_x(vertex)
+                const y0 = render_transform.view_transform_y(vertex)
                 if (!isNaN(x0) && !isNaN(y0)) {
                     const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     if (distance < bestDistance) {
@@ -688,8 +573,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 const a = world_vertexes[edge.vertexIndexA]
                 const b = world_vertexes[edge.vertexIndexB]
                 const midpoint = a.add_vector(b).scale(0.5)
-                const x0 = view_transform_x(midpoint)
-                const y0 = view_transform_y(midpoint)
+                const x0 = render_transform.view_transform_x(midpoint)
+                const y0 = render_transform.view_transform_y(midpoint)
                 if (!isNaN(x0) && !isNaN(y0)) {
                     let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     distance += 2 // HACK: deprioritizes midpoint snap
@@ -704,10 +589,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             for (const edge of actor.brushModel.edges){
                 const a = world_vertexes[edge.vertexIndexA]
                 const b = world_vertexes[edge.vertexIndexB]
-                const ax = view_transform_x(a)
-                const ay = view_transform_y(a)
-                const bx = view_transform_x(b)
-                const by = view_transform_y(b)
+                const ax = render_transform.view_transform_x(a)
+                const ay = render_transform.view_transform_y(a)
+                const bx = render_transform.view_transform_x(b)
+                const by = render_transform.view_transform_y(b)
                 if (!isNaN(ax) && !isNaN(bx)){
                     let distance = distance_to_line_segment(canvas_x, canvas_y, ax, ay, bx, by)
                     distance += 4 // HACK: deprioritizes edge snap
@@ -724,8 +609,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             // snap polygon median
             for (const polygon of actor.brushModel.polygons){
                 const median = polygon.median
-                const x0 = view_transform_x(median)
-                const y0 = view_transform_y(median)
+                const x0 = render_transform.view_transform_x(median)
+                const y0 = render_transform.view_transform_y(median)
                 if (!isNaN(x0) && !isNaN(y0)) {
                     let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     distance += 2 // HACK: deprioritizes polygon median snap
@@ -753,7 +638,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         find_nearest_actor: findNearestActor,
         find_nearest_vertex: findNearestVertex,
         find_nearest_snapping_point,
-        get_pointer_world_location: (x,y) => canvas_to_world_location(x,y),
+        get_pointer_world_location: (x,y) => render_transform.canvas_to_world_location(x,y),
         set_show_vertexes: (state:boolean) => { showVertexes = state; } 
     }
     return s;
