@@ -14,3 +14,4 @@ export class BrushPolygonData
     panU: number = 0;
     panV: number = 0;
 }
+
