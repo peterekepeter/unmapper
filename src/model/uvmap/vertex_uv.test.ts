@@ -2,7 +2,7 @@ import { BrushModel } from "../BrushModel"
 import { load_map_from_string } from "../loader"
 import { UnrealMap } from "../UnrealMap"
 import { Vector } from "../Vector"
-import { get_brush_polygon_vertex_uvs } from "./vertex_uv"
+import { get_brush_polygon_vertex_uvs, polygon_uv_from_vertex_uvs } from "./vertex_uv"
 
 let map: UnrealMap
 
@@ -31,6 +31,14 @@ test('panned sheet UVs are generated correctly', () => {
    expect(uvs).toEqual(expected_uvs.map(v => v.add_numbers(-128, -128, 0)))
 })
 
+test('polygon_uv_from_vertex_uvs trivial case', () => {
+   const positions = make_vectors([0, 0, 0, /*1*/ 128, 0, 0, /*2*/ 128, 128, 0, /*3*/ 0, 128, 0])
+   const uvs = make_uvs([0, 0, /*1*/ -128, 0, /*2*/ -128, 128, /*3*/ 0, 128])
+   const result = polygon_uv_from_vertex_uvs(positions, uvs)
+   expect([result.textureU, result.textureV])
+      .toEqual(make_vectors([-1, -0, -0, /*1*/ 0, +1, 0]))
+})
+
 const rotated_brush_names = [
    'Brush3Rotated1',
    'Brush3Rotated2',
@@ -44,11 +52,26 @@ rotated_brush_names.forEach(n => test(
       expect(uvs).toHaveLength(expected_uvs.length)
       // rotated versions may have rounding errors
       for (let i = 0; i < uvs.length; i++) {
-         expect(uvs[i].x).toBeCloseTo(expected_uvs[i].x, 1e-3)
-         expect(uvs[i].y).toBeCloseTo(expected_uvs[i].y, 1e-3)
+         expect(uvs[i].x).toBeCloseTo(expected_uvs[i].x, 3)
+         expect(uvs[i].y).toBeCloseTo(expected_uvs[i].y, 3)
       }
    }
 ))
+
+rotated_brush_names.forEach(n => test(
+   `bidirection UV conversion for ${n}`, () => {
+      const brush = get_brush(n)
+      const uvs = get_brush_polygon_vertex_uvs(brush, 0)
+      const poly = brush.polygons[0];
+      const positions = poly.vertexes.map(v => brush.vertexes[v].position)
+      const result = polygon_uv_from_vertex_uvs(positions, uvs)
+      expect(result.textureU.x).toBeCloseTo(poly.textureU.x, 4)
+      expect(result.textureU.y).toBeCloseTo(poly.textureU.y, 4)
+      expect(result.textureV.x).toBeCloseTo(poly.textureV.x, 4)
+      expect(result.textureV.y).toBeCloseTo(poly.textureV.y, 4)
+   })
+)
+
 function get_brush(name: string): BrushModel {
    return map.actors.find(a => a.name === name).brushModel
 }
@@ -63,6 +86,22 @@ const expected_uvs = [
    new Vector(256.0, -256.0, 0),
    new Vector(256.0, 0, 0),
 ]
+
+function make_vectors(numbers: number[]): Vector[] {
+   const result: Vector[] = []
+   for (let i = 0; i < numbers.length; i += 3) {
+      result.push(Vector.from_array(numbers, i))
+   }
+   return result
+}
+
+function make_uvs(numbers: number[]): Vector[] {
+   const result: Vector[] = []
+   for (let i = 0; i < numbers.length; i += 2) {
+      result.push(new Vector(numbers[i], numbers[i + 1], 0))
+   }
+   return result
+}
 
 const _test_level_data = `Begin Map
 Begin Actor Class=Brush Name=Brush3
