@@ -26,56 +26,64 @@ export function polygon_uv_from_vertex_uvs(vertexes: Vector[], uvs: Vector[]): B
     const [posA, posB, posC] = vertexes
     const [uvA, uvB, uvC] = uvs
 
-    let dpAB = posB.subtract_vector(posA)
-    let dpAC = posC.subtract_vector(posA)
-    let duAB = uvB.subtract_vector(uvA)
-    let duAC = uvC.subtract_vector(uvA)
+    let textureU: Vector, textureV: Vector
 
-    // considering the segmented matrix:
-    // [
-    //   dpAB.x dpAB.y dpAB.z | duAB.x duAB.y
-    //   dpAC.x dpAC.y dpAC.z | duAC.x duAC.y 
-    // ]
-    // using row operations reduce the right segment to identity
-    // and you'll get the polygon basis vectors for UV space on the left
+    // find polygon UV vectors textureU and textureV
+    {
+        let dpAB = posB.subtract_vector(posA)
+        let dpAC = posC.subtract_vector(posA)
+        let duAB = uvB.subtract_vector(uvA)
+        let duAC = uvC.subtract_vector(uvA)
     
-    if (duAB.x === 0 && duAC.x !== 0){
-        [dpAB, dpAC, duAB, duAC] = [dpAC, dpAB, duAC, duAB]
+        // considering the segmented matrix:
+        // [
+        //   dpAB.x dpAB.y dpAB.z | duAB.x duAB.y
+        //   dpAC.x dpAC.y dpAC.z | duAC.x duAC.y 
+        // ]
+        // using row operations reduce the right segment to identity
+        // and you'll get the polygon basis vectors for UV space on the left
+    
+        if (duAB.x === 0 && duAC.x !== 0) {
+            [dpAB, dpAC, duAB, duAC] = [dpAC, dpAB, duAC, duAB]
+        }
+    
+        if (duAC.x !== 0) {
+            EditorError.if(duAB.x === 0, 'polygon has degenerate vertex UV')
+            const reduct01 = duAC.x / duAB.x
+            dpAC = dpAC.subtract_vector(dpAB.scale(reduct01))
+            duAC = duAC.subtract_vector(duAB.scale(reduct01))
+        }
+    
+        if (duAB.y !== 0) {
+            EditorError.if(duAC.y === 0, 'polygon has degenerate vertex UV')
+            const reduct10 = duAB.y / duAC.y
+            dpAB = dpAB.subtract_vector(dpAC.scale(reduct10))
+            duAB = duAB.subtract_vector(duAC.scale(reduct10))
+        }
+    
+        if (duAB.x !== 1) {
+            const scaleAB = 1 / duAB.x
+            dpAB = dpAB.scale(scaleAB)
+            duAB = duAB.scale(scaleAB)
+        }
+    
+        if (duAC.y !== 1) {
+            const scaleAC = 1 / duAC.y
+            dpAC = dpAC.scale(scaleAC)
+            duAC = duAC.scale(scaleAC)
+        }
+        textureU = dpAB
+        textureV = dpAC
     }
 
-    if (duAC.x !== 0){
-        EditorError.if(duAB.x === 0, 'polygon has degenerate vertex UV')
-        const reduct01 = duAC.x/duAB.x
-        dpAC = dpAC.subtract_vector(dpAB.scale(reduct01))
-        duAC = duAC.subtract_vector(duAB.scale(reduct01))
-    }
+    // origin should be the world position where UV is ZERO
+    const origin: Vector = posA
+        .subtract_vector(textureU.scale(uvA.x))
+        .subtract_vector(textureV.scale(uvA.y))
+    
+    // this algorithm applies panning by moving the origin
+    // so there is no need for these additional pans
+    const panU = 0, panV = 0 
 
-    if (duAB.y !== 0){
-        EditorError.if(duAC.y === 0, 'polygon has degenerate vertex UV')
-        const reduct10 = duAB.y/duAC.y
-        dpAB = dpAB.subtract_vector(dpAC.scale(reduct10))
-        duAB = duAB.subtract_vector(duAC.scale(reduct10))
-    }
-
-    if (duAB.x !== 1){
-        const scaleAB = 1/duAB.x
-        dpAB = dpAB.scale(scaleAB)
-        duAB = duAB.scale(scaleAB)
-    }
-
-    if (duAC.y !== 1){
-        const scaleAC = 1/duAC.y
-        dpAC = dpAC.scale(scaleAC)
-        duAC = duAC.scale(scaleAC)
-    }
-
-    // TODO using the original vertexes and uvs, find the origin
-
-    return {
-        origin: Vector.ZERO,
-        panU: 0,
-        panV: 0,
-        textureU: dpAB,
-        textureV: dpAC
-    }
+    return { origin, panU, panV, textureU, textureV }
 }

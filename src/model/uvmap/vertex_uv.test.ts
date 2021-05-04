@@ -32,11 +32,27 @@ test('panned sheet UVs are generated correctly', () => {
 })
 
 test('polygon_uv_from_vertex_uvs trivial case', () => {
-   const positions = make_vectors([0, 0, 0, /*1*/ 128, 0, 0, /*2*/ 128, 128, 0, /*3*/ 0, 128, 0])
+   const pos = make_vectors([0, 0, 0, /*1*/ 128, 0, 0, /*2*/ 128, 128, 0, /*3*/ 0, 128, 0])
    const uvs = make_uvs([0, 0, /*1*/ -128, 0, /*2*/ -128, 128, /*3*/ 0, 128])
-   const result = polygon_uv_from_vertex_uvs(positions, uvs)
+   const result = polygon_uv_from_vertex_uvs(pos, uvs)
    expect([result.textureU, result.textureV])
       .toEqual(make_vectors([-1, -0, -0, /*1*/ 0, +1, 0]))
+})
+
+test('polygon_uv_from_vertex_uvs returns origin', () => {
+   const pos = make_vectors([-128, -128, 0, /*1*/ 128, -128, 0, /*2*/ 128, 128, 0, /*3*/ -128, 128, 0])
+   const uvs = make_uvs([0, 0, /*1*/ -128, 0, /*2*/ -128, 128, /*3*/ 0, 128])
+   const result = polygon_uv_from_vertex_uvs(pos, uvs)
+   expect(result.origin)
+      .toMatchObject({ x:-128, y:-128 })
+})
+
+test('polygon_uv_from_vertex_uvs returns panned origin', () => {
+   const pos = make_vectors([-128, -128, 0, /*1*/ 128, -128, 0, /*2*/ 128, 128, 0, /*3*/ -128, 128, 0])
+   const uvs = make_uvs([-64, -64, /*1*/ 64, -64, /*2*/ 64, 64, /*3*/ -64, 64])
+   const result = polygon_uv_from_vertex_uvs(pos, uvs)
+   expect(result.origin)
+      .toMatchObject({ x:0, y:0 })
 })
 
 const rotated_brush_names = [
@@ -67,8 +83,11 @@ rotated_brush_names.forEach(n => test(
       const result = polygon_uv_from_vertex_uvs(positions, uvs)
       expect(result.textureU.x).toBeCloseTo(poly.textureU.x, 4)
       expect(result.textureU.y).toBeCloseTo(poly.textureU.y, 4)
+      expect(result.textureU.z).toBeCloseTo(poly.textureU.z, 4)
       expect(result.textureV.x).toBeCloseTo(poly.textureV.x, 4)
       expect(result.textureV.y).toBeCloseTo(poly.textureV.y, 4)
+      expect(result.textureV.z).toBeCloseTo(poly.textureV.z, 4)
+      expect(result.origin).toEqual(poly.origin)
    })
 )
 
