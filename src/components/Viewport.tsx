@@ -32,7 +32,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         
     const viewport_state = state.viewports[viewport_index]
     const map = state.map
-    const vertex_mode = state.vertex_mode
+    const vertex_mode = state.options.vertex_mode
 
     const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 

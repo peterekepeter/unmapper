@@ -18,7 +18,7 @@ export const rotate_command: ICommandInfoV2 = {
     ],
     exec: (state, pivot_rotation: PivotRotation) => {
         const pivot_rotation_transform = pivot_rotation.to_transform_fn()
-        return state.vertex_mode
+        return state.options.vertex_mode
             ? change_selected_brushes(state, (old_brush, actor) => {
                 const actor_to_world = get_actor_to_world_transform(actor)
                 const world_to_actor = get_world_to_actor_transform(actor)

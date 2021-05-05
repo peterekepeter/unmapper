@@ -31,7 +31,7 @@ describe('vertexes are deleted', () => {
     brush.addVertex(new Vector(0,0,0), false);
     brush.addVertex(new Vector(1,0,0), true);
     const prev_state = editor_state_from_actors([actor]);
-    prev_state.vertex_mode = true;
+    prev_state.options.vertex_mode = true;
     const next_state = command.exec(prev_state);
 
     test('only 1 vertex should remain', () => 

@@ -11,7 +11,7 @@ export const delete_selected_command: ICommandInfoV2 = {
 }
 
 function implementation(state: EditorState): EditorState {
-    return state.vertex_mode
+    return state.options.vertex_mode
         ? delete_vertexes(state)
         : delete_actors(state)
 }

@@ -36,7 +36,7 @@ export const scale_command: ICommandInfoV2 = {
         const scaling_factor = scale.to.subtract_vector(pivot).length() 
             / scale.from.subtract_vector(pivot).length()
 
-        return state.vertex_mode ? change_selected_brushes(state, (b, a) => {
+        return state.options.vertex_mode ? change_selected_brushes(state, (b, a) => {
 
             const transform_fn = get_world_to_actor_transform(a)
             const actor_pivot = transform_fn(pivot)

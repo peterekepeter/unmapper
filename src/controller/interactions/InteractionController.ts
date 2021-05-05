@@ -68,7 +68,7 @@ export class InteractionController {
     default_interaction(canvas_x: number, canvas_y: number, renderer: Renderer, ctrl: boolean): void {
         const controller = this.controller
         const state = controller.state_signal.value
-        const vertex_mode = state.vertex_mode
+        const vertex_mode = state.options.vertex_mode
         if (vertex_mode) {
             const [actor, vertexIndex] = renderer.find_nearest_vertex(state.map, canvas_x, canvas_y)
             if (ctrl) {

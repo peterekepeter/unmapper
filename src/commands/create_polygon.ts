@@ -12,7 +12,7 @@ export const create_polygon_command : ICommandInfoV2 = {
 }
 
 function exec(state: EditorState) : EditorState {
-    if (!state.vertex_mode){
+    if (!state.options.vertex_mode){
         throw new EditorError("Need to be in vertex mode!");
     }
     return change_selected_brushes(state, brush => {

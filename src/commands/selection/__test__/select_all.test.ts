@@ -41,7 +41,7 @@ describe('select all vertexes', () => {
     actor_b.brushModel.addVertex(new Vector(0,0,0), false);
     actor_b.selected = false;
     const current_state = editor_state_from_actors([actor_a, actor_b]);
-    current_state.vertex_mode = true;
+    current_state.options.vertex_mode = true;
     const next_state = command.exec(current_state);
 
     test('current_state vertexes of selected actor are not selected', () =>

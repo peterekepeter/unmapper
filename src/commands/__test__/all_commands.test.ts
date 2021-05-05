@@ -36,10 +36,10 @@ function build_test_states(){
     actor_2.brushModel = brushWithPoly;
 
     const state = editor_state_from_actors([actor_1, actor_2]);
-    state.vertex_mode = false;
+    state.options.vertex_mode = false;
     
     const state_vertex_mode = editor_state_from_actors([actor_1, actor_2])
-    state_vertex_mode.vertex_mode = true;
+    state_vertex_mode.options.vertex_mode = true;
     
     return [
         {
@@ -137,7 +137,7 @@ function validate_state(state: EditorState){
     // some basic validation checks
     expect(state).not.toBe(null);
     expect(state.map).not.toBe(null);
-    expect(state.vertex_mode === true || state.vertex_mode === false).toBeTruthy();
+    expect(state.options.vertex_mode === true || state.options.vertex_mode === false).toBeTruthy();
     expect(state.map.actors).not.toBe(null);
     expect(state.map.actors.length).not.toBe(null);
     for (const actor of state.map.actors){

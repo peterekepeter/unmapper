@@ -1,9 +1,9 @@
-import { InteractionRenderState } from "../controller/interactions/InteractionRenderState";
-import { Actor } from "./Actor";
-import { Rotation } from "./Rotation";
-import { UnrealMap } from "./UnrealMap";
-import { Vector } from "./Vector";
-import { ViewportMode } from "./ViewportMode";
+import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
+import { Actor } from "./Actor"
+import { Rotation } from "./Rotation"
+import { UnrealMap } from "./UnrealMap"
+import { Vector } from "./Vector"
+import { ViewportMode } from "./ViewportMode"
 
 export interface ViewportState
 {
@@ -19,20 +19,25 @@ export interface IHistoryStateAccess
     get_previous_state(): EditorState;
 }
 
+export interface EditorOptions {
+    vertex_mode: boolean;
+    lock_vertex_uv: boolean;
+    editor_layout: number;
+}
+
 export interface EditorState
 {
     map: UnrealMap;
     viewports: ViewportState[];
     history: IHistoryStateAccess;
-    vertex_mode: boolean;
-    editor_layout: number,
+    options: EditorOptions;
     interaction_render_state?: InteractionRenderState,
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
-    const state = create_initial_editor_state();
-    state.map.actors = actors;
-    return state;
+    const state = create_initial_editor_state()
+    state.map.actors = actors
+    return state
 }
 
 export function create_initial_editor_state() : EditorState{
@@ -42,7 +47,11 @@ export function create_initial_editor_state() : EditorState{
             get_previous_state: () => null,
         },
         map: new UnrealMap(),
-        vertex_mode: false,
+        options: {
+            vertex_mode: false,
+            lock_vertex_uv: false,
+            editor_layout: 0
+        },
         viewports: [
             {
                 mode: ViewportMode.Top,
@@ -69,7 +78,6 @@ export function create_initial_editor_state() : EditorState{
                 zoom_level: 0
             },
         ],
-        editor_layout: 0,
         interaction_render_state: null
     }
 }

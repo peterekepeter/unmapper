@@ -13,7 +13,7 @@ export const apply_transform_command: ICommandInfoV2 = {
 
     exec: state => change_selected_actors(state, old_actor => {
         const transform_fn = get_actor_to_world_transform(old_actor)
-        if (state.vertex_mode) { throw new EditorError('does not work in vertex mode') }
+        if (state.options.vertex_mode) { throw new EditorError('does not work in vertex mode') }
         if (transform_fn(Vector.ZERO) === Vector.ZERO &&
             transform_fn(Vector.ONES) === Vector.ONES) {
             return old_actor // identity transform detected

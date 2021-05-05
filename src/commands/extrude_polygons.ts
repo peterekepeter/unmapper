@@ -23,7 +23,7 @@ export const extrude_polygons_command : ICommandInfoV2 = {
 }
 
 function implementation(state: EditorState, extrusion: number | Vector = 32) : EditorState {
-    if (!state.vertex_mode){
+    if (!state.options.vertex_mode){
         throw new EditorError('only works in vertex mode');
     }
     return change_selected_brushes(state, (brush, actor) => {

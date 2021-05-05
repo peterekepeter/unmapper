@@ -21,7 +21,7 @@ describe('extrude polygon', () => {
     actor.brushModel = brushWithPoly;
     
     const old_state = editor_state_from_actors([actor]);
-    old_state.vertex_mode = true;
+    old_state.options.vertex_mode = true;
 
     let new_state : EditorState;
     beforeAll(() => {

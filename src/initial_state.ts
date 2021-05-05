@@ -1,4 +1,5 @@
-import { create_initial_editor_state, EditorState, ViewportState } from "./model/EditorState"
+/* eslint-disable semi */
+import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "./model/EditorState"
 import { load_map_from_string, store_map_to_string } from "./model/loader"
 import { Rotation } from "./model/Rotation"
 import { Vector } from "./model/Vector"
@@ -9,8 +10,7 @@ const STORAGE: Storage = setup_storage()
 
 type ExtraStoredState = {
    viewports: ViewportState[];
-   vertex_mode: boolean;
-   editor_layout: number,
+   options: EditorOptions;
    selected_actors_indexes: number[];
 }
 
@@ -24,9 +24,8 @@ export function get_initial_level_state(): EditorState {
    if (extra_json){
       const extra = JSON.parse(extra_json) as Partial<ExtraStoredState>
 
-      // copy simple props      
-      state.vertex_mode = extra.vertex_mode === true
-      state.editor_layout = extra.editor_layout ?? state.editor_layout
+      // copy options
+      state.options = { ...state.options, ...extra.options }
 
       // parse viewports
       for (let i=0; i<state.viewports.length; i++){
@@ -57,8 +56,7 @@ export function set_initial_level_state(state: EditorState): void {
    const map_string = store_map_to_string(state.map)
    STORAGE.setItem(LEVEL_KEY, map_string)
    const extra : ExtraStoredState = {
-      editor_layout: state.editor_layout,
-      vertex_mode: state.vertex_mode,
+      options: state.options,
       viewports: state.viewports,
       selected_actors_indexes: [...state.map.actors.entries()].filter(a => a[1].selected).map(a => a[0])
    } 

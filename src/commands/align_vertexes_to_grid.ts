@@ -23,7 +23,7 @@ export const align_vertexes_to_8_grid: ICommandInfoV2 = {
 function align_vertexes_to_grid(state: EditorState, size: number): EditorState {
     const grid = new Vector(size, size, size);
     return change_selected_brushes(state, brush => {
-        if (state.vertex_mode === true) {
+        if (state.options.vertex_mode === true) {
             const next = brush.shallowCopy();
             next.vertexes = next.vertexes.map(currentVertex => {
                 if (currentVertex.selected) {

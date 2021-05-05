@@ -10,7 +10,7 @@ export const select_all_command: ICommandInfoV2 = {
 }
 
 function implementation(state : EditorState) : EditorState {
-    if (state.vertex_mode){
+    if (state.options.vertex_mode){
         return select_all_vertexes(state);
     } else {
         return select_all_actors(state);

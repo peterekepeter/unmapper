@@ -16,7 +16,7 @@ describe('polygon creation', () => {
     actor.brushModel.addVertex(new Vector(0,1,0), true);
     actor.selected = true;
     const prev_state = editor_state_from_actors([actor]);
-    prev_state.vertex_mode = true;
+    prev_state.options.vertex_mode = true;
     const next_state = command.exec(prev_state);
 
     test('before execution brushmodel has 0 polygons', () => 
@@ -33,7 +33,7 @@ describe('polygon creation', () => {
 
 test('EditorError is thrown if not in vertex mode', async () => {
     const state = editor_state_from_actors([]);
-    state.vertex_mode = false;
+    state.options.vertex_mode = false;
     let error : EditorError;
     try {
         await command.exec(state);

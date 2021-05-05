@@ -42,7 +42,7 @@ export const MainGrid = ({ controller = create_controller() }) => {
         }
     })
 
-    switch (state.editor_layout) {
+    switch (state.options.editor_layout) {
         case 0:
         default: return <div style={{
             display: 'grid',

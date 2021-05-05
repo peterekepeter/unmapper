@@ -8,6 +8,9 @@ export const toggle_editor_layout_command : ICommandInfoV2 = {
     shortcut: "ctrl + alt + l",
     exec: state => ({
         ...state, 
-        editor_layout: (state.editor_layout + 1) % LAYOUT_COUNT 
+        options: { 
+            ...state.options, 
+            editor_layout: (state.options.editor_layout + 1) % LAYOUT_COUNT 
+        }
     })
 }
