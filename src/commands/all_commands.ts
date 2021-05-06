@@ -17,6 +17,7 @@ import { apply_transform_command } from "./apply_transform"
 import { uv_random_map_command } from "./uv_random_map"
 import { scale_command } from "./scale"
 import { reset_initial_state, set_initial_state } from "./set_initial_state"
+import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
@@ -33,6 +34,7 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     triangulate_mesh_polygons_command,
     uv_triplanar_map_command,
     toggle_editor_layout_command,
+    toggle_preserve_vertex_uv_command,
     move_command,
     rotate_command,
     scale_command,

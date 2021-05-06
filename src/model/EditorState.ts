@@ -21,7 +21,7 @@ export interface IHistoryStateAccess
 
 export interface EditorOptions {
     vertex_mode: boolean;
-    lock_vertex_uv: boolean;
+    preserve_vertex_uv: boolean;
     editor_layout: number;
 }
 
@@ -49,7 +49,7 @@ export function create_initial_editor_state() : EditorState{
         map: new UnrealMap(),
         options: {
             vertex_mode: false,
-            lock_vertex_uv: false,
+            preserve_vertex_uv: false,
             editor_layout: 0
         },
         viewports: [
