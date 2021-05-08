@@ -7,7 +7,7 @@ export const select_vertex_command: ICommandInfoV2 = {
     exec: select_vertex
 }
 
-function select_vertex(state: EditorState, target: Actor, vertexIndex: number): EditorState {
+export function select_vertex(state: EditorState, target: Actor, vertexIndex: number): EditorState {
     return change_actors(state, actor => {
         const brush = actor.brushModel;
         if (!brush) {

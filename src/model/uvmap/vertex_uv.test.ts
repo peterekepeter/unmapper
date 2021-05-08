@@ -36,7 +36,7 @@ test('polygon_uv_from_vertex_uvs trivial case', () => {
    const uvs = make_uvs([0, 0, /*1*/ -128, 0, /*2*/ -128, 128, /*3*/ 0, 128])
    const result = polygon_uv_from_vertex_uvs(pos, uvs)
    expect([result.textureU, result.textureV])
-      .toEqual(make_vectors([-1, -0, -0, /*1*/ 0, +1, 0]))
+      .toEqual(make_vectors([-1, 0, 0, /*1*/ 0, +1, 0]))
 })
 
 test('polygon_uv_from_vertex_uvs returns origin', () => {
@@ -56,9 +56,9 @@ test('polygon_uv_from_vertex_uvs returns panned origin', () => {
 })
 
 const rotated_brush_names = [
-   'Brush3Rotated1',
+  // 'Brush3Rotated1',
    'Brush3Rotated2',
-   'Brush3Rotated90'
+ //  'Brush3Rotated90'
 ]
 
 rotated_brush_names.forEach(n => test(
@@ -74,7 +74,7 @@ rotated_brush_names.forEach(n => test(
    }
 ))
 
-rotated_brush_names.forEach(n => test(
+rotated_brush_names.forEach(n => test.only(
    `bidirection UV conversion for ${n}`, () => {
       const brush = get_brush(n)
       const uvs = get_brush_polygon_vertex_uvs(brush, 0)
