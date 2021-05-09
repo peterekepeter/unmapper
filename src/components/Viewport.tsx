@@ -8,7 +8,7 @@ import { Rotation } from "../model/Rotation"
 import { Matrix3x3 } from "../model/Matrix3x3"
 import { ViewportMode, viewport_mode_rotateable } from "../model/ViewportMode"
 import { UnrealMap } from "../model/UnrealMap"
-import { create_initial_editor_state, EditorState, ViewportState } from "../model/EditorState"
+import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "../model/EditorState"
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
 import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom"
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
@@ -32,7 +32,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         
     const viewport_state = state.viewports[viewport_index]
     const map = state.map
-    const vertex_mode = state.options.vertex_mode
+    const edit_options = state.options
 
     const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
 
@@ -46,7 +46,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     const [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
     const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null);
     const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
-    const [last_vertex_mode, set_last_vertex_mode] = useState<boolean>(null);
+    const [last_edit_options, set_last_edit_options] = useState<EditorOptions>(null);
     const [last_width, set_last_width] = useState<number>(null);
     const [last_height, set_last_height] = useState<number>(null);
     const [last_view_mode, set_last_view_mode] = useState<ViewportMode>(null);
@@ -75,8 +75,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             set_last_interaction(last_interaction)
             needs_render = true
         }
-        if (last_vertex_mode !== vertex_mode){
-            set_last_vertex_mode(vertex_mode)
+        if (last_edit_options !== edit_options){
+            set_last_edit_options(edit_options)
             needs_render = true
         }
         if (last_width !== width){
@@ -109,7 +109,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             const perspectiveFov = 90
             const scale = get_ortoho_scale()
             target.set_view_mode(view_mode)
-            target.set_show_vertexes(vertex_mode)
+            target.set_show_vertexes(edit_options.vertex_mode)
             view_transform.width = canvas.width
             view_transform.height = canvas.height
             view_transform.device_size = Math.min(canvas.width, canvas.height)

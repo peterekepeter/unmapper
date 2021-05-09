@@ -46,6 +46,7 @@ const colors: IBrushColors = {
 const vertexColor = colors.activeBrush
 const vertexSelectedColor = "#fff"
 const uv_color = "#4c2"
+const uv_preserve_color = "#896"
 
 const selectedColors: IBrushColors = {
     activeBrush: make_selected_color(colors.activeBrush),
@@ -98,11 +99,12 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     const viewport_queries = new ViewportQueries(geometry_cache)
 
     function render(state: EditorState): void {
-        render_map(state.map)
+        render_map(state)
         render_interaction(state.interaction_render_state)
     }
 
-    function render_map(map: UnrealMap) {
+    function render_map(state: EditorState) {
+        const map = state.map
         width = canvas.width
         height = canvas.height
         device_size = Math.min(width, height)
@@ -131,7 +133,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             }
         }
         else {
-            context.strokeStyle = uv_color
+            // UV viewport
+            context.strokeStyle = state.options.preserve_vertex_uv 
+                ? uv_preserve_color : uv_color
             context.lineWidth = 1.5
             for (const actor of map.actors) {
                 if (actor.selected && actor.brushModel) {
@@ -139,7 +143,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 }
             }
             if (showVertexes) {
-                context.fillStyle = uv_color
+                context.fillStyle = state.options.preserve_vertex_uv 
+                    ? uv_preserve_color : uv_color
                 for (const actor of map.actors) {
                     if (actor.selected && actor.brushModel) {
                         render_unselected_uv_points(actor.brushModel)
@@ -410,7 +415,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     const s: Renderer = {
         set_view_transform,
-        render: render_map,
         render_v2: render,
         set_view_mode,
         get_view_mode: () => view_mode,
