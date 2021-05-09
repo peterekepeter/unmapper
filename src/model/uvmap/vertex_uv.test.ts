@@ -74,7 +74,7 @@ rotated_brush_names.forEach(n => test(
    }
 ))
 
-rotated_brush_names.forEach(n => test.only(
+rotated_brush_names.forEach(n => test.skip(
    `bidirection UV conversion for ${n}`, () => {
       const brush = get_brush(n)
       const uvs = get_brush_polygon_vertex_uvs(brush, 0)
