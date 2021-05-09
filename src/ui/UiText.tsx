@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import React = require("react");
+import * as React from "react"
 import { font } from "./typography";
 
 const uiTextStyle : React.CSSProperties = {

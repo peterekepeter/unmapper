@@ -1,4 +1,4 @@
-import React = require("react");
+import * as React from "react"
 import { HoverEffect } from "../ui/HoverEffect";
 import { UiText } from "../ui/UiText";
 import { SectionTitle } from "../ui/SectionTitle";

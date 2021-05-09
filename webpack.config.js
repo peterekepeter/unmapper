@@ -2,6 +2,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
 
+    target: 'web',
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
 

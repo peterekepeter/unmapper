@@ -1,0 +1,65 @@
+
+This is a level editor that sort of positions itself somewhere between Blender 
+CAD and Unreal Editor. To goal is able to create geometry with precision,
+and having the power of breaking away from level design constraints imposed
+by traditional tooling.
+
+Currently this tool is meant to fill out the missing features when using 
+UED2, while maybe in the future it might become a more general tool with
+additional use cases. We'll have to see how things turn out, I'm working on this
+on my spare time so I heavily prioritize what features go in.
+
+
+## Basic Usage
+
+Select objects to edit them. Press `tab` to toggle between to edit the 3d model
+of selected objects. This allows you to select vertexes and move them around.
+
+Basic shortcuts are inspired from blender, so if you're familiar with those, 
+good for you. `m` - move, `s` - scale, `r` - rotate, but instead of the tapping 
+the letter and moving the mouse to make an edit, you need to specify edit points, 
+for example each of these commands require an origin first. 
+
+So to move a vertex you first click to set the origin, then click second time which
+represents where you move the origin to. This will move all the selection in that direction.
+
+Scaling and rotation require 3 points. This allows you to freely select rotation center
+every time instead of having the rotation center always be the center of selection.
+
+By default everything snaps. You can snap to vertexes, to edges, to the cetter of edges.
+
+There is no save/open import/export. But you can copy paste level data, from/to 
+text files and UED2.
+
+
+## UV Mapping
+
+Work in progress. 
+
+Any viewport can be switched to UV mode, in UV mode the selected 3d model is shown 
+in the UV space (currently view only, not editable)
+
+But there is a partially working UV vertex preserve mode which can be toggled. 
+When it is ON then every edit will maintain the vertex UV coordinates. Otherwise
+the polygon UV is maintained. The first mode is useful for modeling organic shapes,
+where the texture distorts. The second one is more useful for architecture where
+making a wall longer will extend the wall texture instead of stretching it.
+
+This can be toggled with `alt + u`, but the vertex UV preserve mode is only 
+partially implemented for now.
+
+
+## Command Palette
+
+At any moment, press F1 to get a list of commands with short descriptions
+and also their hotkeys. There are a few useful commands that are stable:
+
+Align vertexes to 8x8x8/16x16x16/32x32x32 grid - will move each vertex to the 
+nearest point on a 3D grid.
+
+Triangulate Mesh Polygons - replaces all polygons with triangles.
+
+Flip polygon - inverts polygon normal
+
+UV: random polygon mapping - sets a random UV coordinates to each polygon, can useful to avoid 
+having merged faces when exporting to UED2

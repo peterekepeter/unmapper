@@ -1,4 +1,4 @@
-import React = require("react");
+import * as React from "react"
 import { expression_from_vector, tweak_expression_value, vector_from_expression } from "../model/expression/expression";
 import { Vector } from "../model/Vector";
 import { UiInput } from "./UiInput";

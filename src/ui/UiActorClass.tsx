@@ -1,5 +1,5 @@
-import React = require("react");
-import { font } from "./typography";
+import * as React from "react"
+import { font } from "./typography"
 
 export const uiActorClassStyle : React.CSSProperties = {
     ...font,

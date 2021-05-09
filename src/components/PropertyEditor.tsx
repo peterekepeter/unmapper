@@ -1,4 +1,4 @@
-import React = require("react");
+import * as React from "react"
 import { SectionTitle } from "../ui/SectionTitle";
 import { create_controller } from "../controller/AppController";
 import { Actor } from "../model/Actor";

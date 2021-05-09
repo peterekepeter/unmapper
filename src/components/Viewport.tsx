@@ -2,7 +2,7 @@ import { FunctionComponent, useState } from "react"
 import { Renderer } from "../render/IRenderer"
 import { create_wireframe_renderer } from "../render/WireframeRenderer"
 import { Vector } from "../model/Vector"
-import React = require("react")
+import * as React from "react"
 import { create_controller, AppController } from "../controller/AppController"
 import { Rotation } from "../model/Rotation"
 import { Matrix3x3 } from "../model/Matrix3x3"

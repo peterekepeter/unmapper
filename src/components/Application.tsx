@@ -1,4 +1,4 @@
-import React = require("react");
+import * as React from "react"
 import { create_controller } from "../controller/AppController";
 import { useSignal } from "./useSignal";
 import { ViewportMode } from "../model/ViewportMode";

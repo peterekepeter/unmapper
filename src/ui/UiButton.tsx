@@ -1,4 +1,4 @@
-import React = require("react");
+import * as React from "react"
 
 export const buttonStyle = {
     border: '1px solid #333',

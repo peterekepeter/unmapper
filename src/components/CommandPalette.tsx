@@ -1,4 +1,4 @@
-import React = require("react")
+import * as React from "react"
 import { useSignal } from "./useSignal"
 import { themeColors } from "../theme"
 import { create_controller } from "../controller/AppController";

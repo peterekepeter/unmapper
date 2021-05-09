@@ -9,6 +9,8 @@ import { get_all_commands_v2 } from "./commands/all_commands"
 import { AppController } from "./controller/AppController"
 import { get_initial_level_state } from "./initial_state"
 
+const help = new URL('./help.txt', import.meta.url)
+console.info('additional info avaiable at', help.toString())
 
 function main() {
 
