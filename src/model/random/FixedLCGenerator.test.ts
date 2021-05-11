@@ -1,7 +1,6 @@
 import { FixedLCGenerator } from "./FixedLCGenerator"
-import { RandomGeneratorCore } from "./RandomGeneratorCore"
 
-let generator: RandomGeneratorCore
+let generator: FixedLCGenerator
 
 beforeEach(() => {
     generator = new FixedLCGenerator()

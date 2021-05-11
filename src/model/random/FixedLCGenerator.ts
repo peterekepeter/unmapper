@@ -1,11 +1,14 @@
 import { RandomGeneratorCore } from "./RandomGeneratorCore"
 
 /** generates 28 bits of randomness with relatively good distribution */
+
 export class FixedLCGenerator implements RandomGeneratorCore {
+    readonly min_value_inclusive: 0 = 0;
+    readonly max_value_exclusive: number = 0x1000000 // 28 bits of randomness
 
     private state: number;
     private readonly max_state_value = 0x7fffffff // https://www.w3schools.com/js/js_bitwise.asp
-    readonly range: [number, number] = [0, 0xffffff] // 28 bits of randomness
+    readonly range: [number, number] = [this.min_value_inclusive, this.max_value_exclusive] 
 
     set seed(value: number) {
         this.state = value & this.max_state_value
