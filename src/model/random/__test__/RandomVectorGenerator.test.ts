@@ -1,6 +1,6 @@
-import { BoundingBox } from '../BoundingBox'
-import { Vector } from '../Vector'
-import { RandomVectorGenerator } from './RandomVectorGenerator'
+import { BoundingBox } from '../../BoundingBox'
+import { Vector } from '../../Vector'
+import { RandomVectorGenerator } from '../RandomVectorGenerator'
 
 describe('next_vector_from_unit_disk', () => {
 

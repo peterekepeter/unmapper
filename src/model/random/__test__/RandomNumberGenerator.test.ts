@@ -1,4 +1,4 @@
-import { RandomNumberGenerator } from "./RandomNumberGenerator"
+import { RandomNumberGenerator } from "../RandomNumberGenerator"
 
 let random: RandomNumberGenerator
 

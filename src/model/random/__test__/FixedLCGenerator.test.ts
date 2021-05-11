@@ -1,4 +1,4 @@
-import { FixedLCGenerator } from "./FixedLCGenerator"
+import { FixedLCGenerator } from "../FixedLCGenerator"
 
 let generator: FixedLCGenerator
 
