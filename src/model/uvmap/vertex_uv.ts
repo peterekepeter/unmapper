@@ -38,7 +38,7 @@ export function polygon_uv_from_vertex_uvs(vertexes: Vector[], uvs: Vector[]): B
     EditorError.if(vertexes.length != uvs.length)
     const [posA, posB, posC] = vertexes
     const [uvA, uvB, uvC] = uvs
-    console.log('polygon_uv_from_vertex_uvs', vertexes, uvs)
+    //console.log('polygon_uv_from_vertex_uvs', vertexes, uvs)
 
     let textureU = Vector.UNIT_X, textureV = Vector.UNIT_Y
 
@@ -49,36 +49,64 @@ export function polygon_uv_from_vertex_uvs(vertexes: Vector[], uvs: Vector[]): B
     let pc = posA.subtract_vector(posC)
     let uc = uvA.subtract_vector(uvC)
 
-    printTable(pa, ua, pb, ub, pc, uc)
+    //printTable(pa, ua, pb, ub, pc, uc)
 
-    {
-        const s = pb.x / pa.x
-        pb = pb.subtract_vector(pa.scale(s))
-        ub = ub.subtract_vector(ua.scale(s))
+    if (pa.x === 0) {
+        if (pb.x !== 0) {
+            [pa, pb, ua, ub] = [pb, pa, ub, ua]
+        } else if (pc.x !== 0) {
+            [pa, pc, ua, uc] = [pc, pa, uc, ua]
+        }
     }
 
-    {
-        const s = pc.x / pa.x
-        pc = pc.subtract_vector(pa.scale(s))
-        uc = uc.subtract_vector(ua.scale(s))
+    if (pb.y === 0){
+        if (pc.y !== 0){
+            [pb, pc, ub, uc] = [pc, pb, uc, ub]
+        }
     }
 
-    {
-        const s = pa.y / pb.y
-        pa = pa.subtract_vector(pb.scale(s))
-        ua = ua.subtract_vector(ub.scale(s))
+    if (pa.x !== 0) {
+        {
+            const s = pb.x / pa.x
+            pb = pb.subtract_vector(pa.scale(s))
+            ub = ub.subtract_vector(ua.scale(s))
+        }
+
+        {
+            const s = pc.x / pa.x
+            pc = pc.subtract_vector(pa.scale(s))
+            uc = uc.subtract_vector(ua.scale(s))
+        }
     }
 
-    {
-        const s = pc.y / pb.y
-        pc = pc.subtract_vector(pb.scale(s))
-        uc = uc.subtract_vector(ub.scale(s))
+    if (pb.y !== 0) {
+        {
+            const s = pa.y / pb.y
+            pa = pa.subtract_vector(pb.scale(s))
+            ua = ua.subtract_vector(ub.scale(s))
+        }
+
+        {
+            const s = pc.y / pb.y
+            pc = pc.subtract_vector(pb.scale(s))
+            uc = uc.subtract_vector(ub.scale(s))
+        }
     }
 
-    {
-        const s = pc.y / pb.y
-        pc = pc.subtract_vector(pb.scale(s))
-        uc = uc.subtract_vector(ub.scale(s))
+    if (pc.z !== 0) {
+
+        {
+            const s = pb.z / pc.z
+            pb = pb.subtract_vector(pc.scale(s))
+            ub = ub.subtract_vector(uc.scale(s))
+        }
+
+        {
+            const s = pa.z / pc.z
+            pa = pa.subtract_vector(pc.scale(s))
+            ua = ua.subtract_vector(uc.scale(s))
+        }
+
     }
 
     if (pa.x !== 0) {
@@ -105,7 +133,7 @@ export function polygon_uv_from_vertex_uvs(vertexes: Vector[], uvs: Vector[]): B
         uc = Vector.ZERO
     }
 
-    printTable(pa, ua, pb, ub, pc, uc)
+    //printTable(pa, ua, pb, ub, pc, uc)
 
     textureU = new Vector(ua.x, ub.x, uc.x)
     textureV = new Vector(ua.y, ub.y, uc.y)
@@ -140,31 +168,31 @@ export function polygon_uv_from_vertex_uvs_origin(vertexes: Vector[], uvs: Vecto
         let dpAC = posC.subtract_vector(posA)
         let duAB = uvB.subtract_vector(uvA)
         let duAC = uvC.subtract_vector(uvA)
-    
+
         if (duAB.x === 0 && duAC.x !== 0) {
             [dpAB, dpAC, duAB, duAC] = [dpAC, dpAB, duAC, duAB]
         }
-    
+
         if (duAC.x !== 0) {
             EditorError.if(duAB.x === 0, 'polygon has degenerate vertex UV')
             const reduct01 = duAC.x / duAB.x
             dpAC = dpAC.subtract_vector(dpAB.scale(reduct01))
             duAC = duAC.subtract_vector(duAB.scale(reduct01))
         }
-    
+
         if (duAB.y !== 0) {
             EditorError.if(duAC.y === 0, 'polygon has degenerate vertex UV')
             const reduct10 = duAB.y / duAC.y
             dpAB = dpAB.subtract_vector(dpAC.scale(reduct10))
             duAB = duAB.subtract_vector(duAC.scale(reduct10))
         }
-    
+
         if (duAB.x !== 1) {
             const scaleAB = 1 / duAB.x
             dpAB = dpAB.scale(scaleAB)
             duAB = duAB.scale(scaleAB)
         }
-    
+
         if (duAC.y !== 1) {
             const scaleAC = 1 / duAC.y
             dpAC = dpAC.scale(scaleAC)
