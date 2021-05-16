@@ -28,14 +28,11 @@ function select_generic(state: EditorState, selection: GenericSelection): Editor
         if (a.selected != actor_selected_next && !state.options.vertex_mode) {
             a = a.immutable_update(actor => actor.selected = actor_selected_next)
         }
-        if (state.options.vertex_mode && actor_selection &&
-            actor_selection.vertexes && actor_selection.vertexes.length > 0) {
+        if (state.options.vertex_mode && a.brushModel) {
 
-            EditorError.if(!a.brushModel, 'trying to select vertex without a brush')
-            
             let need_change = false
             for (let i = 0; i < a.brushModel.vertexes.length; i++) {
-                const should_be_selected = actor_selection.vertexes.indexOf(i) !== -1
+                const should_be_selected = actor_selection && actor_selection.vertexes && actor_selection.vertexes.indexOf(i) !== -1
                 if (a.brushModel.vertexes[i].selected != should_be_selected) {
                     need_change = true
                     break
@@ -43,7 +40,7 @@ function select_generic(state: EditorState, selection: GenericSelection): Editor
             }
             if (need_change) {
                 a = a.immutable_update(a => a.brushModel.vertexes = a.brushModel.vertexes.map((v, i) => {
-                    const should_be_selected = actor_selection.vertexes.indexOf(i) !== -1
+                    const should_be_selected = actor_selection && actor_selection.vertexes && actor_selection.vertexes.indexOf(i) !== -1
                     if (v.selected != should_be_selected) {
                         const next_vertex = v.shallowCopy()
                         next_vertex.selected = should_be_selected
