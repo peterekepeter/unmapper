@@ -23,6 +23,7 @@ export interface EditorOptions {
     vertex_mode: boolean;
     preserve_vertex_uv: boolean;
     editor_layout: number;
+    box_select_mode: boolean;
 }
 
 export interface EditorState
@@ -50,7 +51,8 @@ export function create_initial_editor_state() : EditorState{
         options: {
             vertex_mode: false,
             preserve_vertex_uv: false,
-            editor_layout: 0
+            editor_layout: 0,
+            box_select_mode: false
         },
         viewports: [
             {

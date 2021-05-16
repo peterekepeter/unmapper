@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from "react"
-import { Renderer } from "../render/IRenderer"
+import { Renderer } from "../render/Renderer"
 import { create_wireframe_renderer } from "../render/WireframeRenderer"
 import { Vector } from "../model/Vector"
 import * as React from "react"
@@ -41,7 +41,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     const view_mode = viewport_state.mode;
 
     const [isMouseDown, setMouseDown] = useState(false);
-    const [didMouseMove, setDidMouseMove] = useState(false);
+    const [did_mouse_move, setDidMouseMove] = useState(false);
 
     const [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
     const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null);
@@ -108,6 +108,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         if (target != null) {
             const perspectiveFov = 90
             const scale = get_ortoho_scale()
+            target.set_viewport_index(viewport_index)
             target.set_view_mode(view_mode)
             target.set_show_vertexes(edit_options.vertex_mode)
             view_transform.width = canvas.width
@@ -157,6 +158,10 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         }
         setMouseDown(true)
         setDidMouseMove(false)
+        if (state.options.box_select_mode){
+            const [canvas_x, canvas_y] = get_canvas_coords(event)
+            controller.interaction.pointer_down(canvas_x, canvas_y, renderer, event.ctrlKey)
+        }
     }
 
     function handle_pointer_up(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -164,16 +169,13 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         if (usePointerLock && document.exitPointerLock) {
             document.exitPointerLock()
         }
-        if (!didMouseMove) {
-            mouse_click(event)
+        if (!did_mouse_move || state.options.box_select_mode) {
+            const [canvas_x, canvas_y] = get_canvas_coords(event)
+            controller.interaction.pointer_up(canvas_x, canvas_y, renderer, viewport_index, event.ctrlKey)
         }
         setMouseDown(false)
     }
 
-    function mouse_click(event: React.PointerEvent<HTMLCanvasElement>){
-        const [canvas_x, canvas_y] = get_canvas_coords(event)
-        controller.interaction.pointer_click(canvas_x, canvas_y, renderer, event.ctrlKey)
-    }
 
     function handle_wheel(event: React.WheelEvent){
         let new_zoom_level = viewport_state.zoom_level;
@@ -191,8 +193,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     function handle_pointer_move(event: React.PointerEvent<HTMLCanvasElement>) {
         const [canvas_x, canvas_y] = get_canvas_coords(event)
     
-        if (!isMouseDown) {
-            controller.interaction.pointer_move(canvas_x, canvas_y, renderer);
+        if (!isMouseDown || state.options.box_select_mode) {
+            controller.interaction.pointer_move(canvas_x, canvas_y, renderer, viewport_index);
             return
         }
         let dx = event.movementX;

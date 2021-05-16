@@ -63,12 +63,13 @@ export const change_selected_actors = (
     actor => actor.selected ? actor_fn(actor) : actor
 );
 
-export function change_actors(state: EditorState, actor_fn: (a: Actor) => Actor): EditorState {
+export function change_actors(state: EditorState, actor_fn: (a: Actor, i: number) => Actor): EditorState {
     return change_actors_list(state, actor_list => {
         let has_change = false;
-        let new_list = [];
-        for (const actor of actor_list) {
-            const new_actor = actor_fn(actor);
+        const new_list = []
+        for (let i=0; i<actor_list.length; i++) {
+            const actor = actor_list[i]
+            const new_actor = actor_fn(actor, i)
             if (!new_actor) {
                 throw new Error('unexpected null actor result');
             }

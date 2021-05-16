@@ -1,6 +1,6 @@
 import { UnrealMap } from "../model/UnrealMap"
 import { Actor } from "../model/Actor"
-import { Renderer } from "./IRenderer"
+import { Renderer } from "./Renderer"
 import { Vector } from "../model/Vector"
 import { CsgOperation } from "../model/CsgOperation"
 import { PolyFlags } from "../model/PolyFlags"
@@ -93,6 +93,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     let device_size = Math.min(width, height)
     let showVertexes = false
     let render_transform: ViewTransform = null
+    let viewport_index = -1;
 
     let view_mode = ViewportMode.Top
 
@@ -134,7 +135,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
         else {
             // UV viewport
-            context.strokeStyle = state.options.preserve_vertex_uv 
+            context.strokeStyle = state.options.preserve_vertex_uv
                 ? uv_preserve_color : uv_color
             context.lineWidth = 1.5
             for (const actor of map.actors) {
@@ -143,7 +144,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 }
             }
             if (showVertexes) {
-                context.fillStyle = state.options.preserve_vertex_uv 
+                context.fillStyle = state.options.preserve_vertex_uv
                     ? uv_preserve_color : uv_color
                 for (const actor of map.actors) {
                     if (actor.selected && actor.brushModel) {
@@ -347,6 +348,20 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         }
 
+        if (state.viewport_box_index != null && state.viewport_box_index === viewport_index) {
+            if (state.viewport_box) {
+                context.strokeStyle = '#fff'
+                context.beginPath()
+                const { min_x, min_y, max_x, max_y } = state.viewport_box
+                context.moveTo(min_x, min_y)
+                context.lineTo(max_x, min_y)
+                context.lineTo(max_x, max_y)
+                context.lineTo(min_x, max_y)
+                context.closePath()
+                context.stroke()
+            }
+        }
+
         if (state.line_from && state.line_to) {
             const vertexA = state.line_from
             const vertexB = state.line_to
@@ -409,20 +424,30 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         view_mode = mode
     }
 
-    function set_view_transform(transform: ViewTransform): void {   
+    function set_view_transform(transform: ViewTransform): void {
         render_transform = transform
     }
 
-    const s: Renderer = {
+    const renderer: Renderer = {
         set_view_transform,
         render_v2: render,
         set_view_mode,
+        set_viewport_index: index => viewport_index = index,
         get_view_mode: () => view_mode,
+        find_actors_in_box: (map: UnrealMap, canvas_x0: number, canvas_y0: number, canvas_x1: number, canvas_y1: number)
+            : number[] => {
+            viewport_queries.render_transform = render_transform
+            return viewport_queries.find_actors_in_box(map, canvas_x0, canvas_y0, canvas_x1, canvas_y1)
+        },
+        find_vertexes_of_selected_actors_in_box: (map: UnrealMap, canvas_x0: number, canvas_y0: number, canvas_x1: number, canvas_y1: number, custom_geometry_cache: GeometryCache) => {
+            viewport_queries.render_transform = render_transform
+            return viewport_queries.find_vertexes_of_selected_actors_in_box(map, canvas_x0, canvas_y0, canvas_x1, canvas_y1, custom_geometry_cache)
+        },
         find_nearest_actor: (map: UnrealMap, x: number, y: number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_Actor(map, x, y) },
-        find_nearest_vertex: (map: UnrealMap, x: number, y:number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_vertex(map, x,y) },
+        find_nearest_vertex: (map: UnrealMap, x: number, y: number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_vertex(map, x, y) },
         find_nearest_snapping_point: (map: UnrealMap, x: number, y: number, cgc: GeometryCache) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_snapping_point(map, x, y, cgc) },
         get_pointer_world_location: (x, y) => render_transform.canvas_to_world_location(x, y),
         set_show_vertexes: (state: boolean) => { showVertexes = state }
     }
-    return s
+    return renderer
 }
