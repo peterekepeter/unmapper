@@ -117,5 +117,47 @@ export const MainGrid = ({ controller = create_controller() }) => {
                 controller={controller} />
         </div>
 
+
+        case 3: return <div style={{
+            display: 'grid',
+            grid: '1fr 1fr / 0.25fr 1fr',
+            overflow: 'hidden',
+            background: colors.background,
+            color: colors.foreground,
+            width: '100%',
+            height: '100%'
+        }}>
+            <ActorList controller={controller} />
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+            <PropertyEditor controller={controller} />
+            <ViewportPanel
+                viewport_index={2}
+                location={new Vector(-500, -300, 300)}
+                mode={ViewportMode.Perspective}
+                controller={controller} />
+        </div>
+
+        case 4: return <div style={{
+            display: 'grid',
+            grid: '1fr 1fr / 1fr',
+            overflow: 'hidden',
+            background: colors.background,
+            color: colors.foreground,
+            width: '100%',
+            height: '100%'
+        }}>
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={2}
+                location={new Vector(-500, -300, 300)}
+                mode={ViewportMode.Perspective}
+                controller={controller} />
+        </div>
     }
 }
