@@ -1,44 +1,54 @@
 import * as React from "react"
-import { create_controller } from "../controller/AppController";
-import { useSignal } from "./useSignal";
-import { ViewportMode } from "../model/ViewportMode";
-import { Vector } from "../model/Vector";
-import { ViewportPanel } from "./ViewportPanel";
-import { themeColors } from "../theme";
-import { ActorList } from "./ActorList";
-import { PropertyEditor } from "./PropertyEditor";
-import { CommandPalette } from "./CommandPalette";
+import { create_controller } from "../controller/AppController"
+import { use_signal } from "./useSignal"
+import { ViewportMode } from "../model/ViewportMode"
+import { Vector } from "../model/Vector"
+import { ViewportPanel } from "./ViewportPanel"
+import { themeColors } from "../theme"
+import { ActorList } from "./ActorList"
+import { PropertyEditor } from "./PropertyEditor"
+import { CommandPalette } from "./CommandPalette"
+import { StatusBar } from "./StatusBar"
 
 export const Application = ({ controller = create_controller() }) => {
     return <>
-        <MainGrid controller={controller} />
+        <div style={{
+            display: "grid",
+            width: '100%',
+            height: '100%'
+        }}>
+            <div>
+                <MainGrid controller={controller} />
+            </div>
+            <StatusBar controller={controller} />
+        </div>
         <CommandPalette controller={controller} />
     </>
 }
 
 export const MainGrid = ({ controller = create_controller() }) => {
 
-    const state = useSignal(controller.state_signal)
-    const colors = useSignal(themeColors)
+    const state = use_signal(controller.state_signal)
+    const colors = use_signal(themeColors)
     const [resizeCount, setResizeCount] = React.useState(0)
 
     React.useEffect(() => {
-        let timeout: any = null;
+        let timeout: any = null
         const handler = (event: UIEvent) => {
             if (timeout != null) {
-                clearTimeout(timeout);
+                clearTimeout(timeout)
             }
             // force layout recalc with 100ms debounce
-            timeout = setTimeout(() => setResizeCount(resizeCount + 1), 100);
+            timeout = setTimeout(() => setResizeCount(resizeCount + 1), 100)
 
         };
-        window.addEventListener('resize', handler);
+        window.addEventListener('resize', handler)
         return () => {
             if (timeout) {
-                clearTimeout(timeout);
-                timeout = null;
+                clearTimeout(timeout)
+                timeout = null
             }
-            window.removeEventListener('resize', handler);
+            window.removeEventListener('resize', handler)
         }
     })
 

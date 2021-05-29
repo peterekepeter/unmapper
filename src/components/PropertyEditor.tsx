@@ -6,14 +6,14 @@ import { UiText } from "../ui/UiText";
 import { PolyFlags } from "../model/PolyFlags";
 import { KnownClasses } from "../model/KnownClasses";
 import { Vector } from "../model/Vector";
-import { useSignal } from "./useSignal";
+import { use_signal } from "./useSignal";
 import { UiVectorInput } from "../ui/UiVectorInput";
 import { edit_property_command as edit_property } from "../commands/edit_property";
 
 
 export function PropertyEditor({ controller = create_controller() }) {
 
-    const map = useSignal(controller.state_signal).map;
+    const map = use_signal(controller.state_signal).map;
     let reuse_property_context = true;
     // get selection
     let selection = map.actors.filter(a => a.selected);

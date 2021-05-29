@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useSignal } from "./useSignal"
+import { use_signal } from "./useSignal"
 import { themeColors } from "../theme"
 import { create_controller } from "../controller/AppController";
 import { UiText } from "../ui/UiText";
@@ -10,8 +10,8 @@ import { buttonStyle } from "../ui/UiButton";
 
 export const CommandPalette = ({ controller = create_controller() }) => {
     
-    const colors = useSignal(themeColors);
-    const shown = useSignal(controller.commands_shown_state);
+    const colors = use_signal(themeColors);
+    const shown = use_signal(controller.commands_shown_state);
     const [value, setValue] = React.useState('');
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const [isMouseOver, xxx] = React.useState(false);

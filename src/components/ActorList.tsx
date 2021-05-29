@@ -5,14 +5,14 @@ import { SectionTitle } from "../ui/SectionTitle";
 import { AppController } from "../controller/AppController";
 import { Actor } from "../model/Actor";
 import { themeColors } from "../theme";
-import { useSignal } from "./useSignal";
+import { use_signal } from "./useSignal";
 import { toggle_actor_selected_command } from "../commands/selection/toggle_actor_selected";
 import { make_actor_selection_command } from "../commands/selection/make_actor_selection";
 
 export function ActorList({ controller = new AppController() }) {
 
-    const map = useSignal(controller.state_signal).map;
-    const colors = useSignal(themeColors);
+    const map = use_signal(controller.state_signal).map;
+    const colors = use_signal(themeColors);
 
     return <div style={{overflow:"hidden", display:'grid'}}>
         <SectionTitle>Objects</SectionTitle>
