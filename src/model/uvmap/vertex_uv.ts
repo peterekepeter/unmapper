@@ -1,6 +1,6 @@
 import { BrushModel } from "../BrushModel"
 import { BrushPolygonUvData } from "../BrushPolygonUvData"
-import { EditorError } from "../EditorError"
+import { EditorError } from "../error/EditorError"
 import { Vector } from "../Vector"
 
 

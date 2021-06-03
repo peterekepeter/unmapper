@@ -1,6 +1,6 @@
 import { Actor } from '../../model/Actor';
 import { BrushModel } from '../../model/BrushModel';
-import { EditorError } from '../../model/EditorError';
+import { EditorError } from '../../model/error/EditorError';
 import { editor_state_from_actors } from '../../model/EditorState';
 import { Vector } from '../../model/Vector';
 import { create_polygon_command as command } from '../create_polygon';

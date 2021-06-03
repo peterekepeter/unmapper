@@ -1,5 +1,5 @@
 import { BoundingBox } from "../BoundingBox"
-import { EditorError } from "../EditorError"
+import { EditorError } from "../error/EditorError"
 import { Vector } from "../Vector"
 import { FixedLCGenerator } from "./FixedLCGenerator"
 import { RandomGeneratorCore } from "./RandomGeneratorCore"

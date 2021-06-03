@@ -1,7 +1,7 @@
 import { ICommandInfoV2 } from "../controller/command";
 import { change_selected_brushes } from "../model/algorithms/editor_state_change";
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
-import { EditorError } from "../model/EditorError";
+import { EditorError } from "../model/error/EditorError";
 import { EditorState } from "../model/EditorState";
 import { Vector } from "../model/Vector";
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform";

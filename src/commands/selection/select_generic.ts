@@ -1,6 +1,6 @@
 import { ICommandInfoV2 } from "../../controller/command"
 import { change_actors } from "../../model/algorithms/editor_state_change"
-import { EditorError } from "../../model/EditorError"
+import { EditorError } from "../../model/error/EditorError"
 import { EditorState } from "../../model/EditorState"
 
 
