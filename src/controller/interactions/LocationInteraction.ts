@@ -1,13 +1,13 @@
-import { Vector } from "../../model/Vector";
-import { ViewportMode } from "../../model/ViewportMode";
-import { Interaction } from "./Interaction";
-import { InteractionRenderState } from "./InteractionRenderState";
+import { Vector } from "../../model/Vector"
+import { ViewportEvent } from "../../model/ViewportEvent"
+import { Interaction } from "./Interaction"
+import { InteractionRenderState } from "./InteractionRenderState"
 
 export class LocationInteraction implements Interaction<Vector>
 {
     set_pointer_world_location(
         location: Vector,
-        view_mode: ViewportMode = ViewportMode.Perspective
+        event: ViewportEvent
     ): void {
         this.result = location
     }

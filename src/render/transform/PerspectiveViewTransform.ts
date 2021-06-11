@@ -14,19 +14,23 @@ export class PerspectiveViewTransform implements ViewTransform {
     scale: number;
     view_center: Vector;
 
-    private rotation_matrix: Matrix3x3;
+    private _rotation_matrix: Matrix3x3;
+    private _inv_rotation_matrix: Matrix3x3;
 
     set view_rotation(rotation: Rotation) {
-        this.rotation_matrix = Matrix3x3
+        this._rotation_matrix = Matrix3x3
             .rotateDegreesY(-rotation.pitch)
             .rotateDegreesZ(-rotation.yaw)
+        this._inv_rotation_matrix = Matrix3x3
+            .rotateDegreesZ(rotation.yaw)
+            .rotateDegreesY(rotation.pitch)
     }
 
     constructor(public field_of_view = 90){
     }
 
     get_view_bounding_box(): BoundingBox {
-        const forward = this.rotation_matrix.apply(Vector.FORWARD)
+        const forward = this._rotation_matrix.apply(Vector.FORWARD)
 
         let max_squared = 0
         let axis = 0
@@ -66,17 +70,17 @@ export class PerspectiveViewTransform implements ViewTransform {
         const y = vector.y - this.view_center.y
         const z = vector.z - this.view_center.z
         return new Vector(
-            this.rotation_matrix.getTransformedX(x, y, z),
-            this.rotation_matrix.getTransformedY(x, y, z),
-            this.rotation_matrix.getTransformedZ(x, y, z))
+            this._rotation_matrix.getTransformedX(x, y, z),
+            this._rotation_matrix.getTransformedY(x, y, z),
+            this._rotation_matrix.getTransformedZ(x, y, z))
     }
 
     view_transform_x(v: Vector): number {
         const w_x = v.x - this.view_center.x
         const w_y = v.y - this.view_center.y
         const w_z = v.z - this.view_center.z
-        const x = this.rotation_matrix.getTransformedX(w_x, w_y, w_z)
-        const y = this.rotation_matrix.getTransformedY(w_x, w_y, w_z)
+        const x = this._rotation_matrix.getTransformedX(w_x, w_y, w_z)
+        const y = this._rotation_matrix.getTransformedY(w_x, w_y, w_z)
         return x < 0
             ? Number.NaN
             : (y / x) * this.device_size + this.width * .5
@@ -86,14 +90,20 @@ export class PerspectiveViewTransform implements ViewTransform {
         const w_x = v.x - this.view_center.x
         const w_y = v.y - this.view_center.y
         const w_z = v.z - this.view_center.z
-        const x = this.rotation_matrix.getTransformedX(w_x, w_y, w_z)
-        const z = this.rotation_matrix.getTransformedZ(w_x, w_y, w_z)
+        const x = this._rotation_matrix.getTransformedX(w_x, w_y, w_z)
+        const z = this._rotation_matrix.getTransformedZ(w_x, w_y, w_z)
         return x < 0
             ? Number.NaN
             : (-z / x) * this.device_size + this.height * .5
     }
 
     canvas_to_world_location(canvas_x: number, canvas_y: number): Vector {
-        return Vector.ZERO
+        const distance = 1024
+        const screen_vector = new Vector(
+            distance, 
+            +(canvas_x - this.width *.5) / this.device_size * distance,
+            -(canvas_y - this.height *.5) / this.device_size * distance
+        )
+        return this._inv_rotation_matrix.apply(screen_vector).add_vector(this.view_center)
     }
 }

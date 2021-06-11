@@ -1,4 +1,5 @@
 import { Vector } from "../../model/Vector"
+import { ViewportEvent } from "../../model/ViewportEvent";
 import { ViewportMode } from "../../model/ViewportMode"
 import { FromToInteraction } from "./FromToInteraction";
 import { Interaction } from "./Interaction"
@@ -8,8 +9,8 @@ export class VectorInteraction implements Interaction<Vector>
 {
     from_to = new FromToInteraction();
 
-    set_pointer_world_location(location: Vector, view_mode: ViewportMode = ViewportMode.Perspective): void {
-        this.from_to.set_pointer_world_location(location, view_mode)
+    set_pointer_world_location(location: Vector, event: ViewportEvent): void {
+        this.from_to.set_pointer_world_location(location, event)
     }
 
     pointer_click(): void {

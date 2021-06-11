@@ -1,10 +1,10 @@
 import { Vector } from "../../model/Vector"
-import { ViewportMode } from "../../model/ViewportMode"
+import { ViewportEvent } from "../../model/ViewportEvent"
 import { InteractionRenderState } from "./InteractionRenderState"
 
 export interface Interaction<T = unknown> {
 
-    set_pointer_world_location(location: Vector, view_mode: ViewportMode): void,
+    set_pointer_world_location(location: Vector, event: ViewportEvent): void,
     pointer_click(): void,
     
     readonly result: T

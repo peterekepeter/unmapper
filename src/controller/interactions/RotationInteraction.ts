@@ -3,6 +3,7 @@ import { vector_to_vector_rotation_matrix } from "../../model/geometry/vector-ro
 import { PivotRotation } from "../../model/PivotRotation"
 import { Rotation } from "../../model/Rotation"
 import { Vector } from "../../model/Vector"
+import { ViewportEvent } from "../../model/ViewportEvent"
 import { ViewportMode } from "../../model/ViewportMode"
 import { Interaction } from "./Interaction"
 import { ViewportVectorAdjustment } from "./interaction-helpers"
@@ -17,7 +18,7 @@ export class RotationInteraction implements Interaction<PivotRotation>
     result: PivotRotation = PivotRotation.IDENTITY
     finished: boolean;
 
-    set_pointer_world_location(location: Vector, view_mode: ViewportMode): void {
+    set_pointer_world_location(location: Vector, event: ViewportEvent): void {
         switch (this.state) {
             case "center":
                 this.pivot = location
@@ -28,7 +29,7 @@ export class RotationInteraction implements Interaction<PivotRotation>
                 break
             case "to":
                 this.to = location
-                this.calulate_result(view_mode)
+                this.calulate_result(event.view_mode)
                 break
         }
     }

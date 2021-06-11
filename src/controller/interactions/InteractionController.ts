@@ -72,7 +72,7 @@ export class InteractionController {
             }
         } else {
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
-            this.interaction.set_pointer_world_location(vector, event.view_mode)
+            this.interaction.set_pointer_world_location(vector, event)
             this.interaction.pointer_click()
             this.try_complete_execution()
         }
@@ -140,7 +140,7 @@ export class InteractionController {
     pointer_move(event: ViewportEvent): void {
         if (this.interaction) {
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
-            this.interaction.set_pointer_world_location(vector, event.view_mode)
+            this.interaction.set_pointer_world_location(vector, event)
             this.args[this.arg_index] = this.interaction.result
             const interaction_render_state: InteractionRenderState = {
                 ...this.interaction.render_state,
