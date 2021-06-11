@@ -14,6 +14,7 @@ import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_view
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { ViewTransform } from "../render/ViewTransform"
 import { create_view_transform } from "../render/transform/create_view_transform"
+import { ViewportEvent } from "../model/ViewportEvent"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -34,23 +35,23 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     const map = state.map
     const edit_options = state.options
 
-    const [canvas, set_canvas] = useState<HTMLCanvasElement>(null);
+    const [canvas, set_canvas] = useState<HTMLCanvasElement>(null)
 
-    const [renderer, set_renderer] = useState<Renderer>(null);
+    const [renderer, set_renderer] = useState<Renderer>(null)
 
-    const view_mode = viewport_state.mode;
+    const view_mode = viewport_state.mode
 
-    const [isMouseDown, setMouseDown] = useState(false);
-    const [did_mouse_move, setDidMouseMove] = useState(false);
+    const [isMouseDown, setMouseDown] = useState(false)
+    const [did_mouse_move, setDidMouseMove] = useState(false)
 
-    const [last_render_map, set_last_render_map] = useState<UnrealMap>(null);
-    const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null);
-    const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null);
-    const [last_edit_options, set_last_edit_options] = useState<EditorOptions>(null);
-    const [last_width, set_last_width] = useState<number>(null);
-    const [last_height, set_last_height] = useState<number>(null);
-    const [last_view_mode, set_last_view_mode] = useState<ViewportMode>(null);
-    const [view_transform, set_view_transform] = useState<ViewTransform>(create_view_transform(view_mode));
+    const [last_render_map, set_last_render_map] = useState<UnrealMap>(null)
+    const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null)
+    const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null)
+    const [last_edit_options, set_last_edit_options] = useState<EditorOptions>(null)
+    const [last_width, set_last_width] = useState<number>(null)
+    const [last_height, set_last_height] = useState<number>(null)
+    const [last_view_mode, set_last_view_mode] = useState<ViewportMode>(null)
+    const [view_transform, set_view_transform] = useState<ViewTransform>(create_view_transform(view_mode))
 
     function canvas_ref(new_canvas: HTMLCanvasElement) {
         if (new_canvas == null){
@@ -99,9 +100,9 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function get_ortoho_scale(){
-        const levels_per_double = 4;
-        const scale = 1/4096*Math.pow(2, viewport_state.zoom_level/levels_per_double); 
-        return scale;
+        const levels_per_double = 4
+        const scale = 1/4096*Math.pow(2, viewport_state.zoom_level/levels_per_double) 
+        return scale
     }
 
     function renderUpdate(target: Renderer) {
@@ -109,7 +110,6 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             const perspectiveFov = 90
             const scale = get_ortoho_scale()
             target.set_viewport_index(viewport_index)
-            target.set_view_mode(view_mode)
             target.set_show_vertexes(edit_options.vertex_mode)
             view_transform.width = canvas.width
             view_transform.height = canvas.height
@@ -126,8 +126,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         }
     }
 
-    const usePointerLock = false;
-    const normalDragDirection = true;
+    const usePointerLock = false
+    const normalDragDirection = true
 
     return <canvas
         width={width}
@@ -160,7 +160,11 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         setDidMouseMove(false)
         if (state.options.box_select_mode){
             const [canvas_x, canvas_y] = get_canvas_coords(event)
-            controller.interaction.pointer_down(canvas_x, canvas_y, renderer, event.ctrlKey)
+            const e : ViewportEvent = {
+                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
+                renderer, view_mode, view_transform, viewport_index
+            }
+            controller.interaction.pointer_down(e)
         }
     }
 
@@ -171,45 +175,53 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         }
         if (!did_mouse_move || state.options.box_select_mode) {
             const [canvas_x, canvas_y] = get_canvas_coords(event)
-            controller.interaction.pointer_up(canvas_x, canvas_y, renderer, viewport_index, event.ctrlKey)
+            const e : ViewportEvent = {
+                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
+                renderer, view_mode, view_transform, viewport_index
+            }
+            controller.interaction.pointer_up(e)
         }
         setMouseDown(false)
     }
 
 
     function handle_wheel(event: React.WheelEvent){
-        let new_zoom_level = viewport_state.zoom_level;
+        let new_zoom_level = viewport_state.zoom_level
         if (event.deltaY > 0){
-            new_zoom_level--;
+            new_zoom_level--
         }
         if (event.deltaY < 0){
-            new_zoom_level ++;
+            new_zoom_level ++
         }
-        controller.execute(zoom, viewport_index, new_zoom_level);
-        event.preventDefault();
-        return false;
+        controller.execute(zoom, viewport_index, new_zoom_level)
+        event.preventDefault()
+        return false
     }
 
     function handle_pointer_move(event: React.PointerEvent<HTMLCanvasElement>) {
         const [canvas_x, canvas_y] = get_canvas_coords(event)
     
         if (!isMouseDown || state.options.box_select_mode) {
-            controller.interaction.pointer_move(canvas_x, canvas_y, renderer, viewport_index);
+            const e : ViewportEvent = {
+                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
+                renderer, view_mode, view_transform, viewport_index
+            }
+            controller.interaction.pointer_move(e)
             return
         }
-        let dx = event.movementX;
-        let dy = event.movementY;
+        let dx = event.movementX
+        let dy = event.movementY
         if (normalDragDirection) {
-            dx *= -1;
-            dy *= -1;
+            dx *= -1
+            dy *= -1
         }
-        const ortohoScale = get_ortoho_scale();
-        const device_size = Math.min(width, height);
-        const scale = ortohoScale * device_size;
-        setDidMouseMove(true);
+        const ortohoScale = get_ortoho_scale()
+        const device_size = Math.min(width, height)
+        const scale = ortohoScale * device_size
+        setDidMouseMove(true)
         const [next_rotation, nextLocation] =
-            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortohoScale);
-        controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation);
+            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortohoScale)
+        controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation)
     }
 
     function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
@@ -232,42 +244,42 @@ function nextViewState(
     deviceSize: number,
     ortohoScale: number)
     : [Rotation, Vector] {
-    let nextRotation = rotation;
-    let nextLocation = location;
+    let nextRotation = rotation
+    let nextLocation = location
 
-    const leftPress = pointerButtons === 1;
-    const rightPress = pointerButtons === 2;
-    const bothPress = pointerButtons === 3;
+    const leftPress = pointerButtons === 1
+    const rightPress = pointerButtons === 2
+    const bothPress = pointerButtons === 3
 
-    const scale = deviceSize * ortohoScale;
-    const scaledX = moveX / scale;
-    const scaledY = moveY / scale;
-    const normX = moveX / deviceSize;
-    const normY = moveY / deviceSize;
+    const scale = deviceSize * ortohoScale
+    const scaledX = moveX / scale
+    const scaledY = moveY / scale
+    const normX = moveX / deviceSize
+    const normY = moveY / deviceSize
 
-    const perspectiveRotateSpeed = 90;
-    const perspectiveMoveSpeed = 1024;
+    const perspectiveRotateSpeed = 90
+    const perspectiveMoveSpeed = 1024
 
     switch (viewmode) {
         case ViewportMode.Perspective:
             if (leftPress) {
-                const dir = rotation.toMatrix().apply(Vector.FORWARD);
-                nextLocation = location.add(dir.x * normY * perspectiveMoveSpeed, dir.y * normY * perspectiveMoveSpeed, 0);
-                nextRotation = rotation.add(0, -normX * perspectiveRotateSpeed, 0);
+                const dir = rotation.toMatrix().apply(Vector.FORWARD)
+                nextLocation = location.add(dir.x * normY * perspectiveMoveSpeed, dir.y * normY * perspectiveMoveSpeed, 0)
+                nextRotation = rotation.add(0, -normX * perspectiveRotateSpeed, 0)
             } else if (rightPress) {
-                nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0);
+                nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0)
             } else if (bothPress) {
                 const matrix = Matrix3x3
                     .rotateDegreesZ(rotation.yaw)
-                    .rotateDegreesY(rotation.pitch);
-                const forward = matrix.apply(Vector.UP);
-                const right = matrix.apply(Vector.RIGHT);
+                    .rotateDegreesY(rotation.pitch)
+                const forward = matrix.apply(Vector.UP)
+                const right = matrix.apply(Vector.RIGHT)
                 nextLocation = location
                     .add_vector(Vector.UP.scale(normY * perspectiveMoveSpeed))
-                    .add_vector(right.scale(-normX * perspectiveMoveSpeed));
+                    .add_vector(right.scale(-normX * perspectiveMoveSpeed))
             }
 
-            break;
+            break
         case ViewportMode.UV:
         case ViewportMode.Top:
             nextLocation = location.add_numbers(scaledX, scaledY, 0)
@@ -279,5 +291,5 @@ function nextViewState(
             nextLocation = location.add_numbers(scaledX, 0, -scaledY)
             break
     }
-    return [nextRotation, nextLocation];
+    return [nextRotation, nextLocation]
 }

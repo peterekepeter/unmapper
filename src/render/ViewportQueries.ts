@@ -12,7 +12,7 @@ export class ViewportQueries {
 
     constructor(private geometry_cache: GeometryCache) { }
 
-    find_nearest_Actor(
+    find_nearest_actor(
         map: UnrealMap,
         canvas_x: number,
         canvas_y: number

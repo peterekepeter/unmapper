@@ -1,12 +1,9 @@
-import { UnrealMap } from "../model/UnrealMap"
 import { Actor } from "../model/Actor"
 import { Renderer } from "./Renderer"
 import { Vector } from "../model/Vector"
 import { CsgOperation } from "../model/CsgOperation"
 import { PolyFlags } from "../model/PolyFlags"
 import { Color } from "../model/Color"
-import { Rotation } from "../model/Rotation"
-import { Matrix3x3 } from "../model/Matrix3x3"
 import { BrushModel } from "../model/BrushModel"
 import { EditorState } from "../model/EditorState"
 import { BoundingBox } from "../model/BoundingBox"
@@ -15,12 +12,7 @@ import { intersect_segment_with_plane } from "../model/geometry/intersect-functi
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { ViewportMode } from "../model/ViewportMode"
 import { get_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv"
-import { PerspectiveViewTransform } from "./transform/PerspectiveViewTransform"
 import { ViewTransform } from "./ViewTransform"
-import { TopViewTransform } from "./transform/TopViewTransform"
-import { FrontViewTransform } from "./transform/FrontViewTransform"
-import { SideViewTransform } from "./transform/SideViewTransform"
-import { ViewportQueries } from "./ViewportQueries"
 
 const backgroundColor = '#222'
 
@@ -96,8 +88,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     let viewport_index = -1;
 
     let view_mode = ViewportMode.Top
-
-    const viewport_queries = new ViewportQueries(geometry_cache)
 
     function render(state: EditorState): void {
         render_map(state)
@@ -420,10 +410,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function set_view_mode(mode: ViewportMode): void {
-        view_mode = mode
-    }
-
     function set_view_transform(transform: ViewTransform): void {
         render_transform = transform
     }
@@ -431,22 +417,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     const renderer: Renderer = {
         set_view_transform,
         render_v2: render,
-        set_view_mode,
         set_viewport_index: index => viewport_index = index,
-        get_view_mode: () => view_mode,
-        find_actors_in_box: (map: UnrealMap, canvas_x0: number, canvas_y0: number, canvas_x1: number, canvas_y1: number)
-            : number[] => {
-            viewport_queries.render_transform = render_transform
-            return viewport_queries.find_actors_in_box(map, canvas_x0, canvas_y0, canvas_x1, canvas_y1)
-        },
-        find_vertexes_of_selected_actors_in_box: (map: UnrealMap, canvas_x0: number, canvas_y0: number, canvas_x1: number, canvas_y1: number, custom_geometry_cache: GeometryCache) => {
-            viewport_queries.render_transform = render_transform
-            return viewport_queries.find_vertexes_of_selected_actors_in_box(map, canvas_x0, canvas_y0, canvas_x1, canvas_y1, custom_geometry_cache)
-        },
-        find_nearest_actor: (map: UnrealMap, x: number, y: number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_Actor(map, x, y) },
-        find_nearest_vertex: (map: UnrealMap, x: number, y: number) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_vertex(map, x, y) },
-        find_nearest_snapping_point: (map: UnrealMap, x: number, y: number, cgc: GeometryCache) => { viewport_queries.render_transform = render_transform; return viewport_queries.find_nearest_snapping_point(map, x, y, cgc) },
-        get_pointer_world_location: (x, y) => render_transform.canvas_to_world_location(x, y),
         set_show_vertexes: (state: boolean) => { showVertexes = state }
     }
     return renderer
