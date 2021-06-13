@@ -12,14 +12,14 @@ import { make_actor_selection_command } from "../commands/selection/make_actor_s
 export function ActorList({ controller = new AppController() }) {
 
     const map = use_signal(controller.state_signal).map;
-    const colors = use_signal(themeColors);
+    const colors = use_signal(themeColors)
 
     return <div style={{overflow:"hidden", display:'grid'}}>
         <SectionTitle>Objects</SectionTitle>
         <div style={{overflow:'auto', scrollbarColor: 'dark'}}>
         {
-            map.actors.map(actor => 
-                <div key={actor.name} style={{
+            map.actors.map((actor, index) => 
+                <div key={index} style={{
                     userSelect:'none', 
                     background:actor.selected ? colors.accent : null,
                     color:actor.selected ? colors.background : null 

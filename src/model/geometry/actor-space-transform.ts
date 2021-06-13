@@ -25,6 +25,7 @@ export function get_actor_to_world_rotation_scaling(actor: Actor): Matrix3x3 {
         .multiply(mainScale.to_matrix())
 }
 
+
 export function get_world_to_actor_transform_simple(
     actor: Actor
 ): (v: Vector) => Vector {

@@ -1,7 +1,7 @@
-import { Plane } from "../../model/Plane";
+import { Plane } from "../../model/Plane"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
-import { ViewportMode } from "../../model/ViewportMode";
+import { ViewportMode } from "../../model/ViewportMode"
 import { Interaction } from "./Interaction"
 import { InteractionRenderState } from "./InteractionRenderState"
 
@@ -25,7 +25,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
         const second = location
         const third = this._get_third_point(event)
         const normal = first.subtract_vector(second).cross(first.subtract_vector(third)).normalize()
-        this.result = new Plane(normal, first)
+        this.result = new Plane(normal, second)
         this.render_state = {
             line_from: first,
             line_to: second
@@ -33,7 +33,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
     }
 
     pointer_click(): void {
-        if (!this.expecting_second_point){
+        if (!this.expecting_second_point) {
             this.expecting_second_point = true
         } else {
             this.finished = true
@@ -50,7 +50,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
                 return this.first_point.add_vector(Vector.UNIT_Y)
             case ViewportMode.Top:
             case ViewportMode.UV:
-                    return this.first_point.add_vector(Vector.UNIT_Z)
+                return this.first_point.add_vector(Vector.UNIT_Z)
         }
     }
 }

@@ -19,12 +19,14 @@ import { scale_command } from "./scale"
 import { reset_initial_state, set_initial_state } from "./set_initial_state"
 import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
 import { toggle_box_select_command } from "./editor/toggle_box_select"
+import { clip_geometry_command } from "./clip_geometry"
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     select_all_command,
     toggle_vertex_mode_command,
     create_polygon_command,
+    clip_geometry_command,
     delete_selected_command,
     extrude_polygons_command,
     align_vertexes_to_32_grid,
