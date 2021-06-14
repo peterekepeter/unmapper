@@ -1,4 +1,6 @@
 import { Plane } from "../Plane";
+import { RandomNumberGenerator } from "../random/RandomNumberGenerator";
+import { RandomVectorGenerator } from "../random/RandomVectorGenerator";
 import { Vector } from "../Vector";
 
 
@@ -36,9 +38,6 @@ test('XY plane is in front of UNIT_NEGATIVE_Z', () => {
 test('normal cannot be zero vector', () => 
     expect(() => new Plane(Vector.ZERO, 0)).toThrow())
 
-test('distance cannot be negative', () => 
-    expect(() => new Plane(Vector.UNIT_X, -4)).toThrow())
-
 describe('constructing plane from normal and position', () => {
 
     test('planes are equal if positions are on same plane', () => {
@@ -46,6 +45,21 @@ describe('constructing plane from normal and position', () => {
             .toEqual(new Plane(Vector.UNIT_Z, new Vector(1,-4,0)))
     })
 
+})
+
+test("fuzz correct plane is generated when generating plane from normal and position", () =>{
+    const normal = new Vector(1,1,0).normalize()
+    const generator = new RandomNumberGenerator()
+    for (let i=0; i<10; i++){
+        const u = generator.next_float_in_range(-1,1)
+        const v = generator.next_float_in_range(-1,1)
+        const distance = generator.next_float_in_range(0,1)
+        const position = new Vector(0,0,1).scale(u)
+            .add_vector(new Vector(-1,1,0).scale(v))
+            .add_vector(normal.scale(distance))
+        const plane = new Plane(normal, position)
+        expect(plane.distance).toBeCloseTo(distance, 10)
+    }
 })
 
 describe('intersect segment', () => {

@@ -3,8 +3,11 @@ import { Vector } from "./Vector"
 
 export class Plane {
 
+    /** facing direction of the plane */
     normal: Vector;
-    distance: number;
+
+    /** signed distance from origin */
+    distance: number; 
 
     static XY = new Plane(Vector.UNIT_Z, 0);
     static XZ = new Plane(Vector.UNIT_Y, 0);
@@ -24,11 +27,10 @@ export class Plane {
         }
         this.normal = normal
         if (b instanceof Vector) {
-            this.distance = Math.abs(this.normal.dot(b))
+            this.distance = this.normal.dot(b)
         } else {
             this.distance = b
         }
-        LogicError.if(this.distance < 0, "distance from origin cannot be negative")
     }
 
     equals(other: Plane): boolean {
