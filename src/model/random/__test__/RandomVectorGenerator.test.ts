@@ -19,6 +19,9 @@ describe('next_vector_from_unit_disk', () => {
 
     test('mean is close to 0',
         () => expect_vector_close_to(mean_of(list), Vector.ZERO, 1))
+ 
+    test('z component is always 0',
+        () => list.forEach(v => expect(v.z).toBe(0)))
 
 })
 
@@ -40,6 +43,9 @@ describe('next_vector_from_unit_circle', () => {
     test('mean is close to 0',
         () => expect_vector_close_to(mean_of(list), Vector.ZERO, 1))
 
+    test('z component is always 0',
+        () => list.forEach(v => expect(v.z).toBe(0)))
+
 })
 
 describe('next_vector_from_unit_sphere_volume', () => {
@@ -57,6 +63,15 @@ describe('next_vector_from_unit_sphere_volume', () => {
     test('mean is close to 0',
         () => expect_vector_close_to(mean_of(list), Vector.ZERO, 0))
 
+    test('has x component',
+        () => list.forEach(v => expect(v.x).not.toBe(0)))
+
+    test('has y component',
+        () => list.forEach(v => expect(v.y).not.toBe(0)))
+
+    test('has z component',
+        () => list.forEach(v => expect(v.z).not.toBe(0)))
+
 })
 
 describe('next_vector_from_unit_sphere_surface', () => {
@@ -73,6 +88,15 @@ describe('next_vector_from_unit_sphere_surface', () => {
 
     test('mean is close to 0',
         () => expect_vector_close_to(mean_of(list), Vector.ZERO, 0))
+
+    test('has x component',
+        () => list.forEach(v => expect(v.x).not.toBe(0)))
+
+    test('has y component',
+        () => list.forEach(v => expect(v.y).not.toBe(0)))
+
+    test('has z component',
+        () => list.forEach(v => expect(v.z).not.toBe(0)))
 
 })
 
@@ -94,6 +118,14 @@ describe('next_vector_from_bounding_box', () => {
     test('mean is close to box center',
         () => expect_vector_close_to(mean_of(list), new Vector(6, -2, 8), 0))
 
+    test('has x component',
+        () => list.forEach(v => expect(v.x).not.toBe(0)))
+
+    test('has y component',
+        () => list.forEach(v => expect(v.y).not.toBe(0)))
+
+    test('has z component',
+        () => list.forEach(v => expect(v.z).not.toBe(0)))
 })
 
 

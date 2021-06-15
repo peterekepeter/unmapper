@@ -16,14 +16,14 @@ test('normal of XY plan is cross product between X and Y', () =>
 test('normal of YZ plan is cross product between Y and Z', () =>
     expect(Plane.YZ.normal.equals(Vector.UNIT_Y.cross(Vector.UNIT_Z))).toBe(true))
 
-test('normal of XZ plan is cross product between X and Z', () =>
-    expect(Plane.XZ.normal.equals(Vector.UNIT_X.cross(Vector.UNIT_Z))).toBe(true))
+test('normal of ZX plan is cross product between X and Z', () =>
+    expect(Plane.ZX.normal.equals(Vector.UNIT_Z.cross(Vector.UNIT_X))).toBe(true))
 
 test('signed distance', () => {
     for (let i=-3; i<3; i++){
         expect(Plane.XY.signed_distance_to_point(Vector.UNIT_Z.scale(i))).toBe(i)
         expect(Plane.YZ.signed_distance_to_point(Vector.UNIT_X.scale(i))).toBe(i)
-        expect(Plane.XZ.signed_distance_to_point(Vector.UNIT_Y.scale(i))).toBe(i)
+        expect(Plane.ZX.signed_distance_to_point(Vector.UNIT_Y.scale(i))).toBe(i)
     }
 })
 

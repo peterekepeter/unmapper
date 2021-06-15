@@ -24,8 +24,10 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
         const first = this.first_point
         const second = location
         const third = this._get_third_point(event)
-        const normal = first.subtract_vector(second).cross(first.subtract_vector(third)).normalize()
-        this.result = new Plane(normal, second)
+        const a = first.subtract_vector(third)
+        const b = second.subtract_vector(third)
+        const cross_product = Vector.cross_product(a,b)
+        this.result = new Plane(cross_product, second)
         this.render_state = {
             line_from: first,
             line_to: second
@@ -50,7 +52,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
                 return this.first_point.add_vector(Vector.UNIT_Y)
             case ViewportMode.Top:
             case ViewportMode.UV:
-                return this.first_point.add_vector(Vector.UNIT_Z)
+                return this.first_point.add_vector(Vector.UNIT_NEGATIVE_Z)
         }
     }
 }

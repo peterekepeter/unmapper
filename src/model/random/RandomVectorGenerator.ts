@@ -52,7 +52,7 @@ export class RandomVectorGenerator {
             z = this._next_signed_float()
             if (x * x + y * y + z * z < 1) { break }
         }
-        return new Vector(x, y, 0)
+        return new Vector(x, y, z)
     }
 
     next_vector_from_unit_sphere_surface(): Vector {

@@ -10,12 +10,12 @@ export class Plane {
     distance: number; 
 
     static XY = new Plane(Vector.UNIT_Z, 0);
-    static XZ = new Plane(Vector.UNIT_Y, 0);
     static YZ = new Plane(Vector.UNIT_X, 0);
+    static ZX = new Plane(Vector.UNIT_Y, 0);
 
     static YX = new Plane(Vector.UNIT_NEGATIVE_Z, 0);
-    static ZX = new Plane(Vector.UNIT_NEGATIVE_Y, 0);
     static ZY = new Plane(Vector.UNIT_NEGATIVE_X, 0);
+    static XZ = new Plane(Vector.UNIT_NEGATIVE_Y, 0);
 
     constructor(normal: Vector, distance_from_origin: number)
     constructor(normal: Vector, position: Vector)

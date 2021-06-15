@@ -110,7 +110,7 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
 function world_plane_to_object_plane(world_plane: Plane, object: Actor): Plane {
     const world_to_object = get_world_to_actor_rotation_scaling(object)
     const new_normal = world_to_object.apply(world_plane.normal)
-    const new_location = world_plane.get_center_position().subtract_vector(object.location)
+    const new_location = world_plane.get_center_position().add_vector(object.location)
     return new Plane(new_normal, new_location)
 }
 

@@ -42,7 +42,7 @@ export class Vector {
     }
 
     get_component(index: number): number {
-        switch(index){
+        switch (index) {
             case 0: return this.x
             case 1: return this.y
             case 2: return this.z
@@ -72,7 +72,7 @@ export class Vector {
     scale(s: number): Vector {
         return new Vector(this.x * s, this.y * s, this.z * s)
     }
-    
+
     scale_components(s: Vector): Vector {
         return new Vector(this.x * s.x, this.y * s.y, this.z * s.z)
     }
@@ -96,7 +96,7 @@ export class Vector {
 
     length(): number {
         const length_squared = this.dot(this)
-        return Math.sqrt(length_squared) 
+        return Math.sqrt(length_squared)
     }
 
     distance_to(other: Vector): number {
@@ -106,12 +106,19 @@ export class Vector {
         return Math.sqrt(dx * dx + dy * dy + dz * dz)
     }
 
-    vector_to(x: number, y: number, z:number) : Vector {
-        return this.reverse_subtract(x,y,z)
+    vector_to(x: number, y: number, z: number): Vector {
+        return this.reverse_subtract(x, y, z)
     }
 
-    vector_to_vector(other:Vector) : Vector {
+    vector_to_vector(other: Vector): Vector {
         return other.subtract_vector(this)
+    }
+
+    with_positive_zeroes(): Vector {
+        return new Vector(
+            this.x === 0 ? 0 : this.x, 
+            this.y === 0 ? 0 : this.y,
+            this.z === 0 ? 0 : this.z)
     }
 
     static from_array(array: number[], index = 0): Vector {
@@ -124,11 +131,12 @@ export class Vector {
 
     static cross_product_numbers(
         a1: number, a2: number, a3: number,
-        b1: number, b2: number, b3: number): Vector {
+        b1: number, b2: number, b3: number
+    ): Vector {
         return new Vector(
-            a2 * b3 - a3 * b2,
-            a1 * b3 - a3 * b1,
-            a1 * b2 - a2 * b1)
+            a2 * b3 - b2 * a3,
+            a3 * b1 - b3 * a1,
+            a1 * b2 - b1 * a2)
     }
 
     static dot_product(a: Vector, b: Vector): number {
@@ -142,7 +150,7 @@ export class Vector {
         bx: number, by: number, bz: number): number {
         return ax * bx + ay * by + az * bz
     }
-    
+
     equals(vector: Vector): boolean {
         return this.x === vector.x
             && this.y === vector.y
@@ -150,20 +158,20 @@ export class Vector {
     }
 
     toString(): string {
-        if (this.equals(Vector.ZERO)){
+        if (this.equals(Vector.ZERO)) {
             return "<zero vector>"
         }
         const result = []
         let sep = '{ '
-        if (this.x !== 0) { 
-            result.push(sep, "x:", this.x) 
+        if (this.x !== 0) {
+            result.push(sep, "x:", this.x)
             sep = ", "
         }
-        if (this.y !== 0) { 
-            result.push(sep, "y:", this.y) 
+        if (this.y !== 0) {
+            result.push(sep, "y:", this.y)
             sep = ", "
         }
-        if (this.z !== 0) { 
+        if (this.z !== 0) {
             result.push(sep, "z:", this.z)
         }
         result.push(' }')
@@ -179,7 +187,7 @@ export class Vector {
     addVector(v: Vector): Vector {
         return this.add_numbers(v.x, v.y, v.z)
     }
-    
+
     /** @deprecated use subtract_vector */
     subtractVector(v: Vector): Vector {
         return this.subtract_numbers(v.x, v.y, v.z)
@@ -196,7 +204,7 @@ export class Vector {
     }
 
     /** @deprecated use vector_to_vector */
-    vectorToVector(other:Vector) : Vector {
+    vectorToVector(other: Vector): Vector {
         return other.subtract_vector(this)
     }
 
