@@ -1,3 +1,4 @@
+import { EditorError } from "../../model/error/EditorError"
 import { Plane } from "../../model/Plane"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
@@ -27,7 +28,14 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
         const a = first.subtract_vector(third)
         const b = second.subtract_vector(third)
         const cross_product = Vector.cross_product(a,b)
+        if (cross_product.equals(Vector.ZERO)){
+            return
+        }
         this.result = new Plane(cross_product, second)
+        // verify that the points are on the plane
+        EditorError.if(Math.abs(this.result.signed_distance_to_point(first))>1e-9)
+        EditorError.if(Math.abs(this.result.signed_distance_to_point(second))>1e-9)
+        EditorError.if(Math.abs(this.result.signed_distance_to_point(third))>1e-9)
         this.render_state = {
             line_from: first,
             line_to: second

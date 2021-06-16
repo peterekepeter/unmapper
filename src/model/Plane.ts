@@ -38,7 +38,7 @@ export class Plane {
     }
 
     signed_distance_to_point(point: Vector): number {
-        return this.normal.dot(point) + this.distance
+        return this.normal.dot(point) - this.distance
     }
 
     is_in_front_of_point(point: Vector): boolean {

@@ -45,6 +45,19 @@ describe('constructing plane from normal and position', () => {
             .toEqual(new Plane(Vector.UNIT_Z, new Vector(1,-4,0)))
     })
 
+    test('fuzz distance to point is correct', () => {
+        const generator = new RandomVectorGenerator()
+        const random = new RandomNumberGenerator()
+        for (let i=0; i<10; i++){
+            const normal = generator.next_vector_from_unit_sphere_surface()
+            const distance = random.next_float_in_range(-10, 10)
+            const position = normal.scale(distance)
+            const plane = new Plane(normal, position)
+            expect(plane.signed_distance_to_point(position))
+                .toBeCloseTo(0, 10)
+        }
+    })
+
 })
 
 test("fuzz correct plane is generated when generating plane from normal and position", () =>{
