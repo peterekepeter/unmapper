@@ -97,11 +97,11 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
             result_polygons.push(clipped_poly)
         }
         next_brush.polygons = result_polygons
-        // const cleaned = deleteBrushData(
-        //     createBrushPolygon(next_brush, new_vertexes),
-        //     { vertexes: vertexes_to_delete }
-        // )
-        const cleaned = createBrushPolygon(next_brush, new_vertexes);
+        
+        const cleaned = new_vertexes.length >= 3 
+            ? createBrushPolygon(next_brush, new_vertexes)
+            : next_brush
+
         cleaned.rebuild_all_poly_edges()
         return deleteBrushData(cleaned, { vertexes: vertexes_to_delete })
     })
