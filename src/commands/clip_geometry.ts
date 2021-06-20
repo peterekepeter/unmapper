@@ -8,7 +8,7 @@ import { BrushModel } from "../model/BrushModel"
 import { BrushPolygon } from "../model/BrushPolygon"
 import { BrushVertex } from "../model/BrushVertex"
 import { EditorState } from "../model/EditorState"
-import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
+import { get_world_to_actor_rotation_scaling, get_world_to_actor_transform_simple } from "../model/geometry/actor-space-transform"
 import { Plane } from "../model/Plane"
 import { Vector } from "../model/Vector"
 
@@ -109,8 +109,10 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
 
 function world_plane_to_object_plane(world_plane: Plane, object: Actor): Plane {
     const world_to_object = get_world_to_actor_rotation_scaling(object)
+    const world_to_object_fn = get_world_to_actor_transform_simple(object)
     const new_normal = world_to_object.apply(world_plane.normal)
-    const new_location = world_plane.get_center_position().subtract_vector(object.location)
+    const world_plane_center: Vector = world_plane.get_center_position()
+    const new_location = world_to_object_fn(world_plane_center)
     return new Plane(new_normal, new_location)
 }
 
