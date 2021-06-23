@@ -9,17 +9,19 @@ import { ActorList } from "./ActorList"
 import { PropertyEditor } from "./PropertyEditor"
 import { CommandPalette } from "./CommandPalette"
 import { StatusBar } from "./StatusBar"
+import { PanelLayoutRenderer } from "./PanelLayoutComponent"
 
 export const Application = ({ controller = create_controller() }) => {
+    const colors = use_signal(themeColors)
     return <>
         <div style={{
             display: "grid",
             width: '100%',
-            height: '100%'
+            height: '100%',
+            background: colors.background,
+            color: colors.foreground,
         }}>
-            <div>
-                <MainGrid controller={controller} />
-            </div>
+            <MainGrid controller={controller} />
             <StatusBar controller={controller} />
         </div>
         <CommandPalette controller={controller} />
@@ -29,7 +31,6 @@ export const Application = ({ controller = create_controller() }) => {
 export const MainGrid = ({ controller = create_controller() }) => {
 
     const state = use_signal(controller.state_signal)
-    const colors = use_signal(themeColors)
     const [resizeCount, setResizeCount] = React.useState(0)
 
     React.useEffect(() => {
@@ -53,13 +54,16 @@ export const MainGrid = ({ controller = create_controller() }) => {
     })
 
     switch (state.options.editor_layout) {
+        
+        default: 
         case 0:
-        default: return <div style={{
+            return <PanelLayoutRenderer 
+                layout={state.options.layout}
+                controller={controller}/>
+        case 1:return <div style={{
             display: 'grid',
             grid: '1fr 1fr / 0.5fr 1.5fr 1fr',
             overflow: 'hidden',
-            background: colors.background,
-            color: colors.foreground,
             width: '100%',
             height: '100%'
         }}>
@@ -73,34 +77,6 @@ export const MainGrid = ({ controller = create_controller() }) => {
                 mode={ViewportMode.Front}
                 controller={controller} />
             <PropertyEditor controller={controller} />
-            <ViewportPanel
-                viewport_index={2}
-                location={new Vector(-500, -300, 300)}
-                mode={ViewportMode.Perspective}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={3}
-                mode={ViewportMode.Side}
-                controller={controller} />
-        </div>
-
-        case 1: return <div style={{
-            display: 'grid',
-            grid: '1fr 1fr / 1.5fr 1fr',
-            overflow: 'hidden',
-            background: colors.background,
-            color: colors.foreground,
-            width: '100%',
-            height: '100%'
-        }}>
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={1}
-                mode={ViewportMode.Front}
-                controller={controller} />
             <ViewportPanel
                 viewport_index={2}
                 location={new Vector(-500, -300, 300)}
@@ -114,10 +90,34 @@ export const MainGrid = ({ controller = create_controller() }) => {
 
         case 2: return <div style={{
             display: 'grid',
+            grid: '1fr 1fr / 1.5fr 1fr',
+            overflow: 'hidden',
+            width: '100%',
+            height: '100%'
+        }}>
+            <ViewportPanel
+                viewport_index={0}
+                mode={ViewportMode.Top}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={1}
+                mode={ViewportMode.Front}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={2}
+                location={new Vector(-500, -300, 300)}
+                mode={ViewportMode.Perspective}
+                controller={controller} />
+            <ViewportPanel
+                viewport_index={3}
+                mode={ViewportMode.Side}
+                controller={controller} />
+        </div>
+
+        case 3: return <div style={{
+            display: 'grid',
             grid: '1fr / 1fr',
             overflow: 'hidden',
-            background: colors.background,
-            color: colors.foreground,
             width: '100%',
             height: '100%'
         }}>
@@ -128,12 +128,10 @@ export const MainGrid = ({ controller = create_controller() }) => {
         </div>
 
 
-        case 3: return <div style={{
+        case 4: return <div style={{
             display: 'grid',
             grid: '1fr 1fr / 0.25fr 1fr',
             overflow: 'hidden',
-            background: colors.background,
-            color: colors.foreground,
             width: '100%',
             height: '100%'
         }}>
@@ -150,12 +148,10 @@ export const MainGrid = ({ controller = create_controller() }) => {
                 controller={controller} />
         </div>
 
-        case 4: return <div style={{
+        case 5: return <div style={{
             display: 'grid',
             grid: '1fr 1fr / 1fr',
             overflow: 'hidden',
-            background: colors.background,
-            color: colors.foreground,
             width: '100%',
             height: '100%'
         }}>

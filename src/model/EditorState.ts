@@ -1,5 +1,6 @@
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { Actor } from "./Actor"
+import { PanelLayout, PanelSplitDirection, PanelType } from "./layout/PanelLayout"
 import { Rotation } from "./Rotation"
 import { UnrealMap } from "./UnrealMap"
 import { Vector } from "./Vector"
@@ -24,6 +25,7 @@ export interface EditorOptions {
     preserve_vertex_uv: boolean;
     editor_layout: number;
     box_select_mode: boolean;
+    layout: PanelLayout
 }
 
 export interface EditorState
@@ -52,7 +54,33 @@ export function create_initial_editor_state() : EditorState{
             vertex_mode: false,
             preserve_vertex_uv: false,
             editor_layout: 0,
-            box_select_mode: false
+            box_select_mode: false,
+            layout: {
+                split_direction: PanelSplitDirection.Horizontal,
+                split_percentage: 0.2,
+                left_child: {
+                    split_direction: PanelSplitDirection.Vertical,
+                    split_percentage: 0.5,
+                    left_child: PanelType.Objects,
+                    right_child: PanelType.Properties
+                },
+                right_child: {
+                    split_direction: PanelSplitDirection.Horizontal,
+                    split_percentage: 0.66,
+                    left_child: {
+                        split_direction: PanelSplitDirection.Vertical,
+                        split_percentage: 0.5,
+                        left_child: PanelType.Viewport, 
+                        right_child: PanelType.Viewport
+                    },
+                    right_child: { 
+                        split_direction: PanelSplitDirection.Vertical,
+                        split_percentage: 0.5,
+                        left_child: PanelType.Viewport,
+                        right_child: PanelType.Viewport
+                    }
+                }
+            }
         },
         viewports: [
             {

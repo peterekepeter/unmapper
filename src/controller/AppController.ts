@@ -93,6 +93,21 @@ export class AppController {
         this.commands_shown_state.value = true;
     }
 
+    viewport_usage: boolean[] = [];
+
+    public free_viewport(viewport: number): void {
+        this.viewport_usage[viewport] = false
+    }
+
+    public allocate_viewport(): number {
+        for (let i=0; i<10; i++){
+            if (!this.viewport_usage[i]){
+                this.viewport_usage[i] = true
+                return i
+            }
+        }
+    }
+
 }
 
 export const create_controller = (): AppController => new AppController();
