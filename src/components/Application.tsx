@@ -9,7 +9,7 @@ import { ActorList } from "./ActorList"
 import { PropertyEditor } from "./PropertyEditor"
 import { CommandPalette } from "./CommandPalette"
 import { StatusBar } from "./StatusBar"
-import { PanelLayoutRenderer } from "./PanelLayoutComponent"
+import { PanelLayoutRoot } from "./layout/PanelLayoutRoot"
 
 export const Application = ({ controller = create_controller() }) => {
     const colors = use_signal(themeColors)
@@ -56,10 +56,10 @@ export const MainGrid = ({ controller = create_controller() }) => {
     switch (state.options.editor_layout) {
         
         default: 
-        case 0:
-            return <PanelLayoutRenderer 
-                layout={state.options.layout}
-                controller={controller}/>
+        case 0: return <PanelLayoutRoot 
+            layout={state.options.layout}
+            controller={controller}
+            />
         case 1:return <div style={{
             display: 'grid',
             grid: '1fr 1fr / 0.5fr 1.5fr 1fr',
