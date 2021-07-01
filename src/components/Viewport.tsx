@@ -15,6 +15,7 @@ import { InteractionRenderState } from "../controller/interactions/InteractionRe
 import { ViewTransform } from "../render/ViewTransform"
 import { create_view_transform } from "../render/transform/create_view_transform"
 import { ViewportEvent } from "../model/ViewportEvent"
+import { EditorError } from "../model/error/EditorError"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -24,6 +25,20 @@ export interface IViewportProps{
     state: EditorState
 }
 
+interface InternalState{
+    canvas: HTMLCanvasElement
+    renderer: Renderer
+    view_mode: ViewportMode
+    view_transform: ViewTransform
+    viewport_state: ViewportState
+    ortoho_scale: number
+    map: UnrealMap
+    interaction: InteractionRenderState
+    editor_options: EditorOptions
+    width: number
+    height: number
+}
+
 export const Viewport : FunctionComponent<IViewportProps> = ({
     viewport_index = 0,
     width = 500,
@@ -31,100 +46,25 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     controller = create_controller(),
     state = create_initial_editor_state()}) => {
         
-    const viewport_state = state.viewports[viewport_index]
-    const map = state.map
-    const edit_options = state.options
 
-    const [canvas, set_canvas] = useState<HTMLCanvasElement>(null)
+    const internal_state = React.useRef<InternalState>({
+        canvas: null,
+        renderer: null,
+        view_mode: null,
+        view_transform: null,
+        viewport_state: null,
+        ortoho_scale: null,
+        map: null,
+        interaction: null, 
+        editor_options: null,
+        width: null, 
+        height: null, 
+    })
 
-    const [renderer, set_renderer] = useState<Renderer>(null)
-
-    const view_mode = viewport_state.mode
 
     const [isMouseDown, setMouseDown] = useState(false)
     const [did_mouse_move, setDidMouseMove] = useState(false)
 
-    const [last_render_map, set_last_render_map] = useState<UnrealMap>(null)
-    const [last_interaction, set_last_interaction] = useState<InteractionRenderState>(null)
-    const [last_render_viewport, set_last_render_viewport] = useState<ViewportState>(null)
-    const [last_edit_options, set_last_edit_options] = useState<EditorOptions>(null)
-    const [last_width, set_last_width] = useState<number>(null)
-    const [last_height, set_last_height] = useState<number>(null)
-    const [last_view_mode, set_last_view_mode] = useState<ViewportMode>(null)
-    const [view_transform, set_view_transform] = useState<ViewTransform>(create_view_transform(view_mode))
-
-    function canvas_ref(new_canvas: HTMLCanvasElement) {
-        if (new_canvas == null){
-            return
-        }
-        if (new_canvas !== canvas){
-            set_canvas(new_canvas)
-            set_renderer(create_wireframe_renderer(new_canvas, controller.geometry_cache))
-            return
-        }
-        // TODO: messy, compare prev state with next state innstead of having it split
-        let needs_render = false
-        if (last_render_map !== map){
-            set_last_render_map(map)
-            needs_render = true
-        }
-        if (last_render_viewport !== viewport_state){
-            set_last_render_viewport(viewport_state)
-            needs_render = true
-        }
-        if (last_interaction !== state.interaction_render_state){
-            set_last_interaction(last_interaction)
-            needs_render = true
-        }
-        if (last_edit_options !== edit_options){
-            set_last_edit_options(edit_options)
-            needs_render = true
-        }
-        if (last_width !== width){
-            set_last_width(width)
-            needs_render = true
-        }
-        if (last_height !== height){
-            set_last_height(height)
-            needs_render = true
-        }
-        if (last_view_mode !== view_mode){
-            set_last_view_mode(view_mode)
-            set_view_transform(create_view_transform(view_mode))
-            needs_render = true
-        }
-        if (needs_render){
-            renderUpdate(renderer)
-        }
-    
-    }
-
-    function get_ortoho_scale(){
-        const levels_per_double = 4
-        const scale = 1/4096*Math.pow(2, viewport_state.zoom_level/levels_per_double) 
-        return scale
-    }
-
-    function renderUpdate(target: Renderer) {
-        if (target != null) {
-            const perspectiveFov = 90
-            const scale = get_ortoho_scale()
-            target.set_viewport_index(viewport_index)
-            target.set_show_vertexes(edit_options.vertex_mode)
-            view_transform.width = canvas.width
-            view_transform.height = canvas.height
-            view_transform.device_size = Math.min(canvas.width, canvas.height)
-            view_transform.view_rotation = viewport_state.rotation
-            view_transform.view_center = viewport_state.center_location
-            view_transform.scale = scale
-            target.set_view_transform(view_transform)
-            // re-render
-            const before_time = Date.now()
-            target.render_v2(controller.state_signal.value)
-            const delta_time = Date.now() - before_time
-            // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', viewport_state.center_location);
-        }
-    }
 
     const usePointerLock = false
     const normalDragDirection = true
@@ -137,21 +77,94 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         onPointerDown={handle_pointer_down}
         onPointerUp={handle_pointer_up}
         onPointerMove={handle_pointer_move}
-        ref={canvas => canvas_ref(canvas)}
-        style={ canvas && canvas.height < canvas.width ? {
-            height: '100%',
-            position: "relative"
-        } : {
-            width: '100%',
-            position: "relative"
-        }} />
+        ref={canvas => render_scene(canvas)} />
 
+
+    function render_scene(new_canvas: HTMLCanvasElement) {
+        if (new_canvas == null){
+            return
+        }
+        let need_render = false
+        let new_view_transform = false
+        let new_renderer = false
+        const s = internal_state.current
+
+        if (new_canvas !== s.canvas){
+            s.canvas = new_canvas
+            s.renderer = create_wireframe_renderer(new_canvas, controller.geometry_cache)
+            need_render = true
+            new_renderer = true
+        }
+        EditorError.if(s.renderer == null, "missing renderer")
+        EditorError.if(s.canvas == null, "missing canvas")
+
+        if (s.viewport_state !== state.viewports[viewport_index]){
+            s.viewport_state = state.viewports[viewport_index]
+            if (s.view_mode !== s.viewport_state.mode){
+                s.view_mode = s.viewport_state.mode
+                s.view_transform = create_view_transform(s.view_mode)
+                new_view_transform = true
+            }
+            s.view_transform.view_rotation = s.viewport_state.rotation
+            s.view_transform.view_center = s.viewport_state.center_location
+            s.ortoho_scale = get_ortoho_scale(s.viewport_state.zoom_level)
+            s.view_transform.scale = s.ortoho_scale
+            need_render = true
+        }
+
+        if (s.map !== state.map){
+            s.map = state.map
+            need_render = true
+        }
+
+        if (s.editor_options !== state.options){
+            s.editor_options = state.options
+            need_render = true
+        }
+    
+        if (s.interaction !== state.interaction_render_state){
+            s.interaction = state.interaction_render_state
+            need_render = true
+        }
+
+        if (s.width !== s.canvas.width || s.height !== s.canvas.height || new_view_transform){
+            s.width = s.canvas.width
+            s.height = s.canvas.height
+            s.view_transform.width = s.canvas.width
+            s.view_transform.height = s.canvas.height
+            s.view_transform.device_size = Math.min(s.canvas.width, s.canvas.height)
+            need_render = true
+        }
+
+        if (new_renderer || new_view_transform){
+            s.renderer.set_view_transform(s.view_transform)
+        }
+    
+        if (need_render) {
+            const perspectiveFov = 90
+            s.renderer.set_viewport_index(viewport_index)
+            // re-render
+            const before_time = Date.now()
+            s.renderer.render_v2(controller.state_signal.value)
+            const delta_time = Date.now() - before_time
+            // console.log('re-render viewport', viewport_index, 'took', delta_time, 'ms', s.viewport_state.center_location);
+            
+        }
+    }
+
+    function get_ortoho_scale(zoom_level: number){
+        const levels_per_double = 4
+        const scale = 1/4096*Math.pow(2, zoom_level/levels_per_double) 
+        return scale
+    }
+    
     function handle_context_menu(event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
         event.stopPropagation()
         event.preventDefault()
     }
 
     function handle_pointer_down(event: React.PointerEvent<HTMLCanvasElement>) {
+        const { canvas, renderer, view_mode, view_transform } = internal_state.current
         canvas.setPointerCapture(event.pointerId)
         if (usePointerLock && canvas.requestPointerLock) {
             canvas.requestPointerLock()
@@ -169,6 +182,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function handle_pointer_up(event: React.PointerEvent<HTMLCanvasElement>) {
+        const { canvas, renderer, view_mode, view_transform } = internal_state.current
         canvas.releasePointerCapture(event.pointerId)
         if (usePointerLock && document.exitPointerLock) {
             document.exitPointerLock()
@@ -186,7 +200,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
 
     function handle_wheel(event: React.WheelEvent){
-        let new_zoom_level = viewport_state.zoom_level
+        let new_zoom_level = internal_state.current.viewport_state.zoom_level
         if (event.deltaY > 0){
             new_zoom_level--
         }
@@ -199,6 +213,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function handle_pointer_move(event: React.PointerEvent<HTMLCanvasElement>) {
+        const { renderer, view_mode, view_transform, viewport_state, ortoho_scale } = internal_state.current
         const [canvas_x, canvas_y] = get_canvas_coords(event)
     
         if (!isMouseDown || state.options.box_select_mode) {
@@ -215,16 +230,15 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             dx *= -1
             dy *= -1
         }
-        const ortohoScale = get_ortoho_scale()
         const device_size = Math.min(width, height)
-        const scale = ortohoScale * device_size
         setDidMouseMove(true)
         const [next_rotation, nextLocation] =
-            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortohoScale)
+            nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortoho_scale)
         controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation)
     }
 
     function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
+        const { canvas } = internal_state.current
         const rects = canvas.getClientRects()
         const canvas_x = event.pageX - rects[0].x
         const canvas_y = event.pageY - rects[0].y
@@ -263,8 +277,11 @@ function nextViewState(
     switch (viewmode) {
         case ViewportMode.Perspective:
             if (leftPress) {
-                const dir = rotation.toMatrix().apply(Vector.FORWARD)
-                nextLocation = location.add(dir.x * normY * perspectiveMoveSpeed, dir.y * normY * perspectiveMoveSpeed, 0)
+                const dir = rotation.to_matrix().apply(Vector.FORWARD)
+                nextLocation = location.add_numbers(
+                    dir.x * normY * perspectiveMoveSpeed, 
+                    dir.y * normY * perspectiveMoveSpeed, 
+                    0)
                 nextRotation = rotation.add(0, -normX * perspectiveRotateSpeed, 0)
             } else if (rightPress) {
                 nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0)

@@ -83,11 +83,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     const context = canvas.getContext("2d")
     let { width, height } = canvas
     let device_size = Math.min(width, height)
-    let showVertexes = false
     let render_transform: ViewTransform = null
-    let viewport_index = -1;
-
-    let view_mode = ViewportMode.Top
+    let viewport_index = -1
 
     function render(state: EditorState): void {
         render_map(state)
@@ -109,18 +106,20 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
         const view_bounding_box = render_transform.get_view_bounding_box()
 
+        const view_mode = state.viewports[viewport_index].mode
+
         if (view_mode !== ViewportMode.UV) {
             for (let i = 0; i < map.actors.length; i++) {
                 const actor = map.actors[i]
-                if (!actor.selected) { render_actor(actor, i, view_bounding_box) }
+                if (!actor.selected) { render_actor(state, actor, i, view_bounding_box) }
             }
-            if (showVertexes) {
+            if (state.options.vertex_mode) {
                 context.fillStyle = backgroundColor + '8'
                 context.fillRect(0, 0, width, height)
             }
             for (let i = 0; i < map.actors.length; i++) {
                 const actor = map.actors[i]
-                if (actor.selected) { render_actor(actor, i, view_bounding_box) }
+                if (actor.selected) { render_actor(state, actor, i, view_bounding_box) }
             }
         }
         else {
@@ -133,7 +132,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                     render_uv_lines(actor.brushModel)
                 }
             }
-            if (showVertexes) {
+            if (state.options.vertex_mode) {
                 context.fillStyle = state.options.preserve_vertex_uv
                     ? uv_preserve_color : uv_color
                 for (const actor of map.actors) {
@@ -151,7 +150,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function render_actor(actor: Actor, index: number, view_bounding_box: BoundingBox) {
+    function render_actor(state: EditorState, actor: Actor, index: number, view_bounding_box: BoundingBox) {
         if (actor.brushModel == null) {
             return
         }
@@ -166,8 +165,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         context.strokeStyle = get_brush_wire_color(actor)
         context.lineWidth = 1.5
 
-        render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && showVertexes)
-        if (showVertexes && actor.selected) {
+        render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && state.options.vertex_mode)
+        if (state.options.vertex_mode && actor.selected) {
             render_vertexes(actor.brushModel, transformed_vertexes)
         }
     }
@@ -297,7 +296,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 context.moveTo(screen_a_x, screen_a_y)
                 context.lineTo(screen_b_x, screen_b_y)
                 context.stroke()
-                continue;
+                continue
             }
 
             const x0 = render_transform.view_transform_x(vertexA)
@@ -418,7 +417,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         set_view_transform,
         render_v2: render,
         set_viewport_index: index => viewport_index = index,
-        set_show_vertexes: (state: boolean) => { showVertexes = state }
     }
     return renderer
 }
