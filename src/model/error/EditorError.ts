@@ -26,4 +26,8 @@ export class EditorError extends Error
             throw new EditorError(message)
         }
     }
+
+    static not_reachable(): void {
+        throw new EditorError("implementation error: undefined state")
+    }
 }

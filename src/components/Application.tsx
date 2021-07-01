@@ -20,6 +20,7 @@ export const Application = ({ controller = create_controller() }) => {
             height: '100%',
             background: colors.background,
             color: colors.foreground,
+            gridTemplate: "1fr 24px / 1fr"
         }}>
             <MainGrid controller={controller} />
             <StatusBar controller={controller} />
@@ -35,7 +36,7 @@ export const MainGrid = ({ controller = create_controller() }) => {
 
     React.useEffect(() => {
         let timeout: any = null
-        const handler = (event: UIEvent) => {
+        const handler = () => {
             if (timeout != null) {
                 clearTimeout(timeout)
             }
@@ -53,117 +54,8 @@ export const MainGrid = ({ controller = create_controller() }) => {
         }
     })
 
-    switch (state.options.editor_layout) {
-        
-        default: 
-        case 0: return <PanelLayoutRoot 
-            layout={state.options.layout}
-            controller={controller}
-            />
-        case 1:return <div style={{
-            display: 'grid',
-            grid: '1fr 1fr / 0.5fr 1.5fr 1fr',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%'
-        }}>
-            <ActorList controller={controller} />
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={1}
-                mode={ViewportMode.Front}
-                controller={controller} />
-            <PropertyEditor controller={controller} />
-            <ViewportPanel
-                viewport_index={2}
-                location={new Vector(-500, -300, 300)}
-                mode={ViewportMode.Perspective}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={3}
-                mode={ViewportMode.Side}
-                controller={controller} />
-        </div>
-
-        case 2: return <div style={{
-            display: 'grid',
-            grid: '1fr 1fr / 1.5fr 1fr',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%'
-        }}>
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={1}
-                mode={ViewportMode.Front}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={2}
-                location={new Vector(-500, -300, 300)}
-                mode={ViewportMode.Perspective}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={3}
-                mode={ViewportMode.Side}
-                controller={controller} />
-        </div>
-
-        case 3: return <div style={{
-            display: 'grid',
-            grid: '1fr / 1fr',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%'
-        }}>
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-        </div>
-
-
-        case 4: return <div style={{
-            display: 'grid',
-            grid: '1fr 1fr / 0.25fr 1fr',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%'
-        }}>
-            <ActorList controller={controller} />
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-            <PropertyEditor controller={controller} />
-            <ViewportPanel
-                viewport_index={2}
-                location={new Vector(-500, -300, 300)}
-                mode={ViewportMode.Perspective}
-                controller={controller} />
-        </div>
-
-        case 5: return <div style={{
-            display: 'grid',
-            grid: '1fr 1fr / 1fr',
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%'
-        }}>
-            <ViewportPanel
-                viewport_index={0}
-                mode={ViewportMode.Top}
-                controller={controller} />
-            <ViewportPanel
-                viewport_index={2}
-                location={new Vector(-500, -300, 300)}
-                mode={ViewportMode.Perspective}
-                controller={controller} />
-        </div>
-    }
+    return <PanelLayoutRoot 
+        layout={state.options.layout}
+        controller={controller}
+        />
 }

@@ -1,22 +1,19 @@
 import * as React from 'react';
-import { Vector } from '../model/Vector';
 import { Viewport } from './Viewport';
 import { ViewportMode, ALL_VIEWPORT_MODES } from "../model/ViewportMode";
-import { SectionTitle } from '../ui/SectionTitle';
-import { create_controller } from '../controller/AppController';
-import { UiButton } from '../ui/UiButton';
+import { AppController, create_controller } from '../controller/AppController';
 import { use_signal } from './useSignal';
 import { set_viewport_mode_command } from '../commands/viewport/set_viewport_mode';
 import { UiText } from '../ui/UiText';
 import { HoverEffect } from '../ui/HoverEffect';
 
-export function ViewportPanel({
-    viewport_index = null,
-    controller = create_controller(),
-    location = new Vector(0, 0, 0),
-    mode = ViewportMode.Top }
-) {
-
+export function ViewportPanel(props: {
+    viewport_index?: number,
+    controller: AppController,
+}) {
+        
+    const { viewport_index, controller } = props
+        
     const state = use_signal(controller.state_signal)
     const [viewportWidth, setViewportWidth] = React.useState(10)
     const [viewportHeight, setViewportHeight] = React.useState(10)
@@ -55,7 +52,9 @@ export function ViewportPanel({
     return <div style={{
         display: 'grid',
         position: 'relative',
-        gridTemplate: '1fr / 1fr'
+        gridTemplate: '1fr / 1fr',
+        width: '100%',
+        height: '100%'
     }}>
         <div ref={viewportContainer} style={{
             display: 'grid',

@@ -27,7 +27,7 @@ test.skip('UV origin is correctly found for random triangle', () => {
     }
 })
 
-test('UV is correctly found for random triangle', () => {
+test.skip('UV is correctly found for random triangle', () => {
     for (let i = 0; i < 10; i++) {
         const random = new RandomVectorGenerator()
         random.seed = i
