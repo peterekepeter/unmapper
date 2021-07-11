@@ -34,6 +34,7 @@
         "prefer-const": "warn",
         "no-useless-rename": "warn",
         "react/prop-types": "off",
-        "no-console": "warn"
+        "no-console": "warn",
+        "no-inner-declarations": "off"
     }
 }

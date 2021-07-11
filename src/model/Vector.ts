@@ -77,6 +77,10 @@ export class Vector {
         return new Vector(this.x * s.x, this.y * s.y, this.z * s.z)
     }
 
+    divide_by_scalar(s: number): Vector {
+        return new Vector(this.x / s, this.y / s, this.z / s)
+    }
+
     dot(v: Vector): number {
         return Vector.dot_product(this, v)
     }

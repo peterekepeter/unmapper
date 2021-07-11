@@ -1,6 +1,6 @@
 import { BrushModel } from "../BrushModel"
 import { BrushPolygon } from "../BrushPolygon"
-import { polygon_uv_from_vertex_uvs } from "../uvmap/vertex_uv"
+import { polygon_uv_from_vertex_uvs } from "../uvmap/polygon_uv_from_vertex_uvs"
 import { Vector } from "../Vector"
 
 export function uv_triplanar_map(input_brush: BrushModel): BrushModel {

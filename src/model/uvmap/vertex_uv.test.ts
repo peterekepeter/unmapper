@@ -2,7 +2,8 @@ import { BrushModel } from "../BrushModel"
 import { load_map_from_string } from "../loader"
 import { UnrealMap } from "../UnrealMap"
 import { Vector } from "../Vector"
-import { get_brush_polygon_vertex_uvs, polygon_uv_from_vertex_uvs } from "./vertex_uv"
+import { polygon_uv_from_vertex_uvs } from "./polygon_uv_from_vertex_uvs"
+import { get_brush_polygon_vertex_uvs } from "./vertex_uv"
 
 let map: UnrealMap
 
@@ -74,7 +75,7 @@ rotated_brush_names.forEach(n => test(
    }
 ))
 
-rotated_brush_names.forEach(n => test.skip(
+rotated_brush_names.forEach(n => test(
    `bidirection UV conversion for ${n}`, () => {
       const brush = get_brush(n)
       const uvs = get_brush_polygon_vertex_uvs(brush, 0)
