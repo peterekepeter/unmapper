@@ -20,6 +20,7 @@ import { reset_initial_state, set_initial_state } from "./set_initial_state"
 import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
 import { toggle_box_select_command } from "./editor/toggle_box_select"
 import { clip_geometry_command } from "./clip_geometry"
+import { measure_command } from "./measure"
 
 
 export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
@@ -45,5 +46,6 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     apply_transform_command,
     uv_random_map_command,
     set_initial_state,
-    reset_initial_state
+    reset_initial_state,
+    measure_command,
 ]
