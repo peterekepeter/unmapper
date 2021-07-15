@@ -38,7 +38,18 @@ export class AppController {
     }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
-        let next_state = command_info.exec(this.current_state, ...args)
+        let next_state: EditorState
+        try
+        {
+            let current_state = this.current_state
+            if (command_info.keep_status_by_default !== true && (current_state.status.is_error || current_state.status.message)){
+                current_state = { ... current_state, status: { is_error: false, message: '' }}
+            }
+            next_state = command_info.exec(current_state, ...args)
+        }
+        catch (e){
+            next_state = { ...this.current_state, status: { is_error: true, message: e.message }}
+        }
         if (next_state.interaction_render_state) {
             next_state = { ...next_state, interaction_render_state: null }
         }

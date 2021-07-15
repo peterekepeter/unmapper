@@ -35,6 +35,13 @@ export interface EditorState
     history: IHistoryStateAccess;
     options: EditorOptions;
     interaction_render_state?: InteractionRenderState,
+    status: StatusInfo,
+}
+
+export interface StatusInfo
+{
+    message: string,
+    is_error: boolean
 }
 
 export function editor_state_from_actors(actors: Actor[]) : EditorState {
@@ -108,6 +115,10 @@ export function create_initial_editor_state() : EditorState{
                 zoom_level: 0
             },
         ],
-        interaction_render_state: null
+        interaction_render_state: null,
+        status: {
+            is_error: false,
+            message: 'status string'
+        }
     }
 }

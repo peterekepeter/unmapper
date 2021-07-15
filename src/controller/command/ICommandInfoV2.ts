@@ -13,5 +13,6 @@ export interface ICommandInfoV2 {
         interaction_factory?: () => Interaction;
         example_values?: unknown[];
         default_value?: unknown;
-    }[]
+    }[],
+    keep_status_by_default?: boolean
 }

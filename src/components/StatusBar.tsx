@@ -29,7 +29,7 @@ export function StatusBar({ controller = create_controller() }) {
     }}>
         <div style={{ flexGrow: 1 }}></div>
         <div style={{ flexGrow: 1 }}>
-            <StatusBarItem>{status_text}</StatusBarItem>
+            <StatusBarItem>{state.status.message || status_text}</StatusBarItem>
         </div>
         <div style={{ flexGrow: 1 }}></div>
         <UvModeStatus preserve_vertex={state.options.preserve_vertex_uv} />
