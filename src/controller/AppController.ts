@@ -1,12 +1,13 @@
-import { createSignal, ISignal } from 'reactive-signals';
-import { create_history } from './history';
-import { create_initial_editor_state, EditorState } from '../model/EditorState';
-import { create_command_registry } from './command/command_registry';
-import { ICommandInfoV2 } from "./command/ICommandInfoV2";
-import { UnrealMap } from '../model/UnrealMap';
-import { GeometryCache } from '../model/geometry/GeometryCache';
-import { InteractionController } from './interactions/InteractionController';
-import { InteractionRenderState } from './interactions/InteractionRenderState';
+import { createSignal, ISignal } from 'reactive-signals'
+import { create_history } from './history'
+import { create_initial_editor_state, EditorState } from '../model/EditorState'
+import { create_command_registry } from './command/command_registry'
+import { ICommandInfoV2 } from "./command/ICommandInfoV2"
+import { UnrealMap } from '../model/UnrealMap'
+import { GeometryCache } from '../model/geometry/GeometryCache'
+import { InteractionController } from './interactions/InteractionController'
+import { InteractionRenderState } from './interactions/InteractionRenderState'
+import { deep_freeze } from '../util/deep_freeze'
 
 export class AppController {
 
@@ -92,16 +93,16 @@ export class AppController {
     }
 
     private direct_state_change(next_state: EditorState) {
-        this.current_state = next_state
+        this.current_state = deep_freeze(next_state)
         this.preview_state_change(next_state)
     }
 
     private preview_state_change(next_state: EditorState) {
-        this.state_signal.value = next_state
+        this.state_signal.value = deep_freeze(next_state)
     }
 
     public show_all_commands(): void {
-        this.commands_shown_state.value = true;
+        this.commands_shown_state.value = true
     }
 
     viewport_usage: boolean[] = [];
@@ -121,4 +122,4 @@ export class AppController {
 
 }
 
-export const create_controller = (): AppController => new AppController();
+export const create_controller = (): AppController => new AppController()

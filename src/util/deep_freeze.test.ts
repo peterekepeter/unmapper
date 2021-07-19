@@ -1,8 +1,11 @@
-import { deep_freeze } from "./deep_freeze";
+import { deep_freeze } from "./deep_freeze"
 
 
 test('cannot change object property', () => 
     expect(() => deep_freeze({ x: 4 }).x = 16).toThrow())
+
+test('cannot add new property', () => 
+    expect(() => deep_freeze({} as {x?:number}).x = 16).toThrow())
     
 test('cannot push new element into list', () => 
     expect(() => deep_freeze([4]).push(16)).toThrow())

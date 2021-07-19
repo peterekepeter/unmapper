@@ -101,7 +101,8 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
         const cleaned = new_vertexes.length >= 3 
             ? createBrushPolygon(next_brush, new_vertexes)
             : next_brush
-
+        
+        cleaned.polygons = cleaned.polygons.map(p => p.shallow_copy())
         cleaned.rebuild_all_poly_edges()
         return deleteBrushData(cleaned, { vertexes: vertexes_to_delete })
     })

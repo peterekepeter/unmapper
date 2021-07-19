@@ -39,15 +39,19 @@ function select_generic(state: EditorState, selection: GenericSelection): Editor
                 }
             }
             if (need_change) {
-                a = a.immutable_update(a => a.brushModel.vertexes = a.brushModel.vertexes.map((v, i) => {
-                    const should_be_selected = actor_selection && actor_selection.vertexes && actor_selection.vertexes.indexOf(i) !== -1
-                    if (v.selected != should_be_selected) {
-                        const next_vertex = v.shallowCopy()
-                        next_vertex.selected = should_be_selected
-                        return next_vertex
-                    }
-                    return v
-                }))
+                a = a.immutable_update(a => { 
+                    a.brushModel = a.brushModel.shallow_copy()
+                    a.brushModel.vertexes = a.brushModel.vertexes.map((v, i) => {
+                        const should_be_selected = actor_selection && actor_selection.vertexes && actor_selection.vertexes.indexOf(i) !== -1
+                        if (v.selected != should_be_selected) {
+                            const next_vertex = v.shallowCopy()
+                            next_vertex.selected = should_be_selected
+                            return next_vertex
+                        }
+                        return v
+                    })
+                    return a
+                })
             }
         }
         return a
