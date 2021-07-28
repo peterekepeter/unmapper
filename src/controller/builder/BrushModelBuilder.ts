@@ -1,8 +1,36 @@
+import { BrushVertex } from "../../model/BrushVertex"
+import { EditorError } from "../../model/error/EditorError";
+import { Vector } from "../../model/Vector"
 
 
 export class BrushModelBuilder{
 
-    vertex_data: number[];
+    vertex_data: BrushVertex[];
+
+    add_vertex(x: number, y:number, z: number, selected?: boolean) : void
+    add_vertex(vertex: BrushVertex): void
+    add_vertex(position: Vector, selected?: boolean): void
+    add_vertex(a: Vector|BrushVertex | number, b?: boolean | number, c?: number, d?: boolean): void
+    {
+        if (a instanceof BrushVertex){
+            this.vertex_data.push(a)
+        }
+        else if (a instanceof Vector && (typeof b === 'boolean' || typeof b === "undefined"))
+        {
+            this.vertex_data.push(BrushVertex.from_vector(a, b))
+        }
+        else if (typeof a === 'number' && typeof b === "number" && typeof c === "number" && (typeof b === "boolean" || typeof b === "undefined"))
+        {
+            this.vertex_data.push(BrushVertex.from_coords(a,b,c,d))
+        }
+        else {
+            throw new EditorError("invalid argument")
+        }
+    }
+
+    get next_vertex_index(): number {
+        return this.vertex_data.length
+    }
     
     // polygon
     
