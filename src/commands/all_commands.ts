@@ -21,9 +21,10 @@ import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vert
 import { toggle_box_select_command } from "./editor/toggle_box_select"
 import { clip_geometry_command } from "./clip_geometry"
 import { measure_command } from "./measure"
+import { generate_cube_command } from "./generators/generate_cube"
 
 
-export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
+export function get_all_commands_v2(): ICommandInfoV2[] { return [
     select_all_command,
     toggle_vertex_mode_command,
     create_polygon_command,
@@ -48,4 +49,9 @@ export const get_all_commands_v2 : () => ICommandInfoV2[] = () => [
     set_initial_state,
     reset_initial_state,
     measure_command,
-]
+    ...get_generate_commands()
+] }
+
+function get_generate_commands(): ICommandInfoV2[] { return [ 
+    generate_cube_command 
+] }

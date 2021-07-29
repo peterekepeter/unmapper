@@ -1,5 +1,6 @@
 export enum KnownClasses
 {
     Brush = 'Brush',
-    Light = 'Light'
+    Light = 'Light',
+    Model = 'Model'
 }

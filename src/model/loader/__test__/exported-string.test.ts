@@ -1,4 +1,4 @@
-import { load_map_from_string, store_map_to_string } from '..';
+import { load_map_from_string, store_map_to_string } from '..'
 
 // these tests check that after importing a map, the exporter is capable of
 // reproducing the imported string
@@ -6,28 +6,28 @@ import { load_map_from_string, store_map_to_string } from '..';
 testExporter('empty map', 
 `Begin Map
 End Map
-`);
+`)
 
 testExporter('minimal actor', 
 `Begin Map
 Begin Actor Class=ZoneInfo Name=ZoneInfo123
 End Actor
 End Map
-`);
+`)
 
 testExporter('minimal actor, with space in name', 
 `Begin Map
 Begin Actor Class=ZoneInfo Name="Zone Info123"
 End Actor
 End Map
-`);
+`)
 
 testExporter('minimal actor, class only', 
 `Begin Map
 Begin Actor Class=ZoneInfo
 End Actor
 End Map
-`);
+`)
 
 testExporter('map just a light (unsupported props)', 
 `Begin Map
@@ -38,7 +38,7 @@ Begin Actor Class=Light Name=Light0
     Region=(Zone=LevelInfo'MyLevel.LevelInfo0',iLeaf=-1)
 End Actor
 End Map
-`);
+`)
 
 testExporter('map just a light (supported props)', 
 `Begin Map
@@ -47,7 +47,7 @@ Begin Actor Class=Light Name=Light0
     OldLocation=(X=96.000000,Y=-96.000000,Z=16.000000)
 End Actor
 End Map
-`);
+`)
 
 testExporter('brush scaling', 
 `Begin Map
@@ -74,9 +74,10 @@ Begin Actor Class=Brush Name=Brush1
           End Polygon
        End PolyList
     End Brush
+    Brush=Model'MyLevel.Model2'
 End Actor
 End Map
-`);
+`)
 
 testExporter("brush polygon all props", `Begin Map
 Begin Actor Class=Brush Name=Brush1
@@ -95,6 +96,7 @@ Begin Actor Class=Brush Name=Brush1
           End Polygon
        End PolyList
     End Brush
+    Brush=Model'MyLevel.Model2'
 End Actor
 End Map
 `)
@@ -108,8 +110,8 @@ End Map
 
 function testExporter(name : string, input : string){
     test(name, () => {
-        const loaded = load_map_from_string(input);
-        const reExported = store_map_to_string(loaded);
-        expect(reExported).toEqual(input);
-    });
+        const loaded = load_map_from_string(input)
+        const reExported = store_map_to_string(loaded)
+        expect(reExported).toEqual(input)
+    })
 }

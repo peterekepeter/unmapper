@@ -1,7 +1,7 @@
-import { ICommandInfoV2 } from "../../controller/command";
-import { EditorState } from "../../model/EditorState";
-import { EditorError } from "../../model/error/EditorError";
-import { normalizePanelLayout, PanelLayout } from "../../model/layout/PanelLayout";
+import { ICommandInfoV2 } from "../../controller/command"
+import { EditorState } from "../../model/EditorState"
+import { EditorError } from "../../model/error/EditorError"
+import { PanelLayout } from "../../model/layout/PanelLayout"
 
 export const set_layout_split_percentage_command: ICommandInfoV2 = {    
     exec: set_layout_split_percentage,

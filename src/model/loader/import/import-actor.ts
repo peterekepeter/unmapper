@@ -1,168 +1,173 @@
-import { makeParser } from "./parser-helper";
-import { Actor } from "../../Actor";
-import { Parser } from "./Parser";
-import { importSubobject } from "./import-subobject";
-import { importVector } from "./import-vector";
-import { importBrushModel } from "./import-brushmodel";
-import { csgOperationFromString } from "../converter/convert-CsgOperation";
-import { importScale } from "./import-scale";
-import { importRotation } from "./import-rotation";
+import { makeParser } from "./parser-helper"
+import { Actor } from "../../Actor"
+import { Parser } from "./Parser"
+import { importSubobject } from "./import-subobject"
+import { importVector } from "./import-vector"
+import { importBrushModel } from "./import-brushmodel"
+import { csgOperationFromString } from "../converter/convert-CsgOperation"
+import { importScale } from "./import-scale"
+import { importRotation } from "./import-rotation"
 
 export function importActor(arg : Parser | string) : Actor {
-    const parser = makeParser(arg);
-    const actor = new Actor();
-    parser.acceptAndMoveToNext("Begin");
-    parser.acceptAndMoveToNext("Actor");
-    let parsingProps = true; 
+    const parser = makeParser(arg)
+    const actor = new Actor()
+    parser.acceptAndMoveToNext("Begin")
+    parser.acceptAndMoveToNext("Actor")
+    let parsingProps = true 
     while (parsingProps){
-        const key = parser.getCurrentToken();
-        const operator = parser.getRelativeToken(+1);
+        const key = parser.getCurrentToken()
+        const operator = parser.getRelativeToken(+1)
         if (operator === "("){
-            parser.acceptAndMoveToNext(key);
-            parser.acceptAndMoveToNext('(');
-            const index = parser.parseIntAndMoveToNext();
+            parser.acceptAndMoveToNext(key)
+            parser.acceptAndMoveToNext('(')
+            const index = parser.parseIntAndMoveToNext()
             parser.acceptAndMoveToNext(')')
             parser.acceptAndMoveToNext('=')
-            parseActorArrayProp(actor, key, index, parser);
+            parseActorArrayProp(actor, key, index, parser)
         } else 
         if (operator === "="){
-            parser.acceptAndMoveToNext(key);
-            parser.acceptAndMoveToNext('=');
-            parseActorProp(actor, key, parser);
+            parser.acceptAndMoveToNext(key)
+            parser.acceptAndMoveToNext('=')
+            parseActorProp(actor, key, parser)
         } else if (key == "Begin" && operator == "Brush"){
-            actor.brushModel = importBrushModel(parser);
+            actor.brushModel = importBrushModel(parser)
         } else if (key === "End"){
-            parsingProps = false;
+            parsingProps = false
         } else {
-            parser.error('unable to parse actor');
+            parser.error('unable to parse actor')
         }
     }
-    parser.acceptAndMoveToNext("End");
-    parser.acceptAndMoveToNext("Actor");
-    return actor;
+    parser.acceptAndMoveToNext("End")
+    parser.acceptAndMoveToNext("Actor")
+    return actor
 }
 
 
 function parseActorProp(actor : Actor, key :string, parser : Parser){
 
-    let value: string;
+    let value: string
 
     switch(key){
 
         case "Class": 
-            actor.className = parser.getCurrentTokenAndMoveToNext(); 
-            break;
+            actor.className = parser.getCurrentTokenAndMoveToNext() 
+            break
 
         case "Name": 
-            actor.name = parser.getCurrentTokenAndMoveToNext(); 
-            break;
+            actor.name = parser.getCurrentTokenAndMoveToNext() 
+            break
         
         case "Location":
-            actor.location = importVector(parser, 0.0);
-            break;
+            actor.location = importVector(parser, 0.0)
+            break
         
         case "OldLocation":
-            actor.oldLocation = importVector(parser, 0.0);
-            break;
+            actor.oldLocation = importVector(parser, 0.0)
+            break
 
         case "Group":
-            actor.group = parseSetPropertyValue(parser);
-            break;
+            actor.group = parseSetPropertyValue(parser)
+            break
 
         case "CsgOper":
-            actor.csgOperation = parseCsgOperation(parser);
-            break;
+            actor.csgOperation = parseCsgOperation(parser)
+            break
 
         case "PolyFlags":
-            actor.polyFlags = parseInteger(parser);
-            break;
+            actor.polyFlags = parseInteger(parser)
+            break
 
         case "MainScale": 
-            actor.mainScale = importScale(parser);
-            break;
+            actor.mainScale = importScale(parser)
+            break
         
         case "PostScale": 
-            actor.postScale = importScale(parser);
-            break;
+            actor.postScale = importScale(parser)
+            break
             
         case "TempScale": 
-            actor.tempScale = importScale(parser);
-            break;
+            actor.tempScale = importScale(parser)
+            break
 
         case "Rotation":
-            actor.rotation = importRotation(parser);
-            break;
+            actor.rotation = importRotation(parser)
+            break
 
         case "PrePivot":
-            actor.prePivot = importVector(parser, 0);
-            break;
+            actor.prePivot = importVector(parser, 0)
+            break
+
+        case "Brush":
+            // TODO import reference
+            parser.moveToNext() // just skip for now
+            break
 
         default:
-            value = parser.getCurrentToken();
+            value = parser.getCurrentToken()
             if (value === '('){
-                value = importSubobject(parser);
+                value = importSubobject(parser)
             } else {
-                parser.moveToNext();
+                parser.moveToNext()
             }
-            actor.unsupportedProperties[key] = value;
-            break;
+            actor.unsupportedProperties[key] = value
+            break
         }
 }
 
 function parseActorArrayProp(actor : Actor, key:string, index:number, parser:Parser){
 
-    let list: Array<unknown>;
-    let value: string;
+    let list: Array<unknown>
+    let value: string
 
     switch(key)
     {
         default:
-            list = actor.unsupportedProperties[key];
+            list = actor.unsupportedProperties[key]
             if (list == null){
-                list = actor.unsupportedProperties[key] = [];
+                list = actor.unsupportedProperties[key] = []
             }
-            value = parser.getCurrentToken();
+            value = parser.getCurrentToken()
             if (value === '('){
-                value = importSubobject(parser);
+                value = importSubobject(parser)
             } else {
-                parser.moveToNext();
+                parser.moveToNext()
             }
-            list[index] = value;
-            break;
+            list[index] = value
+            break
     }
 }
 
 function parseInteger(parser : Parser){
-    const token = parser.getCurrentTokenAndMoveToNext();
-    return Number.parseInt(token);
+    const token = parser.getCurrentTokenAndMoveToNext()
+    return Number.parseInt(token)
 }
 
 function parseCsgOperation(parser : Parser)
 {
-    const token = parser.getCurrentToken();
-    parser.moveToNext();
-    return csgOperationFromString(token);
+    const token = parser.getCurrentToken()
+    parser.moveToNext()
+    return csgOperationFromString(token)
 }
 
 function parseSetPropertyValue(parser : Parser){
-    const result : string[] = [];
-    let str : string[] = [];
+    const result : string[] = []
+    let str : string[] = []
     while (true){
-        const token = parser.getCurrentToken();
-        const next = parser.getRelativeToken(+1);
+        const token = parser.getCurrentToken()
+        const next = parser.getRelativeToken(+1)
         if (next == '=' || token == "End" && next == "Actor"){
-            break;
+            break
         }
         if (token == ','){
-            result.push(str.join(' '));
-            str = [];
+            result.push(str.join(' '))
+            str = []
         } else {
-            str.push(token);
+            str.push(token)
         }
-        parser.moveToNext();
+        parser.moveToNext()
     }
     if (str.length != 0){
-        result.push(str.join(' '));
+        result.push(str.join(' '))
     }
-    return result;
+    return result
 }

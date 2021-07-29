@@ -1,4 +1,4 @@
-import { Vector } from "./Vector";
+import { Vector } from "./Vector"
 
 
 export class BrushVertex {
@@ -10,33 +10,43 @@ export class BrushVertex {
         this.selected = selected
     }
 
-    shallowCopy(): BrushVertex {
-        const vertex = new BrushVertex(this.position);
-        Object.assign(vertex, this);
-        return vertex;
+    shallow_copy(): BrushVertex {
+        const vertex = new BrushVertex(this.position)
+        Object.assign(vertex, this)
+        return vertex
     }
 
-    static fromVector(v: Vector): BrushVertex {
-        return new BrushVertex(v);
+    static from_vector(v: Vector, selected?: boolean): BrushVertex {
+        return new BrushVertex(v, selected)
     }
 
-    static fromCoords(x = 0, y = 0, z = 0) {
-        return this.fromVector(new Vector(x, y, z));
+    static from_coords(x = 0, y = 0, z = 0, selected?: boolean): BrushVertex {
+        return this.from_vector(new Vector(x, y, z), selected)
     }
 
-    static fromArray(data:number[], index = 0){
-        return this.fromVector(Vector.fromArray(data, index));
+    static from_array(data:number[], index = 0): BrushVertex {
+        return this.from_vector(Vector.from_array(data, index))
     }
 
-    static fromArrayToList(data:number[], index=0, vertexCount=-1){
+    static from_array_to_list(data:number[], index=0, vertexCount=-1): BrushVertex[] {
         if (vertexCount == -1){
-            vertexCount = Math.floor(data.length/3);
+            vertexCount = Math.floor(data.length/3)
         }
-        let result: BrushVertex[] = [];
+        const result: BrushVertex[] = []
         for (let i=0; i<vertexCount; i++){
-            result.push(BrushVertex.fromArray(data, index));
-            index+=3;
+            result.push(BrushVertex.from_array(data, index))
+            index += 3
         }
-        return result;
+        return result
+    }
+
+    /** @deprecated */
+    static fromArrayToList(data:number[], index=0, vertex_count=-1): BrushVertex[] {
+        return this.from_array_to_list(data, index, vertex_count)
+    }
+
+    /** @deprecated */
+    shallowCopy(): BrushVertex {
+        return this.shallow_copy()
     }
 }
