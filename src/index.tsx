@@ -8,6 +8,7 @@ import { install_clipboard_integration } from "./controller/clipboard"
 import { get_all_commands_v2 } from "./commands/all_commands"
 import { AppController } from "./controller/AppController"
 import { get_initial_level_state } from "./initial_state"
+import { install_error_handler } from "./controller/install_error_handler"
 
 const help = new URL('./help.txt', import.meta.url)
 console.info('additional info avaiable at', help.toString())
@@ -41,6 +42,7 @@ function main() {
     }
 
     install_clipboard_integration(window.document, controller);
+    install_error_handler(window, controller)
 
     for (const key in shortcutBindings){
         keyboard.bind_command_shortcut({ 

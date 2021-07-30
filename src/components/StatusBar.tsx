@@ -5,6 +5,7 @@ import { create_controller } from "../controller/AppController"
 import { UvModeStatus } from "./status/UvModeStatus"
 import { StatusBarItem } from "./status/StatusBarItem"
 import { EditModeStatus } from "./status/EditModeStatus"
+import { font } from "../ui/typography"
 
 export function StatusBar({ controller = create_controller() }) {
     const [status_text, set_status_text] = React.useState('')
@@ -28,6 +29,7 @@ export function StatusBar({ controller = create_controller() }) {
         display: 'flex'
     }}>
         <div style={{ flexGrow: 1 }}></div>
+        { state.status.is_error ? <div style={{ ...font, background: state.status.is_error ? colors.error : '', padding:'0rem 1rem' }}>ERROR</div> : null }
         <div style={{ flexGrow: 1 }}>
             <StatusBarItem>{state.status.message || status_text}</StatusBarItem>
         </div>

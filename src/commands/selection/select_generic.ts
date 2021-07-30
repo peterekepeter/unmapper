@@ -12,6 +12,7 @@ export interface GenericSelection {
 }
 
 export const select_generic_command: ICommandInfoV2 = {
+    keep_status_by_default: true,
     exec: select_generic
 }
 

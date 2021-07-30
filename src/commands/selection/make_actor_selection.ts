@@ -4,6 +4,7 @@ import { change_actors } from "../../model/algorithms/editor_state_change"
 
 
 export const make_actor_selection_command : ICommandInfoV2 = {
+    keep_status_by_default: true,
     exec(state, to_select : Actor) {
         let matched = false
         const result = change_actors(state, function(prev_actor){
