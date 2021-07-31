@@ -40,7 +40,7 @@ export interface EditorState
 
 export interface StatusInfo
 {
-    message: string,
+    message: string | null,
     is_error: boolean
 }
 
@@ -118,7 +118,7 @@ export function create_initial_editor_state() : EditorState{
         interaction_render_state: null,
         status: {
             is_error: false,
-            message: 'status string'
+            message: null
         }
     }
 }

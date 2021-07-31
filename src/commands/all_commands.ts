@@ -22,6 +22,7 @@ import { toggle_box_select_command } from "./editor/toggle_box_select"
 import { clip_geometry_command } from "./clip_geometry"
 import { measure_command } from "./measure"
 import { generate_cube_command } from "./generators/generate_cube"
+import { clear_status_command } from "./clear_status_command"
 
 
 export function get_all_commands_v2(): ICommandInfoV2[] { return [
@@ -49,6 +50,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     set_initial_state,
     reset_initial_state,
     measure_command,
+    clear_status_command,
     ...get_generate_commands()
 ] }
 
