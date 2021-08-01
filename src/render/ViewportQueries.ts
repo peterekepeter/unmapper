@@ -55,7 +55,7 @@ export class ViewportQueries {
         canvasY: number): [
             Actor, number
         ] {
-        const MAX_DISTANCE = 8
+        const MAX_DISTANCE = 16
         let best_match_actor: Actor = null
         let best_match_vertex = -1
         let best_distance = Number.MAX_VALUE
