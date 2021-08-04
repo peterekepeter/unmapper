@@ -7,7 +7,16 @@ import { EditorState } from "../../model/EditorState"
 export interface GenericSelection {
     actors: {
         actor_index: number,
-        vertexes?: number[]
+        vertexes?: number[],
+        edges?: number[],
+        polygons?: number[]
+
+        polygon_vertexes?: {
+            // used for selected a vertex online inside a polygon
+            // used for selecting vertexes in UV mode
+            polygon_index: number, 
+            vertexes: number[]
+        }
     }[]
 }
 
