@@ -1,31 +1,32 @@
 import * as React from "react"
-import { SectionTitle } from "../ui/SectionTitle";
-import { create_controller } from "../controller/AppController";
-import { Actor } from "../model/Actor";
-import { UiText } from "../ui/UiText";
-import { PolyFlags } from "../model/PolyFlags";
-import { KnownClasses } from "../model/KnownClasses";
-import { Vector } from "../model/Vector";
-import { use_signal } from "./useSignal";
-import { UiVectorInput } from "../ui/UiVectorInput";
-import { edit_property_command as edit_property } from "../commands/edit_property";
+import { SectionTitle } from "../ui/SectionTitle"
+import { create_controller } from "../controller/AppController"
+import { Actor } from "../model/Actor"
+import { UiText } from "../ui/UiText"
+import { PolyFlags } from "../model/PolyFlags"
+import { KnownClasses } from "../model/KnownClasses"
+import { Vector } from "../model/Vector"
+import { use_signal } from "./useSignal"
+import { UiVectorInput } from "../ui/UiVectorInput"
+import { edit_property_command as edit_property } from "../commands/edit_property"
 
 
 export function PropertyEditor({ controller = create_controller() }) {
 
-    const map = use_signal(controller.state_signal).map;
-    let reuse_property_context = true;
+    const state = use_signal(controller.state_signal)
+    const map = state.map
+    let reuse_property_context = true
     // get selection
-    let selection = map.actors.filter(a => a.selected);
-    const selection_ref = React.useRef<Actor[]>();
+    let selection = state.selection.actors.map(s => map.actors[s.actor_index])
+    const selection_ref = React.useRef<Actor[]>()
     if (is_same_selection(selection, selection_ref.current)){
         selection = selection_ref.current
     } else {
         selection_ref.current = selection
-        reuse_property_context = false;
+        reuse_property_context = false
     }
 
-    const controller_ref = React.useRef<ReturnType<typeof create_controller>>();
+    const controller_ref = React.useRef<ReturnType<typeof create_controller>>()
     if (controller_ref.current !== controller){
         controller_ref.current = controller
         reuse_property_context = false
@@ -35,7 +36,7 @@ export function PropertyEditor({ controller = create_controller() }) {
         ? '(no selection)'
         : selection.length > 1
             ? `(${selection.length} selected)`
-            : null;
+            : null
 
     return <div>
         <SectionTitle>Properties <span>{titleDetail}</span></SectionTitle>
@@ -48,7 +49,7 @@ export function PropertyEditor({ controller = create_controller() }) {
             <VectorProp controller={controller} selection={selection} key="OldLocation" name="OldLocation" getter={a => a.oldLocation}/>
             <VectorProp controller={controller} selection={selection} key="PrePivot" name="PrePivot" getter={a => a.prePivot}/>
         </div>
-    </div>;
+    </div>
 }
 
 function is_same_selection(a : Actor[], b : Actor[]){
@@ -72,25 +73,25 @@ function VectorProp({
     getter
 }: { selection: Actor[], controller: ReturnType<typeof create_controller>, name: string, getter?: (a:Actor) => Vector }) {
     
-    let aggregate : Vector;
-    let aggregateCount = 0;
+    let aggregate : Vector
+    let aggregateCount = 0
     for (const actor of selection){
-        const value = getter ? getter(actor) : actor.get_vector_property(name);
+        const value = getter ? getter(actor) : actor.get_vector_property(name)
         if (value === null || value === undefined){
-            continue;
+            continue
         }
         if (aggregateCount === 0){
-            aggregate = value;
+            aggregate = value
         } else {
-            aggregate = aggregate.addVector(value);
+            aggregate = aggregate.addVector(value)
         }
-        aggregateCount ++;
+        aggregateCount ++
     }
     if (!aggregate){
         return <></>
     }
     if (aggregateCount > 1){
-        aggregate = aggregate.scale(1/aggregateCount);
+        aggregate = aggregate.scale(1/aggregateCount)
     }
     const str = aggregateCount === 1 
         ? `${aggregate.x}x ${aggregate.y}y ${aggregate.z}z`
@@ -109,19 +110,19 @@ function StringProp({
     name = '',
     getter = (a: Actor) => a.name
 }) {
-    let aggregate: string = null;
-    let empty = true; 
-    let different = false;
+    let aggregate: string = null
+    let empty = true 
+    let different = false
     for (const actor of selection) {
-        const value = getter(actor);
+        const value = getter(actor)
         if (empty) {
-            aggregate = value;
-            empty = false;
+            aggregate = value
+            empty = false
         }
         else if (!different && value !== aggregate)
         {
-            aggregate = '... different values';
-            different = true;
+            aggregate = '... different values'
+            different = true
         }
     }
     return <>
@@ -136,29 +137,29 @@ function PolyFlagsProp({
     getter = (a: Actor) => a.polyFlags
 }) {
 
-    let aggregate: PolyFlags = PolyFlags.None;
-    let empty = true; 
-    let different = false;
-    let hasBrush = false;
+    let aggregate: PolyFlags = PolyFlags.None
+    let empty = true 
+    let different = false
+    let hasBrush = false
     for (const actor of selection) {
-        const value = getter(actor);
+        const value = getter(actor)
         if (actor.className === KnownClasses.Brush){
-            hasBrush = true;
+            hasBrush = true
         }
         if (empty) {
-            aggregate = value;
-            empty = false;
+            aggregate = value
+            empty = false
         }
         else if (!different && value !== aggregate)
         {
-            different = true;
+            different = true
         }
     }
     if (!hasBrush){
-        return <></>; // this prop is N/A
+        return <></> // this prop is N/A
     }
     let text = different ? '... different values'
-        : polyFlagsToText(aggregate);
+        : polyFlagsToText(aggregate)
     return <>
         <UiText>{name}</UiText>
         <UiText>{text}</UiText>
@@ -166,21 +167,21 @@ function PolyFlagsProp({
 }
 
 function polyFlagsToText(flags : PolyFlags){
-    const result = [];
-    const value = flags;
+    const result = []
+    const value = flags
     if (flags === PolyFlags.None){
-        result.push('None');
+        result.push('None')
     }
     if (flags & PolyFlags.SemiSolid){
-        result.push('SemiSolid');
-        flags -= PolyFlags.SemiSolid;
+        result.push('SemiSolid')
+        flags -= PolyFlags.SemiSolid
     }
     if (flags & PolyFlags.NonSolid){
-        result.push('NonSolid');
-        flags -= PolyFlags.NonSolid;
+        result.push('NonSolid')
+        flags -= PolyFlags.NonSolid
     }
     if (flags !== PolyFlags.None){
         result.push(PolyFlags)
     } 
-    return `${result.join()} (${value})`;
+    return `${result.join()} (${value})`
 }

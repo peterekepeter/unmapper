@@ -1,23 +1,17 @@
 import { ICommandInfoV2 } from "../../controller/command"
 import { Actor } from "../../model/Actor"
-import { change_actors } from "../../model/algorithms/editor_state_change"
+import { create_actor_selection } from "../../model/EditorSelection"
+import { EditorState, get_actor_index } from "../../model/EditorState"
 
 
 export const make_actor_selection_command : ICommandInfoV2 = {
     keep_status_by_default: true,
-    exec(state, to_select : Actor) {
-        let matched = false
-        const result = change_actors(state, function(prev_actor){
-            const should_select = prev_actor === to_select
-            matched ||= should_select
-            if (should_select === prev_actor.selected){
-                return prev_actor
-            }
-            return prev_actor.immutable_update(a => a.selected = should_select)
-        })
-        if (!matched && to_select){
-            throw new Error("didn't match anything from given state")
-        }
-        return result
-    }
+    exec: make_actor_selection,
+}
+
+function make_actor_selection(state: EditorState, to_select : Actor): EditorState {
+    const actor_index = get_actor_index(state, to_select)
+    return { ...state, selection: { ...state.selection, 
+        actors: [create_actor_selection(actor_index)]
+    }}
 }

@@ -1,72 +1,48 @@
-import { Actor } from '../../../model/Actor';
-import { BrushModel } from '../../../model/BrushModel';
-import { editor_state_from_actors } from '../../../model/EditorState';
-import { Vector } from '../../../model/Vector';
-import { select_all_command as command } from '../select_all';
+import { Actor } from '../../../model/Actor'
+import { BrushModelBuilder } from '../../../model/BrushModelBuilder'
+import { create_actor_selection } from '../../../model/EditorSelection'
+import { editor_state_from_actors } from '../../../model/EditorState'
+import { is_null_or_empty } from '../../../util/is_null_or_empty'
+import { select_all_command as command } from '../select_all'
 
 
 describe('select all actors', () =>{
 
-    const actor_a = new Actor();
-    const actor_b = new Actor();
-    const current_state = editor_state_from_actors([actor_a, actor_b]);
-    const next_state = command.exec(current_state);
+    const actor_0 = new Actor()
+    const actor_1 = new Actor()
+    const current_state = editor_state_from_actors([actor_0, actor_1])
+    const next_state = command.exec(current_state)
     
-    test('next_state actor 0 is selected', () => {
-        expect(next_state.map.actors[0].selected).toBe(true);
-    });
+    test('next_state actors are selected', () => 
+        expect(next_state.selection.actors.map(a => a.actor_index)).toEqual([0,1]))
 
-    test('next_state actor 1 is selected', () => {
-        expect(next_state.map.actors[1].selected).toBe(true);
-    });
+    test('current_state actors are not selected', () => 
+        expect(is_null_or_empty(current_state.selection.actors)).toBe(true))
 
-    test('current_state actor 0 is not selected', () => {
-        expect(current_state.map.actors[0].selected).toBe(false);
-    });
-
-    test('current_state actor 1 is not selected', () => {
-        expect(current_state.map.actors[1].selected).toBe(false);
-    });
-    
 })
 
 describe('select all vertexes', () => {
 
-    const actor_a = new Actor();
-    actor_a.brushModel = new BrushModel();
-    actor_a.brushModel.addVertex(new Vector(0,3,14), false);
-    actor_a.selected = true;
-    const actor_b = new Actor();
-    actor_b.brushModel = new BrushModel();
-    actor_b.brushModel.addVertex(new Vector(0,0,0), false);
-    actor_b.selected = false;
-    const current_state = editor_state_from_actors([actor_a, actor_b]);
-    current_state.options.vertex_mode = true;
-    const next_state = command.exec(current_state);
+    const actor_0 = new Actor()
+    const actor_1 = new Actor()
+    const builder = new BrushModelBuilder()
+    builder.add_vertex_coords(0,3,14)
+    const brush = builder.build()
+    actor_0.brushModel = brush
+    actor_1.brushModel = brush
+    const current_state = editor_state_from_actors([actor_0, actor_1])
+    current_state.options.vertex_mode = true
+    current_state.selection = { actors: [ create_actor_selection(1) ] }
+    const next_state = command.exec(current_state)
 
-    test('current_state vertexes of selected actor are not selected', () =>
-        expect(current_state.map.actors[0].brushModel.vertexes[0].selected).toBe(false)
-    )
+    test('current_state vertexes of selected actor are not selected', () =>{
+        expect(current_state.selection.actors).toHaveLength(1)
+        expect(is_null_or_empty(current_state.selection.actors[0].vertexes)).toBe(true)
+    })
 
-    test('current_state vertexes of non-selected actor are not selected', () =>
-        expect(current_state.map.actors[1].brushModel.vertexes[0].selected).toBe(false)
-    )
+    test('next_state vertexes of selected actor are selected', () => {
+        expect(next_state.selection.actors).toHaveLength(1)
+        expect(next_state.selection.actors[0].vertexes).toHaveLength(1)
+    })
 
-    test('next_state vertexes of selected actor are selected', () =>
-        expect(next_state.map.actors[0].brushModel.vertexes[0].selected).toBe(true)
-    )
-
-    test('next_state vertexes of non-selected actor are not selected', () =>
-        expect(next_state.map.actors[1].brushModel.vertexes[0].selected).toBe(false)
-    )
-
-    test('next_state actor 0 stays true', () => {
-        expect(next_state.map.actors[0].selected).toBe(true);
-    });
-
-    test('next_state actor 1 stays false', () => {
-        expect(next_state.map.actors[1].selected).toBe(false);
-    });
-
-
-});
+})

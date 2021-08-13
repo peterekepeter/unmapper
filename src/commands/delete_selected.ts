@@ -1,31 +1,35 @@
-import { ICommandInfoV2 } from "../controller/command";
-import { change_actors_list, change_selected_brushes } from "../model/algorithms/editor_state_change";
-import { deleteBrushData } from "../model/algorithms/deleteBrushData";
-import { EditorState } from "../model/EditorState";
-
+import { ICommandInfoV2 } from "../controller/command"
+import { change_actors_list } from "../model/state/change_actors_list"
+import { deleteBrushData } from "../model/algorithms/deleteBrushData"
+import { EditorState } from "../model/EditorState"
+import { change_selected_brushes } from "../model/state"
+import { clear_selection } from "./selection/clear_selection"
+import { pipe } from "../util/pipe"
 
 export const delete_selected_command: ICommandInfoV2 = {
     description: "Delete Selection",
     shortcut: "delete",
-    exec: implementation
+    exec: pipe(delete_selected_data, clear_selection)
 }
 
-function implementation(state: EditorState): EditorState {
+function delete_selected_data(state: EditorState): EditorState {
     return state.options.vertex_mode
         ? delete_vertexes(state)
         : delete_actors(state)
 }
 
-const delete_vertexes = (state: EditorState) =>
-    change_selected_brushes(state, b => deleteBrushData(b, {
-        vertexes: b.getSelectedVertexIndices()
-    }));
+function delete_vertexes(state: EditorState) {
+    return change_selected_brushes(state, ((b, _, selection) => deleteBrushData(b, {
+        vertexes: selection.vertexes
+    })))
+}
 
-const delete_actors = (state: EditorState) =>
-    change_actors_list(state, actors => {
-        const next_actors = actors.filter(a => !a.selected);
+function delete_actors(state: EditorState) {
+    return change_actors_list(state, actors => {
+        const next_actors = actors.filter((_,index) => state.selection.actors.find(s => s.actor_index === index) == null)
         if (next_actors.length !== state.map.actors.length) {
-            return next_actors;
+            return next_actors
         }
-        return actors;
+        return actors
     })
+}

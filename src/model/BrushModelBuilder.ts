@@ -29,9 +29,9 @@ export class BrushModelBuilder{
         this._name = name
     }
 
-    add_vertex_coords(x: number, y:number, z: number, selected?: boolean): void
+    add_vertex_coords(x: number, y:number, z: number): void
     {
-        this._vertexes.push(BrushVertex.from_coords(x,y,z,selected))
+        this._vertexes.push(BrushVertex.from_coords(x,y,z))
     }
     
     add_vertex(vertex: BrushVertex): void
@@ -39,9 +39,9 @@ export class BrushModelBuilder{
         this._vertexes.push(vertex)
     }
 
-    add_vertex_vector(position: Vector, selected?: boolean): void
+    add_vertex_vector(position: Vector): void
     {
-        this._vertexes.push(BrushVertex.from_vector(position, selected))
+        this._vertexes.push(BrushVertex.from_vector(position))
     }
     
     get next_vertex_index(): number {

@@ -1,4 +1,5 @@
 /* eslint-disable semi */
+import { EditorSelection } from "./model/EditorSelection"
 import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "./model/EditorState"
 import { load_map_from_string, store_map_to_string } from "./model/loader"
 import { Rotation } from "./model/Rotation"
@@ -11,7 +12,7 @@ const STORAGE: Storage = setup_storage()
 type ExtraStoredState = {
    viewports: ViewportState[];
    options: EditorOptions;
-   selected_actors_indexes: number[];
+   selection: EditorSelection;
 }
 
 export function get_initial_level_state(): EditorState {
@@ -37,12 +38,8 @@ export function get_initial_level_state(): EditorState {
          dest.rotation = new Rotation(parsed.rotation.pitch, parsed.rotation.yaw, parsed.rotation.roll)
       }
 
-      // parse selected actors
-      if (extra.selected_actors_indexes) {
-         for (const selected_index of extra.selected_actors_indexes){
-            state.map.actors[selected_index].selected = true;
-         }
-      }
+      // selection
+      state.selection = extra.selection
    }
    return state
 }
@@ -58,7 +55,7 @@ export function set_initial_level_state(state: EditorState): void {
    const extra : ExtraStoredState = {
       options: state.options,
       viewports: state.viewports,
-      selected_actors_indexes: [...state.map.actors.entries()].filter(a => a[1].selected).map(a => a[0])
+      selection: state.selection
    } 
    STORAGE.setItem(EXTRA_KEY, JSON.stringify(extra))
 }

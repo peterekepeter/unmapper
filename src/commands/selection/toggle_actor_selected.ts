@@ -1,13 +1,16 @@
 import { ICommandInfoV2 } from "../../controller/command"
 import { Actor } from "../../model/Actor"
-import { change_actors } from "../../model/algorithms/editor_state_change"
-import { EditorState } from "../../model/EditorState"
-
+import { DEFAULT_ACTOR_SELECTION } from "../../model/EditorSelection"
+import { EditorState, get_actor_index } from "../../model/EditorState"
+import { change_actor_selection } from "../../model/state/change_actor_selection"
 
 export const toggle_actor_selected_command: ICommandInfoV2 = {
     keep_status_by_default: true,
-    exec(state: EditorState, target: Actor) : EditorState{
-        return change_actors(state, a => a !== target ? a 
-            : target.immutable_update(actor => actor.selected = !actor.selected))
-    }
+    exec: toggle_actor_selected
+}
+
+function toggle_actor_selected(state: EditorState, target: Actor) : EditorState {
+    const actor_index = get_actor_index(state, target)
+    return change_actor_selection(state, actor_index, 
+        s => s != null ? null : { ...DEFAULT_ACTOR_SELECTION, actor_index })
 }

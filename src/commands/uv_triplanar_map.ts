@@ -1,6 +1,6 @@
-import { ICommandInfoV2 } from "../controller/command";
-import { change_selected_brushes } from "../model/algorithms/editor_state_change";
-import { uv_triplanar_map } from "../model/algorithms/uv-triplanar-map";
+import { ICommandInfoV2 } from "../controller/command"
+import { uv_triplanar_map } from "../model/algorithms/uv-triplanar-map"
+import { change_selected_brushes } from "../model/state"
 
 export const uv_triplanar_map_command: ICommandInfoV2 = {
     description: 'UV: triplanar map brush polygons',

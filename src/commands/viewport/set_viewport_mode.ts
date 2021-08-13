@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../../controller/command"
-import { change_viewport_at_index } from "../../model/algorithms/editor_state_change"
+import { change_viewport_at_index } from "../../model/state"
 import { ViewportMode } from "../../model/ViewportMode"
 
 export const set_viewport_mode_command: ICommandInfoV2 = {

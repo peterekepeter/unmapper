@@ -52,21 +52,13 @@ function extrude_face_vector(mutable_brush: BrushModel, face_index: number, extr
     // add new vertexes
     for (const vertexIndex of target_poly.vertexes){
         const vertex = mutable_brush.vertexes[vertexIndex]
-        const newVertexIndex = mutable_brush.addVertex(vertex.position.addVector(extrude_vector), true)
+        const newVertexIndex = mutable_brush.addVertex(vertex.position.add_vector(extrude_vector))
         extruded_poly.vertexes.push(newVertexIndex)
     }
     // replace targetFace
     mutable_brush.polygons[face_index] = extruded_poly
     mutable_brush.rebuild_poly_edges(face_index)
-    // deselect vertexes of targetFace
-    for (const vertexIndex of target_poly.vertexes){
-        const vertex = mutable_brush.vertexes[vertexIndex]
-        if (vertex.selected){
-            const new_vertex = vertex.shallowCopy()
-            new_vertex.selected = false
-            mutable_brush.vertexes[vertexIndex] = new_vertex
-        }
-    }
+    // TODO: deselect vertexes of targetFace
     return bridge_edge_loops(mutable_brush, target_poly.vertexes, extruded_poly.vertexes)
 }
 

@@ -1,8 +1,7 @@
 import { ICommandInfoV2 } from "../../controller/command"
 import { Actor } from "../../model/Actor"
-import { change_actors } from "../../model/algorithms/editor_state_change"
-import { BrushModel } from "../../model/BrushModel"
-import { EditorState } from "../../model/EditorState"
+import { EditorState, get_actor_index } from "../../model/EditorState"
+import { change_actor_selection } from "../../model/state/change_actor_selection"
 
 
 export const select_toggle_vertex_command: ICommandInfoV2 = {
@@ -10,34 +9,13 @@ export const select_toggle_vertex_command: ICommandInfoV2 = {
     exec: select_toggle_vertex
 }
 
-function select_toggle_vertex(state: EditorState, target: Actor, vertexIndex : number): EditorState
+function select_toggle_vertex(state: EditorState, target: Actor, actor_vertex_index : number): EditorState
 {
-    return change_actors(state, actor => {
-        const old_brush = actor.brushModel
-        let new_brush : BrushModel = null
-        if (!old_brush){
-            return actor
-        }
-        if (actor === target && target.selected) {
-            // select target vertex
-            new_brush = target.brushModel.shallowCopy()
-            new_brush.vertexes = old_brush.vertexes.map((vertex, index) => {
-                if (index === vertexIndex){
-                    const new_vertex = vertex.shallowCopy()
-                    new_vertex.selected = !vertex.selected
-                    return new_vertex
-                } else {
-                    return vertex
-                }
-            })
-        }
-        // TODO: deselect vertexes of not selected models
-        if (new_brush != null) {
-            const new_actor = actor.shallow_copy()
-            new_actor.brushModel = new_brush
-            return new_actor
-        } else {
-            return actor
-        }
-    })
+    const actor_index = get_actor_index(state, target)
+    return change_actor_selection(state, actor_index, selection => ({
+        ...selection, 
+        vertexes: selection.vertexes.indexOf(actor_vertex_index) === -1 
+            ? [...selection.vertexes, actor_vertex_index]
+            : selection.vertexes.filter(v => v !== actor_vertex_index)
+    }))
 }

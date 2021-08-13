@@ -3,11 +3,9 @@ import { Vector } from "./Vector"
 
 export class BrushVertex {
     position: Vector
-    selected = false;
 
-    constructor(position: Vector, selected = false) {
+    constructor(position: Vector) {
         this.position = position
-        this.selected = selected
     }
 
     shallow_copy(): BrushVertex {
@@ -16,12 +14,12 @@ export class BrushVertex {
         return vertex
     }
 
-    static from_vector(v: Vector, selected?: boolean): BrushVertex {
-        return new BrushVertex(v, selected)
+    static from_vector(v: Vector): BrushVertex {
+        return new BrushVertex(v)
     }
 
-    static from_coords(x = 0, y = 0, z = 0, selected?: boolean): BrushVertex {
-        return this.from_vector(new Vector(x, y, z), selected)
+    static from_coords(x = 0, y = 0, z = 0): BrushVertex {
+        return this.from_vector(new Vector(x, y, z))
     }
 
     static from_array(data:number[], index = 0): BrushVertex {

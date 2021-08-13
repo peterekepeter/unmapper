@@ -3,13 +3,13 @@ import { ClippingPlaneInteraction } from "../controller/interactions/ClippingPla
 import { Actor } from "../model/Actor"
 import { createBrushPolygon } from "../model/algorithms/createBrushPolygon"
 import { deleteBrushData } from "../model/algorithms/deleteBrushData"
-import { change_selected_brushes } from "../model/algorithms/editor_state_change"
 import { BrushModel } from "../model/BrushModel"
 import { BrushPolygon } from "../model/BrushPolygon"
 import { BrushVertex } from "../model/BrushVertex"
 import { EditorState } from "../model/EditorState"
 import { get_world_to_actor_rotation_scaling, get_world_to_actor_transform_simple } from "../model/geometry/actor-space-transform"
 import { Plane } from "../model/Plane"
+import { change_selected_brushes } from "../model/state"
 import { Vector } from "../model/Vector"
 
 export const clip_geometry_command: ICommandInfoV2 = {
@@ -29,26 +29,26 @@ function exec_clip_geometry(state: EditorState, world_plane: Plane): EditorState
     if (!world_plane) {
         return state
     }
-    return clip_geometry(state, world_plane);
+    return clip_geometry(state, world_plane)
 }
 
 function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
-    return change_selected_brushes(state, (brush, object) => {
+    return change_selected_brushes(state, (brush, object, selection) => {
 
         const object_plane = world_plane_to_object_plane(world_plane, object)
-        const is_clipped_vert = prepare_vertex_clip_array(brush, object_plane);
+        const is_clipped_vert = prepare_vertex_clip_array(brush, object_plane)
         const vertexes_to_delete = is_clipped_vert.reduce((arr, current, index) => current ? (arr.push(index), arr) : arr, [])
         if (vertexes_to_delete.length === 0) {
             return brush // all on same side
         }
 
         const next_brush = brush.shallow_copy()
-        next_brush.vertexes = next_brush.vertexes.map(v => v.selected ? new BrushVertex(v.position, false) : v)
+        next_brush.vertexes = next_brush.vertexes.map((v,i) => selection.vertexes.indexOf(i) !== -1 ? new BrushVertex(v.position) : v)
         next_brush.edges = [...next_brush.edges]
         next_brush.polygons = [...next_brush.polygons]
         const result_polygons: BrushPolygon[] = []
         const [intersections, intersection_on_edge] = get_edge_intersection_points(brush, object_plane, is_clipped_vert)
-        const new_vertexes = intersections.map(p => next_brush.addVertex(p, true))
+        const new_vertexes = intersections.map(p => next_brush.addVertex(p))
         
         for (let i = 0; i < brush.polygons.length; i++) {
             const poly = brush.polygons[i]

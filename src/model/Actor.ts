@@ -1,9 +1,9 @@
-import { Vector } from "./Vector";
-import { BrushModel } from "./BrushModel";
-import { CsgOperation } from "./CsgOperation";
-import { PolyFlags } from "./PolyFlags";
-import { Scale } from "./Scale";
-import { Rotation } from "./Rotation";
+import { Vector } from "./Vector"
+import { BrushModel } from "./BrushModel"
+import { CsgOperation } from "./CsgOperation"
+import { PolyFlags } from "./PolyFlags"
+import { Scale } from "./Scale"
+import { Rotation } from "./Rotation"
 
 export class Actor {
     public name: string = Actor.DEFAULT_ACTOR_NAME;
@@ -15,7 +15,6 @@ export class Actor {
     public group: string[] = [];
     public brushModel: BrushModel | null = null;
     public csgOperation: CsgOperation | null = null;
-    public selected = false;
     public polyFlags: PolyFlags = PolyFlags.None;
     public mainScale = Scale.DEFAULT_SCALE;
     public postScale = Scale.DEFAULT_SCALE;
@@ -31,34 +30,34 @@ export class Actor {
 
     get_property(name: string): unknown {
         switch (name) {
-            case "Location": return this.location;
-            default: return this.unsupportedProperties[name];
+            case "Location": return this.location
+            default: return this.unsupportedProperties[name]
         }
     }
 
     get_vector_property(name: string): Vector {
-        const value = this.get_property(name);
+        const value = this.get_property(name)
         if (value instanceof Vector){
-            return value;
+            return value
         }
-        throw new Error(`property "${name}" is not a vector`);
+        throw new Error(`property "${name}" is not a vector`)
     }
 
     set_property_immutable(name: string, value: unknown): Actor {
-        return this.immutable_update(actor => actor.set_property_mutable(name, value));
+        return this.immutable_update(actor => actor.set_property_mutable(name, value))
     }
 
     immutable_update(fn: (actor: Actor) => void): Actor{
-        const new_actor = this.shallow_copy();
-        fn(new_actor);
-        return new_actor;
+        const new_actor = this.shallow_copy()
+        fn(new_actor)
+        return new_actor
     }
 
     set_property_mutable(name: string, value: unknown): void {
         switch (name) {
             case "Location":
-                this.location = accept_vector(value);
-                break;
+                this.location = accept_vector(value)
+                break
         }
     }
 
@@ -67,17 +66,17 @@ export class Actor {
     }
 
     shallow_copy(): Actor {
-        const copy = new Actor();
-        Object.assign(copy, this);
-        return copy;
+        const copy = new Actor()
+        Object.assign(copy, this)
+        return copy
     }
 }
 
 function accept_vector(value: unknown): Vector {
     if (typeof value === 'object') {
         if (value.constructor === Vector) {
-            return value;
+            return value
         }
     }
-    throw new Error('not a vector');
+    throw new Error('not a vector')
 }

@@ -1,7 +1,7 @@
 import { BrushModelBuilder } from "../../model/BrushModelBuilder"
 import { ICommandInfoV2 } from "../../controller/command"
 import { Actor } from "../../model/Actor"
-import { change_actors_list } from "../../model/algorithms/editor_state_change"
+import { change_actors_list } from "../../model/state/change_actors_list"
 import { BrushModel } from "../../model/BrushModel"
 import { KnownClasses } from "../../model/KnownClasses"
 import { Vector } from "../../model/Vector"

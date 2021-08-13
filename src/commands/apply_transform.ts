@@ -1,11 +1,11 @@
-import { ICommandInfoV2 } from "../controller/command";
-import { change_selected_actors } from "../model/algorithms/editor_state_change";
-import { BrushVertex } from "../model/BrushVertex";
-import { EditorError } from "../model/error/EditorError";
-import { get_actor_to_world_transform } from "../model/geometry/actor-space-transform";
-import { Rotation } from "../model/Rotation";
-import { Scale } from "../model/Scale";
-import { Vector } from "../model/Vector";
+import { ICommandInfoV2 } from "../controller/command"
+import { BrushVertex } from "../model/BrushVertex"
+import { EditorError } from "../model/error/EditorError"
+import { get_actor_to_world_transform } from "../model/geometry/actor-space-transform"
+import { Rotation } from "../model/Rotation"
+import { Scale } from "../model/Scale"
+import { change_selected_actors } from "../model/state"
+import { Vector } from "../model/Vector"
 
 export const apply_transform_command: ICommandInfoV2 = {
 
@@ -21,7 +21,7 @@ export const apply_transform_command: ICommandInfoV2 = {
         const old_brush = old_actor.brushModel
         const new_brush = old_brush.shallow_copy()
         new_brush.vertexes = old_brush.vertexes.map(v =>
-            new BrushVertex(transform_fn(v.position), v.selected))
+            new BrushVertex(transform_fn(v.position)))
         const new_actor = old_actor.shallow_copy()
         new_actor.rotation = Rotation.IDENTITY
         new_actor.mainScale = Scale.DEFAULT_SCALE

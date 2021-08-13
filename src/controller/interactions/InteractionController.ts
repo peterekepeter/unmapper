@@ -1,6 +1,6 @@
 import { toggle_box_select_command } from "../../commands/editor/toggle_box_select"
 import { make_actor_selection_command } from "../../commands/selection/make_actor_selection"
-import { GenericSelection, select_generic_command } from "../../commands/selection/select_generic"
+import { create_actor_selection, EditorSelection } from "../../model/EditorSelection"
 import { select_toggle_vertex_command } from "../../commands/selection/select_toggle_vertex"
 import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
@@ -8,7 +8,6 @@ import { BoundingBox } from "../../model/BoundingBox"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
-import { Renderer } from "../../render/Renderer"
 import { ViewportQueries } from "../../render/ViewportQueries"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
@@ -36,7 +35,7 @@ export class InteractionController {
         this.args = []
         this.args.length = command_info.args?.length ?? 0
         this.arg_index = 0
-        this.try_complete_execution();
+        this.try_complete_execution()
     }
 
     try_complete_execution(): void {
@@ -96,18 +95,19 @@ export class InteractionController {
         this._interaction_geometry_cache.actors = state.map.actors
         this._viewport_queries.render_transform = event.view_transform
 
-        const selection: GenericSelection = state.options.vertex_mode
-            ? this._viewport_queries.find_vertexes_of_selected_actors_in_box(state.map, min_x, min_y, max_x, max_y, this._interaction_geometry_cache)
-            : { actors: this._viewport_queries.find_actors_in_box(state.map, min_x, min_y, max_x, max_y).map(i => ({ actor_index: i })) }
+        const selection: EditorSelection = state.options.vertex_mode
+            ? this._viewport_queries.find_vertexes_of_selected_actors_in_box(state, min_x, min_y, max_x, max_y, this._interaction_geometry_cache)
+            : { actors: this._viewport_queries.find_actors_in_box(state.map, min_x, min_y, max_x, max_y).map(i => create_actor_selection(i)) }
+        const cmd: ICommandInfoV2 = { exec: s=>({...s, selection }) }
         if (!final) {
             const interaction_render_state: InteractionRenderState = {
                 viewport_box_index: event.viewport_index,
                 viewport_box: new BoundingBox({ min_x, min_y, max_x, max_y })
             }
             this.controller.preview_command_with_interaction(
-                interaction_render_state, select_generic_command, [selection])
+                interaction_render_state, cmd, []) 
         } else {
-            this.controller.execute(select_generic_command, selection)
+            this.controller.execute(cmd)
             this.controller.execute(toggle_box_select_command, false)
             this.box_begin_x = null
             this.box_begin_y = null
@@ -121,7 +121,7 @@ export class InteractionController {
         this._interaction_geometry_cache.actors = state.map.actors
         this._viewport_queries.render_transform = event.view_transform
         if (vertex_mode) {
-            const [actor, vertexIndex] = this._viewport_queries.find_nearest_vertex(state.map, event.canvas_x, event.canvas_y)
+            const [actor, vertexIndex] = this._viewport_queries.find_nearest_vertex(state, event.canvas_x, event.canvas_y)
             if (event.ctrl_key) {
                 controller.execute(select_toggle_vertex_command, actor, vertexIndex)
             } else {

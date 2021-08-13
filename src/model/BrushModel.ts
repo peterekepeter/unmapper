@@ -23,24 +23,23 @@ export class BrushModel
     }
 
     /** @deprecated user add_Vertex */
-    addVertex(position: Vector, selected = false): number {
+    addVertex(position: Vector): number {
         const newVertex = new BrushVertex(position)
-        newVertex.selected = selected
         const index = this.vertexes.length
         this.vertexes.push(newVertex)
         return index
     }
 
-    add_vertex(x: number, y: number, z:number, selected?: boolean): void
-    add_vertex(position: Vector, selected?: boolean): void 
-    add_vertex(a: number|Vector, b?: number|boolean, c?:number, d?:boolean): void {
+    add_vertex(x: number, y: number, z:number): void
+    add_vertex(position: Vector): void 
+    add_vertex(a: number|Vector, b?: number, c?:number): void {
         if (a instanceof Vector){
-            this.vertexes.push(new BrushVertex(a, b === true))
+            this.vertexes.push(new BrushVertex(a))
         } else {
             if (typeof b !== 'number' || typeof c !== 'number'){
                 throw new Error('expecting 3 numbers')
             }
-            this.vertexes.push(new BrushVertex(new Vector(a,b,c), d === true))
+            this.vertexes.push(new BrushVertex(new Vector(a,b,c)))
         }
     }
 
@@ -53,7 +52,7 @@ export class BrushModel
         return vid
     }
 
-    findEdgeIndex(edgeVertexA: number, edgeVertexB: number) {
+    find_edge_index(edgeVertexA: number, edgeVertexB: number): number {
         return this.edges.findIndex(e => e.hasVertexes(edgeVertexA, edgeVertexB))
     }
 
@@ -84,7 +83,7 @@ export class BrushModel
     }
 
     findEdgeIndexOrAddEdge(edgeVertexA: number, edgeVertexB: number) : number {
-        const index = this.findEdgeIndex(edgeVertexA, edgeVertexB)
+        const index = this.find_edge_index(edgeVertexA, edgeVertexB)
         if (index < 0){
             return this.add_edge(edgeVertexA, edgeVertexB)
         }
@@ -108,7 +107,7 @@ export class BrushModel
         if (poly.vertexes.length < 3){
             poly.median = null
             // invalid poly
-            return;
+            return
         }
         let x=0, y=0, z=0
         for (const vid of poly.vertexes){
@@ -133,35 +132,6 @@ export class BrushModel
         for (let i=0; i<this.polygons.length; i++){
             this.calculatePolygonMedian(i)
         }
-    }
-
-    getSelectedVertexIndices(): number[] {
-        const result = []
-        for (let i=0; i<this.vertexes.length; i++){
-            if (this.vertexes[i].selected){
-                result.push(i)
-            }
-        }
-        return result
-    }
-
-    getSelectedPolygonIndices(): number[] {
-        const result = []
-        for (let i=0; i<this.polygons.length; i++){
-            const polygon = this.polygons[i]
-            let selected = true
-            for (let j=0; j<polygon.vertexes.length; j++){
-                const vertex = this.vertexes[polygon.vertexes[j]]
-                if (!vertex.selected){
-                    selected = false
-                    break;
-                }
-            }
-            if (selected){
-                result.push(i)
-            }
-        }
-        return result
     }
 
     private _remove_all_poly_edges(){

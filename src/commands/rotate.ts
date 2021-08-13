@@ -1,10 +1,10 @@
 import { ICommandInfoV2 } from "../controller/command"
 import { RotationInteraction } from "../controller/interactions/RotationInteraction"
-import { change_selected_actors, change_selected_brushes } from "../model/algorithms/editor_state_change"
 import { BrushVertex } from "../model/BrushVertex"
 import { get_actor_to_world_transform, get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
 import { PivotRotation } from "../model/PivotRotation"
 import { Rotation } from "../model/Rotation"
+import { change_selected_actors, change_selected_brushes } from "../model/state"
 import { Vector } from "../model/Vector"
 
 export const rotate_command: ICommandInfoV2 = {
@@ -19,18 +19,18 @@ export const rotate_command: ICommandInfoV2 = {
     exec: (state, pivot_rotation: PivotRotation) => {
         const pivot_rotation_transform = pivot_rotation.to_transform_fn()
         return state.options.vertex_mode
-            ? change_selected_brushes(state, (old_brush, actor) => {
+            ? change_selected_brushes(state, (old_brush, actor, selection) => {
                 const actor_to_world = get_actor_to_world_transform(actor)
                 const world_to_actor = get_world_to_actor_transform(actor)
                 const new_brush = old_brush.shallow_copy()
                 let change = false
-                new_brush.vertexes = new_brush.vertexes.map(v => {
-                    if (v.selected){
+                new_brush.vertexes = new_brush.vertexes.map((v,i) => {
+                    if (selection.vertexes.indexOf(i) !== -1){
                         change = true
                         const world_position = actor_to_world(v.position)
                         const world_transformed = pivot_rotation_transform(world_position)
                         const new_position = world_to_actor(world_transformed)
-                        return new BrushVertex(new_position, v.selected)
+                        return new BrushVertex(new_position)
                     } else {
                         return v
                     }

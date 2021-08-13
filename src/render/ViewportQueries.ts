@@ -1,10 +1,11 @@
-import { GenericSelection } from "../commands/selection/select_generic"
+import { DEFAULT_ACTOR_SELECTION, EditorSelection } from "../model/EditorSelection"
 import { Actor } from "../model/Actor"
 import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions"
 import { GeometryCache } from "../model/geometry/GeometryCache"
 import { UnrealMap } from "../model/UnrealMap"
 import { Vector } from "../model/Vector"
 import { ViewTransform } from "./ViewTransform"
+import { EditorState } from "../model/EditorState"
 
 export class ViewportQueries {
 
@@ -50,7 +51,7 @@ export class ViewportQueries {
     }
 
     find_nearest_vertex(
-        map: UnrealMap,
+        state: EditorState,
         canvasX: number,
         canvasY: number): [
             Actor, number
@@ -59,9 +60,13 @@ export class ViewportQueries {
         let best_match_actor: Actor = null
         let best_match_vertex = -1
         let best_distance = Number.MAX_VALUE
-        for (let actor_index = map.actors.length - 1; actor_index >= 0; actor_index--) {
-            const actor = map.actors[actor_index] // reverse iterate to find topmost actor
-            if (!actor.selected || actor.brushModel == null) {
+        // reverse iterate to find topmost actor
+        for (let i=state.selection.actors.length - 1; i >= 0; i--) {
+            const actor_selection = state.selection.actors[i]
+            const actor_index = actor_selection.actor_index
+            const actor = state.map.actors[actor_index] 
+
+            if (actor.brushModel == null) {
                 continue // skip actors which are not selected or don't have a brushModel
             }
 
@@ -110,19 +115,16 @@ export class ViewportQueries {
     }
 
     find_vertexes_of_selected_actors_in_box(
-        map: UnrealMap,
+        state: EditorState,
         canvas_x0: number,
         canvas_y0: number,
         canvas_x1: number,
         canvas_y1: number,
         custom_geometry_cache: GeometryCache
-    ): GenericSelection {
-        const result: GenericSelection = { actors: [] }
-        for (let actor_index = 0; actor_index < map.actors.length; actor_index++) {
-            const actor = map.actors[actor_index]
-            if (!actor.selected || !actor.brushModel) {
-                continue
-            }
+    ): EditorSelection {
+        const result: EditorSelection = { actors: [] }
+        for (const selected_actor of state.selection.actors) {
+            const actor_index = selected_actor.actor_index
             const brush_result = []
             const vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
             for (let vertex_index = 0; vertex_index < vertexes.length; vertex_index++) {
@@ -135,7 +137,11 @@ export class ViewportQueries {
                 }
             }
             if (brush_result.length > 0) {
-                result.actors.push({ actor_index, vertexes: brush_result })
+                result.actors.push({ 
+                    ...DEFAULT_ACTOR_SELECTION, 
+                    actor_index, 
+                    vertexes: brush_result 
+                })
             }
         }
         return result

@@ -1,11 +1,12 @@
-import { ICommandInfoV2 } from "../controller/command";
-import { change_selected_brushes } from "../model/algorithms/editor_state_change";
-import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces";
-import { EditorError } from "../model/error/EditorError";
-import { EditorState } from "../model/EditorState";
-import { Vector } from "../model/Vector";
-import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform";
-import { VectorInteraction } from "../controller/interactions/VectorInteraction";
+import { ICommandInfoV2 } from "../controller/command"
+import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces"
+import { EditorError } from "../model/error/EditorError"
+import { EditorState } from "../model/EditorState"
+import { Vector } from "../model/Vector"
+import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
+import { VectorInteraction } from "../controller/interactions/VectorInteraction"
+import { change_selected_brushes } from "../model/state"
+import { is_null_or_empty } from "../util/is_null_or_empty"
 
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
@@ -24,14 +25,16 @@ export const extrude_polygons_command : ICommandInfoV2 = {
 
 function implementation(state: EditorState, extrusion: number | Vector = 32) : EditorState {
     if (!state.options.vertex_mode){
-        throw new EditorError('only works in vertex mode');
+        throw new EditorError('only works in vertex mode')
     }
-    return change_selected_brushes(state, (brush, actor) => {
+    return change_selected_brushes(state, (brush, actor, selection) => {
+        if (is_null_or_empty(selection.polygons)){
+            return brush
+        }
         if (typeof extrusion !== "number"){
             const matrix = get_world_to_actor_rotation_scaling(actor)
             extrusion = matrix.apply(extrusion)
         }
-        const polygon_indexes = brush.getSelectedPolygonIndices()
-        return extrude_brush_faces(brush, polygon_indexes, extrusion)
+        return extrude_brush_faces(brush, selection.polygons, extrusion)
     })
 }

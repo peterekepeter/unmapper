@@ -1,5 +1,3 @@
-import { select_vertex, select_vertex_command } from "../../commands/selection/select_vertex"
-import { change_selected_brushes } from "../algorithms/editor_state_change"
 import { BrushModel } from "../BrushModel"
 import { load_map_from_string } from "../loader"
 import { Vector } from "../Vector"
@@ -26,7 +24,7 @@ test('moving a vertex of the brush then transfering uvs should result in same ve
     const original_uvs = get_brush_polygon_vertex_uvs(brush, 0)
     let edited_brush = brush.shallow_copy()
     edited_brush.vertexes = [...edited_brush.vertexes]
-    const edited_vertex = edited_brush.vertexes[0].shallowCopy()
+    const edited_vertex = edited_brush.vertexes[0].shallow_copy()
     edited_brush.vertexes[0] = edited_vertex
     edited_vertex.position = edited_vertex.position.add_numbers(1, 0, 0)
     edited_brush = set_brush_polygon_vertex_uvs(edited_brush, 0, original_uvs)
@@ -68,5 +66,5 @@ function get_test_triangle(): BrushModel {
         Brush=Model'MyLevel.Model6'
     End Actor
     End Map
-    `).actors[0].brushModel;
+    `).actors[0].brushModel
 }

@@ -1,5 +1,6 @@
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { Actor } from "./Actor"
+import { DEFAULT_EDITOR_SELECTION, EditorSelection } from "./EditorSelection"
 import { PanelLayout, PanelSplitDirection, PanelType } from "./layout/PanelLayout"
 import { Rotation } from "./Rotation"
 import { UnrealMap } from "./UnrealMap"
@@ -36,6 +37,7 @@ export interface EditorState
     options: EditorOptions;
     interaction_render_state?: InteractionRenderState,
     status: StatusInfo,
+    selection: EditorSelection
 }
 
 export interface StatusInfo
@@ -119,6 +121,16 @@ export function create_initial_editor_state() : EditorState{
         status: {
             is_error: false,
             message: null
-        }
+        },
+        selection: DEFAULT_EDITOR_SELECTION
     }
+}
+
+export function get_actor_index(state: EditorState, target: Actor): number
+{
+    const index = state.map.actors.indexOf(target)
+    if (index === -1){
+        throw new Error("actor was found in the given state")
+    }
+    return index
 }

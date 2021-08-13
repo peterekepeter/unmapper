@@ -13,6 +13,7 @@ import { InteractionRenderState } from "../controller/interactions/InteractionRe
 import { ViewportMode } from "../model/ViewportMode"
 import { get_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv"
 import { ViewTransform } from "./ViewTransform"
+import { ActorSelection } from "../model/EditorSelection"
 
 const backgroundColor = '#222'
 
@@ -63,8 +64,8 @@ function make_selected_color(cstr: string) {
     return Color.fromHex(cstr).mix(colorSelected, 0.65).toHex()
 }
 
-function get_brush_wire_color(actor: Actor): string {
-    const set: IBrushColors = actor.selected ? selectedColors : colors
+function get_brush_wire_color(actor: Actor, is_selected: boolean): string {
+    const set: IBrushColors = is_selected ? selectedColors : colors
     switch (actor.csgOperation) {
         case CsgOperation.Active: return set.activeBrush
         case CsgOperation.Add:
@@ -111,39 +112,49 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         if (view_mode !== ViewportMode.UV) {
             for (let i = 0; i < map.actors.length; i++) {
                 const actor = map.actors[i]
-                if (!actor.selected) { render_actor(state, actor, i, view_bounding_box) }
+                if (state.selection.actors && state.selection.actors.findIndex(s => s.actor_index === i)){
+                    continue
+                }
+                render_actor(state, actor, i, view_bounding_box)
             }
             if (state.options.vertex_mode) {
                 context.fillStyle = backgroundColor + '8'
                 context.fillRect(0, 0, width, height)
             }
-            for (let i = 0; i < map.actors.length; i++) {
-                const actor = map.actors[i]
-                if (actor.selected) { render_actor(state, actor, i, view_bounding_box) }
+            if (state.selection.actors){
+                for (const selected_actor of state.selection.actors) {
+                    const actor = map.actors[selected_actor.actor_index]
+                    render_actor(state, actor, selected_actor.actor_index, view_bounding_box)
+                }
             }
         }
-        else {
+        else if (!state.selection.actors) {
             // UV viewport
             context.strokeStyle = state.options.preserve_vertex_uv
                 ? uv_preserve_color : uv_color
             context.lineWidth = 1.5
-            for (const actor of map.actors) {
-                if (actor.selected && actor.brushModel) {
+            
+            for (const selection of state.selection.actors) {
+                const actor = state.map.actors[selection.actor_index]
+                if (actor.brushModel) {
                     render_uv_lines(actor.brushModel)
                 }
             }
+            
             if (state.options.vertex_mode) {
                 context.fillStyle = state.options.preserve_vertex_uv
                     ? uv_preserve_color : uv_color
-                for (const actor of map.actors) {
-                    if (actor.selected && actor.brushModel) {
-                        render_unselected_uv_points(actor.brushModel)
+                for (const selection of state.selection.actors) {
+                    const actor = state.map.actors[selection.actor_index]
+                    if (actor.brushModel) {
+                        render_unselected_uv_points(actor.brushModel, selection)
                     }
                 }
                 context.fillStyle = vertexSelectedColor
-                for (const actor of map.actors) {
-                    if (actor.selected && actor.brushModel) {
-                        render_selected_uv_points(actor.brushModel)
+                for (const selection of state.selection.actors) {
+                    const actor = state.map.actors[selection.actor_index]
+                    if (actor.brushModel) {
+                        render_selected_uv_points(actor.brushModel, selection)
                     }
                 }
             }
@@ -160,14 +171,16 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         }
 
+        const actor_selection = state.selection.actors.find(s => s.actor_index === index)
         const transformed_vertexes = geometry_cache.get_world_transformed_vertexes(index)
+        const is_selected = state.selection.actors && state.selection.actors.find(s => s.actor_index === index) != null
 
-        context.strokeStyle = get_brush_wire_color(actor)
+        context.strokeStyle = get_brush_wire_color(actor, is_selected)
         context.lineWidth = 1.5
 
-        render_wireframe_edges(actor.brushModel, transformed_vertexes, actor.selected && state.options.vertex_mode)
-        if (state.options.vertex_mode && actor.selected) {
-            render_vertexes(actor.brushModel, transformed_vertexes)
+        render_wireframe_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode)
+        if (state.options.vertex_mode && is_selected) {
+            render_vertexes(actor.brushModel, transformed_vertexes, actor_selection)
         }
     }
 
@@ -199,15 +212,14 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     }
 
-    function render_unselected_uv_points(model: BrushModel) {
+    function render_unselected_uv_points(model: BrushModel, selection: ActorSelection) {
         for (let i = 0; i < model.polygons.length; i++) {
-            const poly = model.polygons[i]
             const uvs = get_brush_polygon_vertex_uvs(model, i)
             for (let j = 0; j < uvs.length; j++) {
                 const current_uv = uvs[j]
-                const current_vertex = model.vertexes[poly.vertexes[j]]
+                const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
 
-                if (current_vertex.selected) { continue }
+                if (selected_polygon.vertexes.indexOf(j) !== -1) { continue }
 
                 const x = render_transform.view_transform_x(current_uv)
                 const y = render_transform.view_transform_y(current_uv)
@@ -220,15 +232,14 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function render_selected_uv_points(model: BrushModel) {
+    function render_selected_uv_points(model: BrushModel, selection: ActorSelection) {
         for (let i = 0; i < model.polygons.length; i++) {
-            const poly = model.polygons[i]
             const uvs = get_brush_polygon_vertex_uvs(model, i)
             for (let j = 0; j < uvs.length; j++) {
                 const current_uv = uvs[j]
-                const current_vertex = model.vertexes[poly.vertexes[j]]
+                const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
 
-                if (!current_vertex.selected) { continue }
+                if (selected_polygon.vertexes.indexOf(j) === -1) { continue }
 
                 const x = render_transform.view_transform_x(current_uv)
                 const y = render_transform.view_transform_y(current_uv)
@@ -241,9 +252,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function render_vertexes(brush: BrushModel, transformed_vertexes: Vector[]) {
+    function render_vertexes(brush: BrushModel, transformed_vertexes: Vector[], selection: ActorSelection) {
         for (let i = 0; i < brush.vertexes.length; i++) {
-            const is_selected = brush.vertexes[i].selected
+            const is_selected = selection.vertexes && selection.vertexes.indexOf(i) !== -1
             const point = transformed_vertexes[i]
             const x = render_transform.view_transform_x(point)
             const y = render_transform.view_transform_y(point)
@@ -265,6 +276,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             if (!brushVertexA || !brushVertexB) {
                 if (!warned_brush_edges) {
                     warned_brush_edges = true
+                    // eslint-disable-next-line no-console
                     console.warn('corrupted brush edges', brush)
                 }
                 continue

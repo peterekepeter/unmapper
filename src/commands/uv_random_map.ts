@@ -1,7 +1,7 @@
 import { ICommandInfoV2 } from "../controller/command"
 import { calculate_polygon_median } from "../model/algorithms/calculate_polygon_median"
 import { calculate_polygon_normal } from "../model/algorithms/calculate_polygon_normal"
-import { change_selected_brushes } from "../model/algorithms/editor_state_change"
+import { change_selected_brushes } from "../model/state"
 import { Vector } from "../model/Vector"
 
 export const uv_random_map_command: ICommandInfoV2 = {

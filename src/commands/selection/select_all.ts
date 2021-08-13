@@ -1,7 +1,6 @@
 import { ICommandInfoV2 } from "../../controller/command"
-import { change_selected_brushes, select_actors } from "../../model/algorithms/editor_state_change"
+import { select_actors } from "../../model/state/select_actors"
 import { EditorState } from "../../model/EditorState"
-
 
 export const select_all_command: ICommandInfoV2 = {
     keep_status_by_default: true,
@@ -19,23 +18,17 @@ function implementation(state : EditorState) : EditorState {
 }
 
 function select_all_actors(state : EditorState) : EditorState {
-    return select_actors(state, a => true)
+    return select_actors(state, () => true)
 }
 
-function select_all_vertexes(state: EditorState){
-    return change_selected_brushes(state, brush => {
-        if (!brush.vertexes.find(v => !v.selected)){
-            return brush
+function select_all_vertexes(state: EditorState): EditorState {
+    return {
+        ...state, 
+        selection: {
+            actors: state.selection.actors.map(s => ({ 
+                ...s, 
+                vertexes: state.map.actors[s.actor_index]?.brushModel.vertexes.map((_,i) => i) 
+            }))
         }
-        const new_brush = brush.shallowCopy()
-        new_brush.vertexes = brush.vertexes.map(vertex => {
-            if (vertex.selected){
-                return vertex
-            }
-            const new_vertex = vertex.shallowCopy()
-            new_vertex.selected = true
-            return new_vertex
-        })
-        return new_brush
-    })
+    }
 }
