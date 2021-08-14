@@ -9,6 +9,11 @@ export const select_vertex_command: ICommandInfoV2 = {
 }
 
 export function select_vertex(state: EditorState, target: Actor, actor_vertex_index: number): EditorState {
+    if (target == null || actor_vertex_index === -1){
+        return { ...state, selection: {...state.selection, 
+            actors: state.selection.actors.map(a => ({...a, vertexes: [] }))
+        }}
+    }
     const actor_index = get_actor_index(state, target)
     return change_actor_selection(state, actor_index, 
         actor_selection => ({ ...actor_selection, vertexes:[actor_vertex_index]}))

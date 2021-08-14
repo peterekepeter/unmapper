@@ -112,9 +112,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         if (view_mode !== ViewportMode.UV) {
             for (let i = 0; i < map.actors.length; i++) {
                 const actor = map.actors[i]
-                if (state.selection.actors && state.selection.actors.findIndex(s => s.actor_index === i)){
-                    continue
-                }
                 render_actor(state, actor, i, view_bounding_box)
             }
             if (state.options.vertex_mode) {

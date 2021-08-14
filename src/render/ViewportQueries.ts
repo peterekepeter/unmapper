@@ -136,13 +136,11 @@ export class ViewportQueries {
                     brush_result.push(vertex_index)
                 }
             }
-            if (brush_result.length > 0) {
-                result.actors.push({ 
-                    ...DEFAULT_ACTOR_SELECTION, 
-                    actor_index, 
-                    vertexes: brush_result 
-                })
-            }
+            result.actors.push({ 
+                ...DEFAULT_ACTOR_SELECTION, 
+                actor_index, 
+                vertexes: brush_result 
+            })
         }
         return result
     }

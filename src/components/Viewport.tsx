@@ -6,7 +6,7 @@ import * as React from "react"
 import { create_controller, AppController } from "../controller/AppController"
 import { Rotation } from "../model/Rotation"
 import { Matrix3x3 } from "../model/Matrix3x3"
-import { ViewportMode, viewport_mode_rotateable } from "../model/ViewportMode"
+import { ViewportMode } from "../model/ViewportMode"
 import { UnrealMap } from "../model/UnrealMap"
 import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "../model/EditorState"
 import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
@@ -16,6 +16,7 @@ import { ViewTransform } from "../render/ViewTransform"
 import { create_view_transform } from "../render/transform/create_view_transform"
 import { ViewportEvent } from "../model/ViewportEvent"
 import { EditorError } from "../model/error/EditorError"
+import { EditorSelection } from "../model/EditorSelection"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -33,6 +34,7 @@ interface InternalState{
     viewport_state: ViewportState
     ortoho_scale: number
     map: UnrealMap
+    selection: EditorSelection
     interaction: InteractionRenderState
     editor_options: EditorOptions
     width: number
@@ -55,6 +57,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         viewport_state: null,
         ortoho_scale: null,
         map: null,
+        selection: null,
         interaction: null, 
         editor_options: null,
         width: null, 
@@ -114,6 +117,11 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
         if (s.map !== state.map){
             s.map = state.map
+            need_render = true
+        }
+
+        if (s.selection !== state.selection){
+            s.selection = state.selection
             need_render = true
         }
 

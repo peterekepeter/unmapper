@@ -130,7 +130,7 @@ export function get_actor_index(state: EditorState, target: Actor): number
 {
     const index = state.map.actors.indexOf(target)
     if (index === -1){
-        throw new Error("actor was found in the given state")
+        throw new Error("actor was not found in the given state")
     }
     return index
 }
