@@ -7,31 +7,53 @@
             "label": "Watch Test",
             "type": "shell",
             "command": "yarn start-tdd",
-            "problemMatcher": [{
-                "pattern" :[
-                    {
-                        "regexp": "^([^\\\\s].*)\\\\((\\\\d+,\\\\d+)\\\\):\\\\s*(.*)$",
-                        "file": 1,
-                        "location": 2,
-                        "message": 3
-                    }
-                ]
-            }],
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": "^([^\\\\s].*)\\\\((\\\\d+,\\\\d+)\\\\):\\\\s*(.*)$",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ]
+                }
+            ],
+            "presentation": {
+                "group": "group-a",
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
         },
         {
-            "label": "Start Development",
+            "label": "Dev Server",
             "type": "shell",
-            "command": "yarn start",
-            "problemMatcher": [{
-                "pattern" :[
-                    {
-                        "regexp": "^([^\\\\s].*)\\\\((\\\\d+,\\\\d+)\\\\):\\\\s*(.*)$",
-                        "file": 1,
-                        "location": 2,
-                        "message": 3
-                    }
-                ]
-            }],
+            "command": "yarn start-dev-server",
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": "^([^\\\\s].*)\\\\((\\\\d+,\\\\d+)\\\\):\\\\s*(.*)$",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ]
+                }
+            ],
+            "presentation": {
+                "group": "group-a",
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
         }
     ]
 }
