@@ -105,55 +105,31 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         }
 
-        const view_bounding_box = render_transform.get_view_bounding_box()
 
         const view_mode = state.viewports[viewport_index].mode
 
-        if (view_mode !== ViewportMode.UV) {
-            for (let i = 0; i < map.actors.length; i++) {
-                const actor = map.actors[i]
-                render_actor(state, actor, i, view_bounding_box)
-            }
-            if (state.options.vertex_mode) {
-                context.fillStyle = backgroundColor + '8'
-                context.fillRect(0, 0, width, height)
-            }
-            if (state.selection.actors){
-                for (const selected_actor of state.selection.actors) {
-                    const actor = map.actors[selected_actor.actor_index]
-                    render_actor(state, actor, selected_actor.actor_index, view_bounding_box)
-                }
-            }
+        if (view_mode === ViewportMode.UV){
+            render_uv_viewport(state)
+        } else {
+            render_regular_viewport(state)
         }
-        else if (!state.selection.actors) {
-            // UV viewport
-            context.strokeStyle = state.options.preserve_vertex_uv
-                ? uv_preserve_color : uv_color
-            context.lineWidth = 1.5
-            
-            for (const selection of state.selection.actors) {
-                const actor = state.map.actors[selection.actor_index]
-                if (actor.brushModel) {
-                    render_uv_lines(actor.brushModel)
-                }
-            }
-            
-            if (state.options.vertex_mode) {
-                context.fillStyle = state.options.preserve_vertex_uv
-                    ? uv_preserve_color : uv_color
-                for (const selection of state.selection.actors) {
-                    const actor = state.map.actors[selection.actor_index]
-                    if (actor.brushModel) {
-                        render_unselected_uv_points(actor.brushModel, selection)
-                    }
-                }
-                context.fillStyle = vertexSelectedColor
-                for (const selection of state.selection.actors) {
-                    const actor = state.map.actors[selection.actor_index]
-                    if (actor.brushModel) {
-                        render_selected_uv_points(actor.brushModel, selection)
-                    }
-                }
+    }
+
+    function render_regular_viewport(state: EditorState){
+        const view_bounding_box = render_transform.get_view_bounding_box()
+        const map = state.map
+        for (let i = 0; i < map.actors.length; i++) {
+            const actor = map.actors[i]
+            render_actor(state, actor, i, view_bounding_box)
+        }
+        if (state.options.vertex_mode) {
+            context.fillStyle = backgroundColor + '8'
+            context.fillRect(0, 0, width, height)
+        }
+        if (state.selection.actors){
+            for (const selected_actor of state.selection.actors) {
+                const actor = map.actors[selected_actor.actor_index]
+                render_actor(state, actor, selected_actor.actor_index, view_bounding_box)
             }
         }
     }
@@ -178,6 +154,37 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         render_wireframe_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode)
         if (state.options.vertex_mode && is_selected) {
             render_vertexes(actor.brushModel, transformed_vertexes, actor_selection)
+        }
+    }
+
+    function render_uv_viewport(state: EditorState) {
+        context.strokeStyle = state.options.preserve_vertex_uv
+            ? uv_preserve_color : uv_color
+        context.lineWidth = 1.5
+        
+        for (const selection of state.selection.actors) {
+            const actor = state.map.actors[selection.actor_index]
+            if (actor.brushModel) {
+                render_uv_lines(actor.brushModel)
+            }
+        }
+        
+        if (state.options.vertex_mode) {
+            context.fillStyle = state.options.preserve_vertex_uv
+                ? uv_preserve_color : uv_color
+            for (const selection of state.selection.actors) {
+                const actor = state.map.actors[selection.actor_index]
+                if (actor.brushModel) {
+                    render_unselected_uv_points(actor.brushModel, selection)
+                }
+            }
+            context.fillStyle = vertexSelectedColor
+            for (const selection of state.selection.actors) {
+                const actor = state.map.actors[selection.actor_index]
+                if (actor.brushModel) {
+                    render_selected_uv_points(actor.brushModel, selection)
+                }
+            }
         }
     }
 
