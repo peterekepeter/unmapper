@@ -22,19 +22,44 @@
     },
     "plugins": [
         "react",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "simple-import-sort",
+        "spellcheck"
     ],
     "rules": {
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": [
           "warn"
         ],
+        "@typescript-eslint/prefer-for-of": "warn",
+        "@typescript-eslint/indent": ["warn"],
+        "@typescript-eslint/object-curly-spacing": ["warn", "always"],
+        "object-property-newline": ["warn", { "allowAllPropertiesOnSameLine": true }],
+        "object-curly-newline": ["warn", { "multiline": true }],
+        "prefer-exponentiation-operator": "warn",
+        "@typescript-eslint/comma-dangle": ["warn", "always-multiline"],
+        "@typescript-eslint/comma-spacing": ["error"],
+        "array-element-newline": ["warn", "consistent"],
+        "array-bracket-newline": ["warn", { "multiline": true }],
+        "eol-last": ["warn", "always"],
+        "no-var": "warn",
+        "no-alert": "error",
+        "no-multiple-empty-lines": ["warn", { "max": 1 }],
+        "function-paren-newline": ["warn", "multiline-arguments"],
+        "function-call-argument-newline": ["warn", "consistent"],
+        "block-spacing": "warn",
         "semi": ["warn", "never"],
         "object-shorthand": "warn",
         "prefer-const": "warn",
         "no-useless-rename": "warn",
         "react/prop-types": "off",
         "no-console": "warn",
-        "no-inner-declarations": "off"
+        "key-spacing": ["warn"],
+        "switch-colon-spacing": "warn",
+        "no-inner-declarations": "off",
+        "unicode-bom": ["error", "never"],
+        "simple-import-sort/imports": "warn",
+        "simple-import-sort/exports": "warn",
+        "spellcheck/spell-checker": ["warn"]
     }
 }

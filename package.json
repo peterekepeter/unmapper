@@ -16,6 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "eslint-plugin-spellcheck": "^0.0.19",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "reactive-signals": "^2.0.1"
@@ -30,6 +31,7 @@
     "electron": "^11.4.6",
     "eslint": "^7.26.0",
     "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
     "html-webpack-plugin": "^4.5.2",
     "jest": "^26.6.3",
     "source-map-loader": "^0.2.4",
