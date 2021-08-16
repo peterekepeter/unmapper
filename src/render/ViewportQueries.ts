@@ -54,11 +54,10 @@ export class ViewportQueries {
         state: EditorState,
         canvasX: number,
         canvasY: number): [
-            Actor, number
+            number, number, number
         ] {
-        const MAX_DISTANCE = 16
-        let best_match_actor: Actor = null
-        let best_match_vertex = -1
+        let best_actor = -1
+        let best_vertex = -1
         let best_distance = Number.MAX_VALUE
         // reverse iterate to find topmost actor
         for (let i=state.selection.actors.length - 1; i >= 0; i--) {
@@ -80,18 +79,55 @@ export class ViewportQueries {
                 if (!isNaN(x0) && !isNaN(y0)) {
                     const distance = distance_2d_to_point(canvasX, canvasY, x0, y0)
                     if (distance < best_distance) {
-                        best_match_actor = actor
-                        best_match_vertex = vertex_index
+                        best_actor = actor_index
+                        best_vertex = vertex_index
                         best_distance = distance
                     }
                 }
             }
         }
-        if (best_distance > MAX_DISTANCE) {
-            best_match_actor = null
-            best_match_vertex = -1
+        return [best_actor, best_vertex, best_distance]
+    }
+
+    find_nearest_edge(
+        state: EditorState,
+        canvas_x: number, 
+        canvas_y: number
+    ): [number, number, number] {
+        let best_actor = -1
+        let best_edge = -1
+        let best_distance = Number.MAX_VALUE
+        // reverse iterate to find topmost actor
+        for (let i=state.selection.actors.length - 1; i >= 0; i--) {
+            const actor_selection = state.selection.actors[i]
+            const actor_index = actor_selection.actor_index
+            const actor = state.map.actors[actor_index] 
+            
+            if (actor.brushModel == null) {
+                continue // skip actors which are not selected or don't have a brushModel
+            }
+
+            const vertexes = this.geometry_cache.get_world_transformed_vertexes(actor_index)
+
+            for (let edge_index = 0; edge_index<actor.brushModel.edges.length; edge_index++) {
+                const edge = actor.brushModel.edges[edge_index]
+                const p0 = vertexes[edge.vertexIndexA]
+                const x0 = this.render_transform.view_transform_x(p0)
+                const y0 = this.render_transform.view_transform_y(p0)
+                const p1 = vertexes[edge.vertexIndexB]
+                const x1 = this.render_transform.view_transform_x(p1)
+                const y1 = this.render_transform.view_transform_y(p1)
+                if (!isNaN(x0) && !isNaN(x1)) {
+                    const distance = distance_to_line_segment(canvas_x, canvas_y, x0, y0, x1, y1)
+                    if (distance < best_distance) {
+                        best_actor = actor_index
+                        best_edge = edge_index
+                        best_distance = distance
+                    }
+                }
+            }
         }
-        return [best_match_actor, best_match_vertex]
+        return [best_actor, best_edge, best_distance]
     }
 
     find_actors_in_box(

@@ -111,7 +111,7 @@ function parseActorProp(actor : Actor, key :string, parser : Parser){
             }
             actor.unsupportedProperties[key] = value
             break
-        }
+    }
 }
 
 function parseActorArrayProp(actor : Actor, key:string, index:number, parser:Parser){

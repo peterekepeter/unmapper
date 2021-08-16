@@ -2,7 +2,6 @@ import { Actor } from "../../../model/Actor"
 import { editor_state_from_actors } from "../../../model/EditorState"
 import { make_actor_selection_command } from "../make_actor_selection"
 
-
 test('can change selection to only the given actor', () => {
     const actor_a = new Actor()
     const actor_b = new Actor()

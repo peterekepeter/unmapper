@@ -187,6 +187,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             }
             controller.interaction.pointer_down(e)
         }
+        event.stopPropagation()
+        event.preventDefault()
     }
 
     function handle_pointer_up(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -204,6 +206,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             controller.interaction.pointer_up(e)
         }
         setMouseDown(false)
+        event.stopPropagation()
+        event.preventDefault()
     }
 
 
@@ -243,6 +247,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         const [next_rotation, nextLocation] =
             nextViewState(viewport_state.center_location, viewport_state.rotation, view_mode, dx, dy, event.buttons, device_size, ortoho_scale)
         controller.execute(update_view_location_rotation_command, viewport_index, nextLocation, next_rotation)
+        event.stopPropagation()
+        event.preventDefault()
     }
 
     function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
@@ -283,7 +289,7 @@ function nextViewState(
     const perspectiveMoveSpeed = 1024
 
     switch (viewmode) {
-        case ViewportMode.Perspective:
+        case ViewportMode.Perspective: 
             if (leftPress) {
                 const dir = rotation.to_matrix().apply(Vector.FORWARD)
                 nextLocation = location.add_numbers(

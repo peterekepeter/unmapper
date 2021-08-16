@@ -6,11 +6,14 @@ import { change_actor_selection } from "../../model/state/change_actor_selection
 
 export const toggle_actor_selected_command: ICommandInfoV2 = {
     keep_status_by_default: true,
-    exec: toggle_actor_selected
+    exec: toggle_actor_selected,
 }
 
 function toggle_actor_selected(state: EditorState, target: Actor) : EditorState {
     const actor_index = get_actor_index(state, target)
-    return change_actor_selection(state, actor_index, 
-        s => s != null ? null : { ...DEFAULT_ACTOR_SELECTION, actor_index })
+    return change_actor_selection(
+        state, 
+        actor_index,
+        s => s != null ? null : { ...DEFAULT_ACTOR_SELECTION, actor_index },
+    )
 }

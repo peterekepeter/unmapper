@@ -1,22 +1,21 @@
+import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { Actor } from "../model/Actor"
-import { Renderer } from "./Renderer"
-import { Vector } from "../model/Vector"
-import { CsgOperation } from "../model/CsgOperation"
-import { PolyFlags } from "../model/PolyFlags"
-import { Color } from "../model/Color"
-import { BrushModel } from "../model/BrushModel"
-import { EditorState } from "../model/EditorState"
 import { BoundingBox } from "../model/BoundingBox"
+import { BrushModel } from "../model/BrushModel"
+import { Color } from "../model/Color"
+import { CsgOperation } from "../model/CsgOperation"
+import { ActorSelection } from "../model/EditorSelection"
+import { EditorState } from "../model/EditorState"
 import { GeometryCache } from "../model/geometry/GeometryCache"
 import { intersect_segment_with_plane } from "../model/geometry/intersect-functions"
-import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
-import { ViewportMode } from "../model/ViewportMode"
+import { PolyFlags } from "../model/PolyFlags"
 import { get_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv"
+import { Vector } from "../model/Vector"
+import { ViewportMode } from "../model/ViewportMode"
+import { Renderer } from "./Renderer"
 import { ViewTransform } from "./ViewTransform"
-import { ActorSelection } from "../model/EditorSelection"
 
 const backgroundColor = '#222'
-
 
 interface IBrushColors {
     activeBrush: string
@@ -105,7 +104,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             return
         }
 
-
         const view_mode = state.viewports[viewport_index].mode
 
         if (view_mode === ViewportMode.UV){
@@ -151,7 +149,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         context.strokeStyle = get_brush_wire_color(actor, is_selected)
         context.lineWidth = 1.5
 
-        render_wireframe_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode)
+        render_wire_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode, actor_selection)
+
         if (state.options.vertex_mode && is_selected) {
             render_vertexes(actor.brushModel, transformed_vertexes, actor_selection)
         }
@@ -202,7 +201,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 const invalid0 = isNaN(x0) || isNaN(y0)
                 const invalid1 = isNaN(x1) || isNaN(y1)
 
-
                 if (!invalid0 && !invalid1) {
                     context.beginPath()
                     context.moveTo(x0, y0)
@@ -223,7 +221,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 const current_uv = uvs[j]
                 const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
 
-                if (selected_polygon.vertexes.indexOf(j) !== -1) { continue }
+                if (selected_polygon && selected_polygon.vertexes.indexOf(j) !== -1) { continue }
 
                 const x = render_transform.view_transform_x(current_uv)
                 const y = render_transform.view_transform_y(current_uv)
@@ -243,7 +241,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 const current_uv = uvs[j]
                 const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
 
-                if (selected_polygon.vertexes.indexOf(j) === -1) { continue }
+                if (!selected_polygon || selected_polygon.vertexes.indexOf(j) === -1) { continue }
 
                 const x = render_transform.view_transform_x(current_uv)
                 const y = render_transform.view_transform_y(current_uv)
@@ -272,82 +270,112 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
-    function render_wireframe_edges(brush: BrushModel, transformed_vertexes: Vector[], colorBasedOnPolyCount: boolean) {
-        let warned_brush_edges = false
-        for (const edge of brush.edges) {
-            const brushVertexA = brush.vertexes[edge.vertexIndexA]
-            const brushVertexB = brush.vertexes[edge.vertexIndexB]
-            if (!brushVertexA || !brushVertexB) {
-                if (!warned_brush_edges) {
-                    warned_brush_edges = true
-                    // eslint-disable-next-line no-console
-                    console.warn('corrupted brush edges', brush)
-                }
-                continue
-            }
-            const vertexA = transformed_vertexes[edge.vertexIndexA]
-            const vertexB = transformed_vertexes[edge.vertexIndexB]
-
-            if (colorBasedOnPolyCount) {
-                context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length)
-            }
-
-            if (render_transform.can_3d_transform) {
-                let out_vertex_a = render_transform.view_transform(vertexA)
-                let out_vertex_b = render_transform.view_transform(vertexB)
-                if (out_vertex_a.x < 0 && out_vertex_b.x < 0) {
+    function render_wire_edges(
+        brush: BrushModel, 
+        transformed_vertexes: Vector[], 
+        color_based_on_state: boolean, 
+        actor_selection: ActorSelection,
+    ) {
+        if (color_based_on_state){
+            
+            for (let i = 0; i < brush.edges.length; i++) {
+                const edge = brush.edges[i]
+                if (actor_selection && actor_selection.edges.indexOf(i) !== -1){
                     continue
-                }
-                else if (out_vertex_a.x < 0) {
-                    out_vertex_a = intersect_segment_with_plane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1)
-                }
-                else if (out_vertex_b.x < 0) {
-                    out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1)
-                }
-                const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * device_size + width * .5
-                const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * device_size + height * .5
-                const screen_b_x = (out_vertex_b.y / out_vertex_b.x) * device_size + width * .5
-                const screen_b_y = (-out_vertex_b.z / out_vertex_b.x) * device_size + height * .5
-                context.beginPath()
-                context.moveTo(screen_a_x, screen_a_y)
-                context.lineTo(screen_b_x, screen_b_y)
-                context.stroke()
-                continue
+                } 
+                context.strokeStyle = get_color_based_on_poly_count(edge.polygons.length)
+                render_wire_edge(brush, i, transformed_vertexes)
             }
 
-            const x0 = render_transform.view_transform_x(vertexA)
-            const y0 = render_transform.view_transform_y(vertexA)
-            const x1 = render_transform.view_transform_x(vertexB)
-            const y1 = render_transform.view_transform_y(vertexB)
-            const invalid0 = isNaN(x0) || isNaN(y0)
-            const invalid1 = isNaN(x1) || isNaN(y1)
+            if (actor_selection){
+                context.strokeStyle = '#fff'
+                for (const i of actor_selection.edges){
+                    render_wire_edge(brush, i, transformed_vertexes)
+                }
+            }
+        }
+        else {
+            for (let i = 0; i < brush.edges.length; i++) {
+                render_wire_edge(brush, i, transformed_vertexes)
+            }
+        }
+    }
+    
+    function render_wire_edge(
+        brush: BrushModel, 
+        edge_index: number, 
+        transformed_vertexes: Vector[],
+    ) : void {
+        let warned_brush_edges = false
+        const edge = brush.edges[edge_index]
+        const brushVertexA = brush.vertexes[edge.vertexIndexA]
+        const brushVertexB = brush.vertexes[edge.vertexIndexB]
 
+        if (!brushVertexA || !brushVertexB) {
+            if (!warned_brush_edges) {
+                warned_brush_edges = true
+                // eslint-disable-next-line no-console
+                console.warn('corrupted brush edges', brush)
+            }
+            return
+        }
 
-            if (!invalid0 && !invalid1) {
+        const vertexA = transformed_vertexes[edge.vertexIndexA]
+        const vertexB = transformed_vertexes[edge.vertexIndexB]
+
+        if (render_transform.can_3d_transform) {
+            let out_vertex_a = render_transform.view_transform(vertexA)
+            let out_vertex_b = render_transform.view_transform(vertexB)
+            if (out_vertex_a.x < 0 && out_vertex_b.x < 0) {
+                return
+            }
+            else if (out_vertex_a.x < 0) {
+                out_vertex_a = intersect_segment_with_plane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1)
+            }
+            else if (out_vertex_b.x < 0) {
+                out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1)
+            }
+            const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * device_size + width * .5
+            const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * device_size + height * .5
+            const screen_b_x = (out_vertex_b.y / out_vertex_b.x) * device_size + width * .5
+            const screen_b_y = (-out_vertex_b.z / out_vertex_b.x) * device_size + height * .5
+            context.beginPath()
+            context.moveTo(screen_a_x, screen_a_y)
+            context.lineTo(screen_b_x, screen_b_y)
+            context.stroke()
+            return
+        }
+
+        const x0 = render_transform.view_transform_x(vertexA)
+        const y0 = render_transform.view_transform_y(vertexA)
+        const x1 = render_transform.view_transform_x(vertexB)
+        const y1 = render_transform.view_transform_y(vertexB)
+        const invalid0 = isNaN(x0) || isNaN(y0)
+        const invalid1 = isNaN(x1) || isNaN(y1)
+
+        if (!invalid0 && !invalid1) {
+            context.beginPath()
+            context.moveTo(x0, y0)
+            context.lineTo(x1, y1)
+            context.stroke()
+        }
+        else if (!invalid0 && invalid1 || invalid0 && !invalid1) {
+            // need view transformed Z for clipping
+            const v0 = invalid1 ? vertexA : vertexB
+            const v1 = invalid1 ? vertexB : vertexA
+            const vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1)
+            if (vi != null) {
+                const x0 = render_transform.view_transform_x(v0)
+                const y0 = render_transform.view_transform_y(v0)
+                const x1 = render_transform.view_transform_x(vi)
+                const y1 = render_transform.view_transform_y(vi)
                 context.beginPath()
                 context.moveTo(x0, y0)
                 context.lineTo(x1, y1)
                 context.stroke()
             }
-            else if (!invalid0 && invalid1 || invalid0 && !invalid1) {
-                // need view transformed Z for clipping
-                const v0 = invalid1 ? vertexA : vertexB
-                const v1 = invalid1 ? vertexB : vertexA
-                const vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1)
-                if (vi != null) {
-                    const x0 = render_transform.view_transform_x(v0)
-                    const y0 = render_transform.view_transform_y(v0)
-                    const x1 = render_transform.view_transform_x(vi)
-                    const y1 = render_transform.view_transform_y(vi)
-                    context.beginPath()
-                    context.moveTo(x0, y0)
-                    context.lineTo(x1, y1)
-                    context.stroke()
-                }
-            }
         }
     }
-
     function render_interaction(state: InteractionRenderState) {
         if (!state) {
             return

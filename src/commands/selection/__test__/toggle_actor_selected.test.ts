@@ -3,7 +3,6 @@ import { editor_state_from_actors } from "../../../model/EditorState"
 import { is_null_or_empty } from "../../../util/is_null_or_empty"
 import { toggle_actor_selected_command } from "../toggle_actor_selected"
 
-
 test('can toggle selected property', () => {
     const actor = new Actor()
     const prev_state = editor_state_from_actors([actor])
