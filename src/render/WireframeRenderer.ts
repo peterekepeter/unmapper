@@ -153,6 +153,24 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
         if (state.options.vertex_mode && is_selected) {
             render_vertexes(actor.brushModel, transformed_vertexes, actor_selection)
+            const world_polygon_centers = geometry_cache.get_world_transformed_polygon_centers(index)
+            render_polygon_centers(actor.brushModel, transformed_vertexes, world_polygon_centers, actor_selection)
+        }
+    }
+
+    function render_polygon_centers(brush: BrushModel, world_vertexes: Vector[], world_polygon_centers: Vector[], selection: ActorSelection){
+        for (let i = 0; i < brush.polygons.length; i++) {
+            const is_selected = selection.polygons && selection.polygons.indexOf(i) !== -1
+            const point = world_polygon_centers[i]
+            const x = render_transform.view_transform_x(point)
+            const y = render_transform.view_transform_y(point)
+
+            if (!isNaN(x) && !isNaN(y)) {
+                context.fillStyle = is_selected ? vertexSelectedColor : vertexColor
+                context.beginPath()
+                context.rect(x-2, y-2, 5, 5)
+                context.fill()
+            }
         }
     }
 

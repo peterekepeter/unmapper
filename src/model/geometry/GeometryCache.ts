@@ -1,7 +1,7 @@
 import { Actor } from "../Actor"
-import { BoundingBox } from "../BoundingBox";
-import { Vector } from "../Vector";
-import { ActorGeometryCache } from "./ActorGeometryCache";
+import { BoundingBox } from "../BoundingBox"
+import { Vector } from "../Vector"
+import { ActorGeometryCache } from "./ActorGeometryCache"
 
 export class GeometryCache
 {
@@ -30,6 +30,9 @@ export class GeometryCache
         return this.actor_caches[index].world_vertexes
     }
 
-}
+    get_world_transformed_polygon_centers(index: number): Vector[] {
+        return this.actor_caches[index].world_polygon_centers
+    }
 
+}
 

@@ -149,6 +149,8 @@ export class InteractionController {
             this._viewport_queries.find_nearest_vertex(state, event.canvas_x, event.canvas_y)
         const [edge_actor, edge, raw_edge_distance] = 
             this._viewport_queries.find_nearest_edge(state, event.canvas_x, event.canvas_y)
+        const [polygon_actor, polygon, polygon_distance] = 
+            this._viewport_queries.find_nearest_polygon(state, event.canvas_x, event.canvas_y)
         
         const edge_distance = Math.max(raw_edge_distance, 16 - vertex_distance)
 
@@ -165,6 +167,12 @@ export class InteractionController {
         {
             best_distance = edge_distance
             selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: edge_actor, edges: [edge] }] }
+        }
+
+        if (polygon_distance < best_distance && polygon_distance < MAX_DISTANCE)
+        {
+            best_distance = polygon_distance
+            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: polygon_actor, polygons: [polygon] }] }
         }
 
         const command = event.ctrl_key 

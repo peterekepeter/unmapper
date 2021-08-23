@@ -1,11 +1,11 @@
-import { DEFAULT_ACTOR_SELECTION, EditorSelection } from "../model/EditorSelection"
 import { Actor } from "../model/Actor"
+import { DEFAULT_ACTOR_SELECTION, EditorSelection } from "../model/EditorSelection"
+import { EditorState } from "../model/EditorState"
 import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions"
 import { GeometryCache } from "../model/geometry/GeometryCache"
 import { UnrealMap } from "../model/UnrealMap"
 import { Vector } from "../model/Vector"
 import { ViewTransform } from "./ViewTransform"
-import { EditorState } from "../model/EditorState"
 
 export class ViewportQueries {
 
@@ -16,7 +16,7 @@ export class ViewportQueries {
     find_nearest_actor(
         map: UnrealMap,
         canvas_x: number,
-        canvas_y: number
+        canvas_y: number,
     ): Actor {
         const MAX_DISTANCE = 8
         let best_match: Actor = null
@@ -53,8 +53,9 @@ export class ViewportQueries {
     find_nearest_vertex(
         state: EditorState,
         canvasX: number,
-        canvasY: number): [
-            number, number, number
+        canvasY: number,
+    ): [
+            number, number, number,
         ] {
         let best_actor = -1
         let best_vertex = -1
@@ -92,7 +93,7 @@ export class ViewportQueries {
     find_nearest_edge(
         state: EditorState,
         canvas_x: number, 
-        canvas_y: number
+        canvas_y: number,
     ): [number, number, number] {
         let best_actor = -1
         let best_edge = -1
@@ -130,12 +131,46 @@ export class ViewportQueries {
         return [best_actor, best_edge, best_distance]
     }
 
+    find_nearest_polygon(state: EditorState, canvas_x: number, canvas_y: number): [number, number, number] {
+        let best_actor = -1
+        let best_vertex = -1
+        let best_distance = Number.MAX_VALUE
+        // reverse iterate to find topmost actor
+        for (let i=state.selection.actors.length - 1; i >= 0; i--) {
+            const actor_selection = state.selection.actors[i]
+            const actor_index = actor_selection.actor_index
+            const actor = state.map.actors[actor_index] 
+
+            if (actor.brushModel == null) {
+                continue // skip actors which are not selected or don't have a brushModel
+            }
+
+            const polygon_centers = this.geometry_cache.get_world_transformed_polygon_centers(actor_index)
+            const polygons = actor.brushModel.polygons
+
+            for (let polygon_index = polygons.length - 1; polygon_index >= 0; polygon_index--) {
+                const p0 = polygon_centers[polygon_index]
+                const x0 = this.render_transform.view_transform_x(p0)
+                const y0 = this.render_transform.view_transform_y(p0)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_distance) {
+                        best_actor = actor_index
+                        best_vertex = polygon_index
+                        best_distance = distance
+                    }
+                }
+            }
+        }
+        return [best_actor, best_vertex, best_distance]
+    }
+
     find_actors_in_box(
         map: UnrealMap,
         canvas_x0: number,
         canvas_y0: number,
         canvas_x1: number,
-        canvas_y1: number
+        canvas_y1: number,
     ): number[] {
         const result = []
         for (let actor_index = 0; actor_index < map.actors.length; actor_index++) {
@@ -156,7 +191,7 @@ export class ViewportQueries {
         canvas_y0: number,
         canvas_x1: number,
         canvas_y1: number,
-        custom_geometry_cache: GeometryCache
+        custom_geometry_cache: GeometryCache,
     ): EditorSelection {
         const result: EditorSelection = { actors: [] }
         for (const selected_actor of state.selection.actors) {
@@ -175,7 +210,7 @@ export class ViewportQueries {
             result.actors.push({ 
                 ...DEFAULT_ACTOR_SELECTION, 
                 actor_index, 
-                vertexes: brush_result 
+                vertexes: brush_result, 
             })
         }
         return result
@@ -185,8 +220,9 @@ export class ViewportQueries {
         map: UnrealMap,
         canvas_x: number,
         canvas_y: number,
-        custom_geometry_cache: GeometryCache): [
-            Vector, number
+        custom_geometry_cache: GeometryCache,
+    ): [
+            Vector, number,
         ] {
         let best_match_location: Vector = null
         let best_distance = Number.MAX_VALUE

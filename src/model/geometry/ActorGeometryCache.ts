@@ -1,12 +1,13 @@
-import { Actor } from "../Actor";
-import { BoundingBox } from "../BoundingBox";
-import { Vector } from "../Vector";
-import { get_actor_to_world_transform } from "./actor-space-transform";
+import { Actor } from "../Actor"
+import { BoundingBox } from "../BoundingBox"
+import { Vector } from "../Vector"
+import { get_actor_to_world_transform } from "./actor-space-transform"
 
 export class ActorGeometryCache {
 
     private _actor: Actor;
     private _cached_world_vertexes: Vector[];
+    private _cached_polygon_centers: Vector[];
     private _cached_bounding_box: BoundingBox;
 
     constructor(actor: Actor) {
@@ -26,6 +27,19 @@ export class ActorGeometryCache {
         return this._cached_world_vertexes
     }
 
+    get world_polygon_centers(): Vector[] {
+        if (this._cached_polygon_centers){
+            return this._cached_polygon_centers
+        }
+
+        const brushModel = this._actor.brushModel
+        const fn = get_actor_to_world_transform(this._actor)
+        const polygon_centers = brushModel.polygons.map(p => fn(p.median))
+
+        this._cached_polygon_centers = polygon_centers
+        return this._cached_polygon_centers
+    }
+
     get bounding_box(): BoundingBox {
         if (this._cached_bounding_box){
             return this._cached_bounding_box
@@ -40,5 +54,4 @@ export class ActorGeometryCache {
     }
 
 }
-
     
