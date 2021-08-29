@@ -152,7 +152,7 @@ export class InteractionController {
         const [polygon_actor, polygon, polygon_distance] = 
             this._viewport_queries.find_nearest_polygon(state, event.canvas_x, event.canvas_y)
         
-        const edge_distance = Math.max(raw_edge_distance, 16 - vertex_distance)
+        const edge_distance = Math.max(raw_edge_distance, Math.max(16 - vertex_distance, 16 - polygon_distance))
 
         let best_distance = Number.MAX_SAFE_INTEGER
         let selection: EditorSelection = DEFAULT_EDITOR_SELECTION

@@ -1,5 +1,6 @@
 import { BrushModel } from "../BrushModel"
 import { Vector } from "../Vector"
+import { calculate_polygon_median } from "./calculate_polygon_median"
 import { createBrushPolygons } from "./createBrushPolygon"
 
 export function extrude_brush_faces(brush: BrushModel, faces: number[], extrude_vector: Vector) : BrushModel
@@ -55,6 +56,7 @@ function extrude_face_vector(mutable_brush: BrushModel, face_index: number, extr
         const newVertexIndex = mutable_brush.addVertex(vertex.position.add_vector(extrude_vector))
         extruded_poly.vertexes.push(newVertexIndex)
     }
+    extruded_poly.median = calculate_polygon_median(mutable_brush.vertexes, extruded_poly)
     // replace targetFace
     mutable_brush.polygons[face_index] = extruded_poly
     mutable_brush.rebuild_poly_edges(face_index)
@@ -73,7 +75,7 @@ function bridge_edge_loops(brush: BrushModel, first_loop_vertexes : number[], se
             first_loop_vertexes[current_index],
             second_loop_vertexes[current_index],
             second_loop_vertexes[last_index],
-            first_loop_vertexes[last_index]
+            first_loop_vertexes[last_index],
         ])
         last_index= current_index
     }
