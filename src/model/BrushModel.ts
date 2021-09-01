@@ -1,8 +1,9 @@
+import { calculate_polygon_median } from "./algorithms/calculate_polygon_median"
+import { calculate_polygon_normal } from "./algorithms/calculate_polygon_normal"
 import { BrushEdge } from "./BrushEdge"
 import { BrushPolygon } from "./BrushPolygon"
 import { BrushVertex } from "./BrushVertex"
 import { Vector } from "./Vector"
-
 
 export class BrushModel
 {
@@ -39,7 +40,7 @@ export class BrushModel
             if (typeof b !== 'number' || typeof c !== 'number'){
                 throw new Error('expecting 3 numbers')
             }
-            this.vertexes.push(new BrushVertex(new Vector(a,b,c)))
+            this.vertexes.push(new BrushVertex(new Vector(a, b, c)))
         }
     }
 
@@ -97,6 +98,20 @@ export class BrushModel
         }
     }
 
+    recalculate_median_normal(): void {
+        this._remove_all_poly_edges()
+        for (const polygon of this.polygons) {
+            const median = calculate_polygon_median(this.vertexes, polygon)
+            if (polygon.median != median){
+                polygon.median = median
+            }
+            const normal = calculate_polygon_normal(this.vertexes, polygon)
+            if (polygon.normal != normal) {
+                polygon.normal = normal
+            }
+        }
+    }
+
     rebuild_poly_edges(polygonIndex: number){
         this._remove_poly_edges(polygonIndex)
         add_polygon_edges(this, polygonIndex)
@@ -124,7 +139,7 @@ export class BrushModel
             || poly.median.x !== x 
             || poly.median.y !== y
             || poly.median.z !== z){
-            poly.median = new Vector(x,y,z)
+            poly.median = new Vector(x, y, z)
         }
     }
 

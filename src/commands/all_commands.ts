@@ -1,29 +1,30 @@
 
 import { ICommandInfoV2 } from "../controller/command"
+import { align_vertexes_to_8_grid, align_vertexes_to_16_grid, align_vertexes_to_32_grid } from './align_vertexes_to_grid'
+import { apply_transform_command } from "./apply_transform"
+import { clear_status_command } from "./clear_status_command"
+import { clip_geometry_command } from "./clip_geometry"
 import { create_polygon_command } from './create_polygon'
-import { extrude_polygons_command } from './extrude_polygons'
 import { delete_selected_command } from './delete_selected'
-import { toggle_vertex_mode_command } from './editor/toggle_vertex_mode'
-import { select_all_command } from './selection/select_all'
-import { align_vertexes_to_16_grid, align_vertexes_to_32_grid, align_vertexes_to_8_grid } from './align_vertexes_to_grid'
-import { shuffle_brush_polygons_command } from './shuffle_brush_polygons'
-import { triangulate_mesh_polygons_command } from './triangulate_mesh_polygons'
-import { uv_triplanar_map_command } from './uv_triplanar_map'
-import { flip_polygon_normal_command } from './flip_polygon_normal'
+import { toggle_box_select_command } from "./editor/toggle_box_select"
 import { toggle_editor_layout_command } from "./editor/toggle_editor_layout"
+import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
+import { toggle_vertex_mode_command } from './editor/toggle_vertex_mode'
+import { extrude_polygons_command } from './extrude_polygons'
+import { flip_polygon_normal_command } from './flip_polygon_normal'
+import { generate_cube_command } from "./generators/generate_cube"
+import { measure_command } from "./measure"
 import { move_command } from "./move"
 import { rotate_command } from "./rotate"
-import { apply_transform_command } from "./apply_transform"
-import { uv_random_map_command } from "./uv_random_map"
 import { scale_command } from "./scale"
+import { select_all_command } from './selection/select_all'
 import { reset_initial_state, set_initial_state } from "./set_initial_state"
-import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
-import { toggle_box_select_command } from "./editor/toggle_box_select"
-import { clip_geometry_command } from "./clip_geometry"
-import { measure_command } from "./measure"
-import { generate_cube_command } from "./generators/generate_cube"
-import { clear_status_command } from "./clear_status_command"
-
+import { shuffle_brush_polygons_command } from './shuffle_brush_polygons'
+import { smooth_vertexes_command } from "./smooth_vertexes"
+import { triangulate_mesh_polygons_command } from './triangulate_mesh_polygons'
+import { uv_random_map_command } from "./uv_random_map"
+import { uv_triplanar_map_command } from './uv_triplanar_map'
+import { vertex_noise_command } from "./vertex_noise"
 
 export function get_all_commands_v2(): ICommandInfoV2[] { return [
     select_all_command,
@@ -51,9 +52,9 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     reset_initial_state,
     measure_command,
     clear_status_command,
-    ...get_generate_commands()
+    vertex_noise_command,
+    smooth_vertexes_command,
+    ...get_generate_commands(),
 ] }
 
-function get_generate_commands(): ICommandInfoV2[] { return [ 
-    generate_cube_command 
-] }
+function get_generate_commands(): ICommandInfoV2[] { return [generate_cube_command] }
