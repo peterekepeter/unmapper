@@ -1,4 +1,5 @@
 import { Actor } from "../model/Actor"
+import { polygonDataToBrush } from "../model/brush-convert"
 import { DEFAULT_ACTOR_SELECTION, EditorSelection } from "../model/EditorSelection"
 import { EditorState } from "../model/EditorState"
 import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions"
@@ -196,21 +197,52 @@ export class ViewportQueries {
         const result: EditorSelection = { actors: [] }
         for (const selected_actor of state.selection.actors) {
             const actor_index = selected_actor.actor_index
-            const brush_result = []
+            const vertex_selection_result = []
+            const polygon_selection_result = []
+            const edge_selection_result = []
             const vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
+            const polygon_centers = custom_geometry_cache.get_world_transformed_polygon_centers(actor_index)
             for (let vertex_index = 0; vertex_index < vertexes.length; vertex_index++) {
                 const vertex = vertexes[vertex_index]
                 const x0 = this.render_transform.view_transform_x(vertex)
                 const y0 = this.render_transform.view_transform_y(vertex)
                 if (canvas_x0 <= x0 && x0 <= canvas_x1 &&
                     canvas_y0 <= y0 && y0 <= canvas_y1) {
-                    brush_result.push(vertex_index)
+                    vertex_selection_result.push(vertex_index)
+                }
+            }
+            for (let i = 0; i < polygon_centers.length; i++){
+                const polygon_center = polygon_centers[i]
+                const x0 = this.render_transform.view_transform_x(polygon_center)
+                const y0 = this.render_transform.view_transform_y(polygon_center)
+                if (canvas_x0 <= x0 && x0 <= canvas_x1 &&
+                    canvas_y0 <= y0 && y0 <= canvas_y1) {
+                    polygon_selection_result.push(i)
+                }
+            }
+            if (state.map.actors[actor_index].brushModel){
+                const edges = state.map.actors[actor_index].brushModel.edges
+                for (let i=0; i<edges.length; i++){
+                    const vertex_a = vertexes[edges[i].vertexIndexA]
+                    const vertex_b = vertexes[edges[i].vertexIndexB]
+                    const x0_a = this.render_transform.view_transform_x(vertex_a)
+                    const y0_a = this.render_transform.view_transform_y(vertex_a)
+                    const x0_b = this.render_transform.view_transform_x(vertex_b)
+                    const y0_b = this.render_transform.view_transform_y(vertex_b)
+                    if (canvas_x0 <= x0_a && x0_a <= canvas_x1 &&
+                        canvas_y0 <= y0_a && y0_a <= canvas_y1 && 
+                        canvas_x0 <= x0_b && x0_b <= canvas_x1 &&
+                        canvas_y0 <= y0_b && y0_b <= canvas_y1) {
+                        edge_selection_result.push(i)
+                    }
                 }
             }
             result.actors.push({ 
                 ...DEFAULT_ACTOR_SELECTION, 
                 actor_index, 
-                vertexes: brush_result, 
+                vertexes: vertex_selection_result, 
+                polygons: polygon_selection_result,
+                edges: edge_selection_result,
             })
         }
         return result
