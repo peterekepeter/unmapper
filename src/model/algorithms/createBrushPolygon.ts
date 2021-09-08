@@ -1,8 +1,8 @@
 import { BrushModel } from "../BrushModel"
 import { BrushPolygon } from "../BrushPolygon"
 import { BrushVertex } from "../BrushVertex"
-import { calculate_polygon_median } from "./calculate_polygon_median"
-import { calculate_polygon_normal } from "./calculate_polygon_normal"
+import { calculate_polygon_center, calculate_polygon_center_from_iterable } from "./calculate_polygon_median"
+import { calculate_normal_from_3_plane_points, calculate_polygon_normal } from "./calculate_polygon_normal"
 
 export function createBrushPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushModel {
     return createBrushPolygons(brush, [selected_vertexes])
@@ -28,17 +28,16 @@ function createPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushPo
     const neighbours = brush.findPolygonsContaining({ min_vertex_match: 2, vertexes: selected_vertexes })
     const neighbour_edges = __extract_edges(neighbours, selected_vertexes)
 
-
     let new_vertex_index_list : number[]
     let index_list_error
-    let try_count = Math.min(selected_vertexes.length, 10)
+    const try_count = Math.min(selected_vertexes.length, 10)
     const rotating_selection = [...selected_vertexes]
 
     for (let i=0; i<try_count; i++){
         // retry loop for creating poly
         try {
             new_vertex_index_list = create_polygon_vertex_index_list(brush.vertexes, neighbour_edges, selected_vertexes)
-            break;
+            break
         }
         catch (error){
             index_list_error = error
@@ -55,7 +54,7 @@ function createPolygon(brush: BrushModel, selected_vertexes: number[]) : BrushPo
     //const pid = nextBrush.polygons.length;
     //nextBrush.polygons.push(newPoly);
     polygon.vertexes = new_vertex_index_list
-    polygon.median = calculate_polygon_median(brush.vertexes, polygon)
+    polygon.median = calculate_polygon_center(brush.vertexes, polygon)
     polygon.origin = polygon.median
     polygon.normal = calculate_polygon_normal(brush.vertexes, polygon)
     return polygon
@@ -78,19 +77,21 @@ export function __extract_edges(polygons: BrushPolygon[], indexes: number[]): nu
 function create_polygon_vertex_index_list(
     vertexes: BrushVertex[], 
     neighbour_edges: number[][], 
-    selected_vertexes: number[]):number[]{
+    selected_vertexes: number[],
+):number[]{
     // neighbour edges must be contained in reverse order
     // all selected vertexes must be part of the new list
     const vertexes_to_add = [...selected_vertexes]
     const result : number[] = [vertexes_to_add.pop()]
     //console.log('start', selected_vertexes, 'from', result);
+    const center = calculate_polygon_center_from_iterable(vertexes_to_add.map(i => vertexes[i]))
 
     while(vertexes_to_add.length > 0){
         // if only one vertex left, add it!
         if (vertexes_to_add.length == 1){
             result.push(vertexes_to_add.pop())
             //console.log('added last', result);
-            continue; // ok, added vertex
+            continue // ok, added vertex
         }
         const last_vertex = result[result.length-1]
         let added = false
@@ -99,21 +100,22 @@ function create_polygon_vertex_index_list(
         for (const n_edge of neighbour_edges){
             if (n_edge[1] === last_vertex){
                 const next_vertex = n_edge[0]
-                vertexes_to_add.splice(vertexes_to_add.indexOf(next_vertex),1)
+                vertexes_to_add.splice(vertexes_to_add.indexOf(next_vertex), 1)
                 result.push(next_vertex)
                 //console.log(`added edge ${n_edge[1]}->${n_edge[0]}`, result);
                 added = true
-                break; // ok, added vertex
+                break // ok, added vertex
             }
         }
         if (added){
             continue
         }
 
-        // no edge constraint for next vertex, find closest vertex of remaining ones
+        // no edge constraint for next vertex, find closest vertex (by dot product) of remaining ones
+        const main_vector = vertexes[last_vertex].position.subtract_vector(center)
         const sorted_by_distance = vertexes_to_add
-            .map(i => ({vertex_index: i, distance: vertexes[last_vertex].position.distanceTo(vertexes[i].position)}))
-            .sort((a,b) => a.distance - b.distance)
+            .map(i => ({ vertex_index: i, distance: main_vector.dot(vertexes[i].position.subtract_vector(center)) }))
+            .sort((a, b) => b.distance - a.distance)
 
         //console.log('distance to',last_vertex, "\n", sorted_by_distance);
 
@@ -127,8 +129,25 @@ function create_polygon_vertex_index_list(
                 if (edge[0] === last_vertex && edge[1] === next_vertex){
                     // poly already contains this vertex
                     next_invalid = true
-                    break;
+                    break
                 }
+            }
+            // check that adding the next_vertex does not change the winding order
+            if (!next_invalid && result.length >= 2){
+                const last_normal = calculate_normal_from_3_plane_points(
+                    center,
+                    vertexes[result[result.length-2]].position,
+                    vertexes[result[result.length-1]].position,
+                )
+                const next_normal = calculate_normal_from_3_plane_points(
+                    center,
+                    vertexes[result[result.length-1]].position,
+                    vertexes[next_vertex].position,
+                )
+                if (last_normal.dot(next_normal) <= 0) {
+                    next_invalid = true
+                }
+                
             }
             if (!next_invalid){
                 break
@@ -139,7 +158,7 @@ function create_polygon_vertex_index_list(
             vertexes_to_add.splice(vertexes_to_add.indexOf(next_vertex), 1)
             result.push(next_vertex)
             //console.log(`added nearest ${next_vertex}`, result);
-            continue;
+            continue
         }
         throw new Error('unable to construct polygon')
     }
