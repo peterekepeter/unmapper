@@ -182,7 +182,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         for (const selection of state.selection.actors) {
             const actor = state.map.actors[selection.actor_index]
             if (actor.brushModel) {
-                render_uv_lines(actor.brushModel)
+                render_uv_edges(actor.brushModel)
             }
         }
         
@@ -192,20 +192,22 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             for (const selection of state.selection.actors) {
                 const actor = state.map.actors[selection.actor_index]
                 if (actor.brushModel) {
-                    render_unselected_uv_points(actor.brushModel, selection)
+                    render_not_selected_uv_points(actor.brushModel, selection)
                 }
             }
             context.fillStyle = vertexSelectedColor
+            context.strokeStyle = vertexSelectedColor
             for (const selection of state.selection.actors) {
                 const actor = state.map.actors[selection.actor_index]
                 if (actor.brushModel) {
                     render_selected_uv_points(actor.brushModel, selection)
+                    render_selected_uv_edges(actor.brushModel, selection)
                 }
             }
         }
     }
 
-    function render_uv_lines(model: BrushModel) {
+    function render_uv_edges(model: BrushModel) {
 
         for (let i = 0; i < model.polygons.length; i++) {
             const uvs = get_brush_polygon_vertex_uvs(model, i)
@@ -232,7 +234,40 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     }
 
-    function render_unselected_uv_points(model: BrushModel, selection: ActorSelection) {
+    function render_selected_uv_edges(model: BrushModel, selection: ActorSelection) {
+
+        for (let i = 0; i < model.polygons.length; i++) {
+            const uv = get_brush_polygon_vertex_uvs(model, i)
+
+            const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
+            if (!selected_polygon){
+                return
+            }
+
+            for (const polygon_edge_index of selected_polygon.edges){
+                const first_polygon_vertex = polygon_edge_index
+                const second_polygon_vertex = first_polygon_vertex !== uv.length -1 ? first_polygon_vertex + 1 : 0
+                const first = uv[first_polygon_vertex]
+                const second = uv[second_polygon_vertex]
+                const x0 = render_transform.view_transform_x(first)
+                const y0 = render_transform.view_transform_y(first)
+                const x1 = render_transform.view_transform_x(second)
+                const y1 = render_transform.view_transform_y(second)
+                const invalid0 = isNaN(x0) || isNaN(y0)
+                const invalid1 = isNaN(x1) || isNaN(y1)
+
+                if (!invalid0 && !invalid1) {
+                    context.beginPath()
+                    context.moveTo(x0, y0)
+                    context.lineTo(x1, y1)
+                    context.stroke()
+                }
+            }
+        }
+
+    }
+
+    function render_not_selected_uv_points(model: BrushModel, selection: ActorSelection) {
         for (let i = 0; i < model.polygons.length; i++) {
             const uvs = get_brush_polygon_vertex_uvs(model, i)
             for (let j = 0; j < uvs.length; j++) {

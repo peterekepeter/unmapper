@@ -60,6 +60,10 @@
         "unicode-bom": ["error", "never"],
         "simple-import-sort/imports": "warn",
         "simple-import-sort/exports": "warn",
-        "spellcheck/spell-checker": ["warn"]
+        "spellcheck/spell-checker": ["warn", {
+            "skipWords": [
+                "uv"
+            ]
+        }]
     }
 }

@@ -22,6 +22,7 @@ export interface ActorSelection
         // used for selecting vertexes in UV mode
         polygon_index: number;
         vertexes: number[];
+        edges: number[];
     }[];
 }
 
