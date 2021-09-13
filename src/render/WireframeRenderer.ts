@@ -236,13 +236,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     function render_selected_uv_edges(model: BrushModel, selection: ActorSelection) {
 
-        for (let i = 0; i < model.polygons.length; i++) {
-            const uv = get_brush_polygon_vertex_uvs(model, i)
-
-            const selected_polygon = selection.polygon_vertexes.find(p => p.polygon_index === i)
-            if (!selected_polygon){
-                return
-            }
+        for (const selected_polygon of selection.polygon_vertexes) {
+            const uv = get_brush_polygon_vertex_uvs(model, selected_polygon.polygon_index)
 
             for (const polygon_edge_index of selected_polygon.edges){
                 const first_polygon_vertex = polygon_edge_index

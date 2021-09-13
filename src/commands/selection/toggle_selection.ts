@@ -121,10 +121,14 @@ function toggle_polygon_vertexes(selection: PV[], to_toggle: PV[]): PV[] {
             result_list.push(item)
         } else {
             const new_vertexes = toggle_list(item.vertexes, toggle.vertexes)
-            if (new_vertexes.length > 0){
+            const new_edges = toggle_list(item.edges, toggle.edges)
+            if (new_vertexes === item.vertexes && new_edges === item.edges){
+                result_list.push(item)
+            } else if (new_vertexes.length > 0 || new_edges.length > 0) {
                 result_list.push({
                     polygon_index: item.polygon_index,
                     vertexes: new_vertexes,
+                    edges: new_edges,
                 })
             }
         }

@@ -34,6 +34,12 @@ export const DEFAULT_ACTOR_SELECTION: ActorSelection = {
     polygon_vertexes: EMPTY_LIST,
 }
 
+export const DEFAULT_ACTOR_POLYGON_SELECTION: ActorSelection['polygon_vertexes'][0] = {
+    edges: EMPTY_LIST,
+    polygon_index: -1,
+    vertexes: EMPTY_LIST,
+}
+
 export function create_actor_selection(actor_index: number): ActorSelection {
     return {
         ...DEFAULT_ACTOR_SELECTION,

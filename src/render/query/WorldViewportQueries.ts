@@ -1,19 +1,57 @@
-import { Actor } from "../model/Actor"
-import { polygonDataToBrush } from "../model/brush-convert"
-import { DEFAULT_ACTOR_SELECTION, EditorSelection } from "../model/EditorSelection"
-import { EditorState } from "../model/EditorState"
-import { distance_2d_to_point, distance_to_line_segment } from "../model/geometry/distance-functions"
-import { GeometryCache } from "../model/geometry/GeometryCache"
-import { UnrealMap } from "../model/UnrealMap"
-import { Vector } from "../model/Vector"
-import { ViewTransform } from "./ViewTransform"
+import { Actor } from "../../model/Actor"
+import { DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
+import { EditorState } from "../../model/EditorState"
+import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
+import { GeometryCache } from "../../model/geometry/GeometryCache"
+import { UnrealMap } from "../../model/UnrealMap"
+import { Vector } from "../../model/Vector"
+import { ViewTransform } from "../ViewTransform"
 
-export class ViewportQueries {
+export class WorldViewportQueries {
 
     public render_transform: ViewTransform
 
     constructor(private geometry_cache: GeometryCache) { }
 
+
+    find_selection_at_point(
+        state:EditorState,
+        canvas_x: number,
+        canvas_y: number,
+    ): EditorSelection {
+        const MAX_DISTANCE = 16
+        const [vertex_actor, vertex, vertex_distance] = 
+            this.find_nearest_vertex(state, canvas_x, canvas_y)
+        const [edge_actor, edge, raw_edge_distance] = 
+            this.find_nearest_edge(state, canvas_x, canvas_y)
+        const [polygon_actor, polygon, polygon_distance] = 
+            this.find_nearest_polygon(state, canvas_x, canvas_y)
+        
+        const edge_distance = Math.max(raw_edge_distance, Math.max(16 - vertex_distance, 16 - polygon_distance))
+
+        let best_distance = Number.MAX_SAFE_INTEGER
+        let selection: EditorSelection = DEFAULT_EDITOR_SELECTION
+
+        if (vertex_distance < best_distance && vertex_distance < MAX_DISTANCE)
+        {
+            best_distance = vertex_distance
+            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: vertex_actor, vertexes: [vertex] }] }
+        }
+
+        if (edge_distance < best_distance && edge_distance < MAX_DISTANCE)
+        {
+            best_distance = edge_distance
+            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: edge_actor, edges: [edge] }] }
+        }
+
+        if (polygon_distance < best_distance && polygon_distance < MAX_DISTANCE)
+        {
+            best_distance = polygon_distance
+            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: polygon_actor, polygons: [polygon] }] }
+        }
+        return selection
+    }
+    
     find_nearest_actor(
         map: UnrealMap,
         canvas_x: number,

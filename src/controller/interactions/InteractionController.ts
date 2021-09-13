@@ -1,8 +1,6 @@
 import { toggle_box_select_command } from "../../commands/editor/toggle_box_select"
 import { make_actor_selection_command } from "../../commands/selection/make_actor_selection"
 import { replace_selection_command } from "../../commands/selection/replace_selection"
-import { select_toggle_vertex_command } from "../../commands/selection/select_toggle_vertex"
-import { select_vertex_command } from "../../commands/selection/select_vertex"
 import { toggle_actor_selected_command } from "../../commands/selection/toggle_actor_selected"
 import { toggle_selection_command } from "../../commands/selection/toggle_selection"
 import { BoundingBox } from "../../model/BoundingBox"
@@ -10,7 +8,7 @@ import { create_actor_selection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTI
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
-import { ViewportQueries } from "../../render/ViewportQueries"
+import { AllViewportQueries } from "../../render/query/AllViewportQueries"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { Interaction } from "./Interaction"
@@ -26,7 +24,7 @@ export class InteractionController {
     box_begin_y: number = null;
 
     private _interaction_geometry_cache = new GeometryCache()
-    private _viewport_queries = new ViewportQueries(this._interaction_geometry_cache);
+    private _viewport_queries = new AllViewportQueries(this._interaction_geometry_cache);
 
     constructor(private controller: AppController) {
 
@@ -95,6 +93,7 @@ export class InteractionController {
         const max_y = Math.max(event.canvas_y, this.box_begin_y)
         const state = this.controller.state_signal.value
         this._interaction_geometry_cache.actors = state.map.actors
+        this._viewport_queries.mode = event.view_mode
         this._viewport_queries.render_transform = event.view_transform
 
         const selection: EditorSelection = state.options.vertex_mode
@@ -120,6 +119,7 @@ export class InteractionController {
         const state = controller.state_signal.value
         const vertex_mode = state.options.vertex_mode
         this._interaction_geometry_cache.actors = state.map.actors
+        this._viewport_queries.mode = event.view_mode
         this._viewport_queries.render_transform = event.view_transform
         if (vertex_mode) {
             this.point_select_in_vertex_mode(event)
@@ -142,38 +142,10 @@ export class InteractionController {
         }
         
         this._interaction_geometry_cache.actors = state.map.actors
+        this._viewport_queries.mode = event.view_mode
         this._viewport_queries.render_transform = event.view_transform
 
-        const MAX_DISTANCE = 16
-        const [vertex_actor, vertex, vertex_distance] = 
-            this._viewport_queries.find_nearest_vertex(state, event.canvas_x, event.canvas_y)
-        const [edge_actor, edge, raw_edge_distance] = 
-            this._viewport_queries.find_nearest_edge(state, event.canvas_x, event.canvas_y)
-        const [polygon_actor, polygon, polygon_distance] = 
-            this._viewport_queries.find_nearest_polygon(state, event.canvas_x, event.canvas_y)
-        
-        const edge_distance = Math.max(raw_edge_distance, Math.max(16 - vertex_distance, 16 - polygon_distance))
-
-        let best_distance = Number.MAX_SAFE_INTEGER
-        let selection: EditorSelection = DEFAULT_EDITOR_SELECTION
-
-        if (vertex_distance < best_distance && vertex_distance < MAX_DISTANCE)
-        {
-            best_distance = vertex_distance
-            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: vertex_actor, vertexes: [vertex] }] }
-        }
-
-        if (edge_distance < best_distance && edge_distance < MAX_DISTANCE)
-        {
-            best_distance = edge_distance
-            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: edge_actor, edges: [edge] }] }
-        }
-
-        if (polygon_distance < best_distance && polygon_distance < MAX_DISTANCE)
-        {
-            best_distance = polygon_distance
-            selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: polygon_actor, polygons: [polygon] }] }
-        }
+        const selection = this._viewport_queries.find_selection_at_point(state, event.canvas_x, event.canvas_y)
 
         const command = event.ctrl_key 
             ? toggle_selection_command
@@ -220,6 +192,7 @@ export class InteractionController {
     get_viewport_event_world_position(event: ViewportEvent): [Vector, boolean] {
 
         const state = this.controller.current_state
+        this._viewport_queries.mode = event.view_mode
         this._viewport_queries.render_transform = event.view_transform
 
         // interaction uses a custom geometry cache, so geometry queries are made against the same state

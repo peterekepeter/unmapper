@@ -52,7 +52,6 @@ function change_selected_vertexes_for_brush_model(
     vertexes: number[],
     fn: VertexFunction,
 ): BrushModel {
-    brush = actor.brushModel
     if (!brush) {
         return brush
     }

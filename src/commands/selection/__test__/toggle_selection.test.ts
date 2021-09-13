@@ -150,8 +150,8 @@ describe("in vertex mode", () => {
         let state = initial_state
         const selection = create_selection({
             polygon_vertexes: [
-                { polygon_index: 0, vertexes: [0, 1, 2] },
-                { polygon_index: 1, vertexes: [0, 1, 2] },
+                { polygon_index: 0, vertexes: [0, 1, 2], edges: [] },
+                { polygon_index: 1, vertexes: [0, 1, 2], edges: [] },
             ], 
         })
         state = toggle(state, selection)
@@ -163,13 +163,25 @@ describe("in vertex mode", () => {
     test("toggle polygon vertex ", () => {
         let state = initial_state
         state = toggle(state, create_selection(
-            { polygon_vertexes: [{ polygon_index: 0, vertexes: [0, 1, 2] }] },
+            { polygon_vertexes: [{ polygon_index: 0, vertexes: [0, 1, 2], edges: [] }] },
         ))
         expect(state.selection.actors[0].polygon_vertexes[0].vertexes).toEqual([0, 1, 2])
         state = toggle(state, create_selection(
-            { polygon_vertexes: [ { polygon_index: 0, vertexes: [0, 1] }] },
+            { polygon_vertexes: [ { polygon_index: 0, vertexes: [0, 1], edges: [] }] },
         ))
         expect(state.selection.actors[0].polygon_vertexes[0].vertexes).toEqual([2])
+    })
+
+    test("toggle polygon edge ", () => {
+        let state = initial_state
+        state = toggle(state, create_selection(
+            { polygon_vertexes: [{ polygon_index: 0, vertexes: [], edges: [0, 1, 2] }] },
+        ))
+        expect(state.selection.actors[0].polygon_vertexes[0].edges).toEqual([0, 1, 2])
+        state = toggle(state, create_selection(
+            { polygon_vertexes: [ { polygon_index: 0, vertexes: [], edges: [0, 1] }] },
+        ))
+        expect(state.selection.actors[0].polygon_vertexes[0].edges).toEqual([2])
     })
 
     function create_selection(
