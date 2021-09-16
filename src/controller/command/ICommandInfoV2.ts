@@ -1,7 +1,6 @@
 import { Interaction } from "../interactions/Interaction"
 import { ICommandV2 } from "./ICommand"
 
-
 export interface ICommandInfoV2 {
     description?: string;
     exec?: ICommandV2;
@@ -15,4 +14,5 @@ export interface ICommandInfoV2 {
         default_value?: unknown;
     }[],
     keep_status_by_default?: boolean
+    uses_interaction_buffer?: boolean
 }

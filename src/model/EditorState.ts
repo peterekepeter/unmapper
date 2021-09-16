@@ -1,6 +1,7 @@
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { Actor } from "./Actor"
 import { DEFAULT_EDITOR_SELECTION, EditorSelection } from "./EditorSelection"
+import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "./InteractionBuffer"
 import { PanelLayout, PanelSplitDirection, PanelType } from "./layout/PanelLayout"
 import { Rotation } from "./Rotation"
 import { UnrealMap } from "./UnrealMap"
@@ -35,6 +36,7 @@ export interface EditorState
     viewports: ViewportState[];
     history: IHistoryStateAccess;
     options: EditorOptions;
+    interaction_buffer: InteractionBuffer,
     interaction_render_state?: InteractionRenderState,
     status: StatusInfo,
     selection: EditorSelection
@@ -71,7 +73,7 @@ export function create_initial_editor_state() : EditorState{
                     split_direction: PanelSplitDirection.Vertical,
                     split_percentage: 0.5,
                     left_child: PanelType.Objects,
-                    right_child: PanelType.Properties
+                    right_child: PanelType.Properties,
                 },
                 right_child: {
                     split_direction: PanelSplitDirection.Horizontal,
@@ -80,49 +82,50 @@ export function create_initial_editor_state() : EditorState{
                         split_direction: PanelSplitDirection.Vertical,
                         split_percentage: 0.5,
                         left_child: PanelType.Viewport, 
-                        right_child: PanelType.Viewport
+                        right_child: PanelType.Viewport,
                     },
                     right_child: { 
                         split_direction: PanelSplitDirection.Vertical,
                         split_percentage: 0.5,
                         left_child: PanelType.Viewport,
-                        right_child: PanelType.Viewport
-                    }
-                }
-            }
+                        right_child: PanelType.Viewport,
+                    },
+                },
+            },
         },
         viewports: [
             {
                 mode: ViewportMode.Top,
                 center_location: Vector.ZERO,
                 rotation: Rotation.IDENTITY,
-                zoom_level: 0
+                zoom_level: 0,
             },
             {
                 mode: ViewportMode.Perspective,
-                center_location: new Vector(-800,-450,500).scale(2),
-                rotation: new Rotation(-30,30,0),
-                zoom_level: 0
+                center_location: new Vector(-800, -450, 500).scale(2),
+                rotation: new Rotation(-30, 30, 0),
+                zoom_level: 0,
             },
             {
                 mode: ViewportMode.Front,
                 center_location: Vector.ZERO,
                 rotation: Rotation.IDENTITY,
-                zoom_level: 0
+                zoom_level: 0,
             },
             {
                 mode: ViewportMode.Side,
                 center_location: Vector.ZERO,
                 rotation: Rotation.IDENTITY,
-                zoom_level: 0
+                zoom_level: 0,
             },
         ],
+        interaction_buffer: DEFAULT_INTERACTION_BUFFER,
         interaction_render_state: null,
         status: {
             is_error: false,
-            message: null
+            message: null,
         },
-        selection: DEFAULT_EDITOR_SELECTION
+        selection: DEFAULT_EDITOR_SELECTION,
     }
 }
 

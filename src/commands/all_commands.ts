@@ -13,6 +13,7 @@ import { toggle_vertex_mode_command } from './editor/toggle_vertex_mode'
 import { extrude_polygons_command } from './extrude_polygons'
 import { flip_polygon_normal_command } from './flip_polygon_normal'
 import { generate_cube_command } from "./generators/generate_cube"
+import { set_interaction_axis_lock_commands } from "./interaction/set_interaction_axis_lock"
 import { measure_command } from "./measure"
 import { move_command } from "./move"
 import { rotate_command } from "./rotate"
@@ -54,6 +55,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     clear_status_command,
     vertex_noise_command,
     smooth_vertexes_command,
+    ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
 ] }
 
