@@ -1,20 +1,20 @@
-import { Vector } from "../../model/Vector";
-import { ViewportEvent } from "../../model/ViewportEvent";
-import { ViewportMode } from "../../model/ViewportMode";
-import { Interaction } from "./Interaction";
-import { ViewportVectorAdjustment } from "./interaction-helpers";
-import { InteractionRenderState } from "./InteractionRenderState";
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { InteractionRenderState } from "../InteractionRenderState"
+import { ViewportVectorAdjustment } from "../ViewportVectorAdjustment"
+import { StatefulInteraction } from "./StatefulInteraction"
 
 export class FromTo {
     constructor(
         public from: Vector,
-        public to: Vector
+        public to: Vector,
     ) {
         Object.freeze(this)
     }
 }
 
-export class FromToInteraction implements Interaction<FromTo>
+export class FromToInteraction implements StatefulInteraction<FromTo>
 {
     private pointer_from: Vector = Vector.ZERO
     private pointer_to: Vector = null
@@ -51,7 +51,7 @@ export class FromToInteraction implements Interaction<FromTo>
         if (this.state === "to") {
             return {
                 line_from: this.pointer_from,
-                line_to: this.pointer_to
+                line_to: this.pointer_to,
             }
         }
         return null
@@ -60,7 +60,7 @@ export class FromToInteraction implements Interaction<FromTo>
     get result(): FromTo {
         return {
             from: this.pointer_from,
-            to: this.pointer_to
+            to: this.pointer_to,
         }
     }
 
@@ -68,7 +68,7 @@ export class FromToInteraction implements Interaction<FromTo>
         return this.state === "done"
     }
 
-    static factory = (): Interaction => new FromToInteraction()
+    static factory = (): StatefulInteraction => new FromToInteraction()
 
 }
 

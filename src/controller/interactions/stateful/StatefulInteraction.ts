@@ -1,8 +1,8 @@
-import { Vector } from "../../model/Vector"
-import { ViewportEvent } from "../../model/ViewportEvent"
-import { InteractionRenderState } from "./InteractionRenderState"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { InteractionRenderState } from "../InteractionRenderState"
 
-export interface Interaction<T = unknown> {
+export interface StatefulInteraction<T = unknown> {
 
     set_pointer_world_location(location: Vector, event: ViewportEvent): void,
     pointer_click(): void,

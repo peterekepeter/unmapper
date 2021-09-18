@@ -1,4 +1,4 @@
-import { Interaction } from "../interactions/Interaction"
+import { StatefulInteraction } from "../interactions/stateful/StatefulInteraction"
 import { ICommandV2 } from "./ICommand"
 
 export interface ICommandInfoV2 {
@@ -9,7 +9,7 @@ export interface ICommandInfoV2 {
     legacy_handling?: boolean;
     args?: {
         name?: string;
-        interaction_factory?: () => Interaction;
+        interaction_factory?: () => StatefulInteraction;
         example_values?: unknown[];
         default_value?: unknown;
     }[],

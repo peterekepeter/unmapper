@@ -1,11 +1,11 @@
-import { Vector } from "../../model/Vector"
-import { ViewportEvent } from "../../model/ViewportEvent";
-import { ViewportMode } from "../../model/ViewportMode"
-import { FromToInteraction } from "./FromToInteraction";
-import { Interaction } from "./Interaction"
-import { InteractionRenderState } from "./InteractionRenderState"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { InteractionRenderState } from "../InteractionRenderState"
+import { FromToInteraction } from "./FromToInteraction"
+import { StatefulInteraction } from "./StatefulInteraction"
 
-export class VectorInteraction implements Interaction<Vector>
+export class VectorInteraction implements StatefulInteraction<Vector>
 {
     from_to = new FromToInteraction();
 
@@ -33,6 +33,6 @@ export class VectorInteraction implements Interaction<Vector>
         return result.to.subtract_vector(result.from)
     }
     
-    static factory = (): Interaction => new VectorInteraction();
+    static factory = (): StatefulInteraction => new VectorInteraction();
 }
 

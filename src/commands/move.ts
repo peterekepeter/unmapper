@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { VectorInteraction } from "../controller/interactions/VectorInteraction"
+import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
 import { get_selected_vertex_list } from "../model/algorithms/get_selected_vertex_list"
 import { update_polygon_median_normal } from "../model/algorithms/update_polygon_median_normal"
 import { BrushVertex } from "../model/BrushVertex"
@@ -17,6 +17,7 @@ export const move_command: ICommandInfoV2 = {
             example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ],
         },
     ],
+    uses_interaction_buffer: true,
     exec: (state, motion: Vector) => state.options.vertex_mode 
         ? change_selected_brushes(state, (b, a, s) => {
             const matrix = get_world_to_actor_rotation_scaling(a)

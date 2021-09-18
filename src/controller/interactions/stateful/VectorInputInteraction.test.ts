@@ -1,11 +1,9 @@
-import { Vector } from "../../../model/Vector";
-import { ViewportEvent } from "../../../model/ViewportEvent";
-import { ViewportMode } from "../../../model/ViewportMode";
-import { VectorInteraction } from "../VectorInteraction"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { VectorInteraction } from "./VectorInteraction"
 
-const event: ViewportEvent = {
-    view_mode: ViewportMode.Perspective
-} as ViewportEvent
+const event: ViewportEvent = { view_mode: ViewportMode.Perspective } as ViewportEvent
 
 test('initially interaction is not finished', () => {
     const interaction = new VectorInteraction()
@@ -58,6 +56,5 @@ viewmode_cases.forEach(([mode, vector]) =>
         interaction.pointer_click()
         interaction.set_pointer_world_location(new Vector(11, 11, 11), { view_mode: mode } as ViewportEvent)
         interaction.pointer_click()
-        expect(interaction.result).toEqual(vector);
-    })
-)
+        expect(interaction.result).toEqual(vector)
+    }))

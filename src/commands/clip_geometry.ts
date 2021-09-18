@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { ClippingPlaneInteraction } from "../controller/interactions/ClippingPlaneInteraction"
+import { ClippingPlaneInteraction } from "../controller/interactions/stateful/ClippingPlaneInteraction"
 import { Actor } from "../model/Actor"
 import { createBrushPolygon } from "../model/algorithms/createBrushPolygon"
 import { deleteBrushData } from "../model/algorithms/deleteBrushData"
@@ -20,9 +20,9 @@ export const clip_geometry_command: ICommandInfoV2 = {
         {
             name: 'Clipping plane',
             example_values: [Plane.XY, Plane.YZ, Plane.XZ],
-            interaction_factory: ClippingPlaneInteraction.factory
-        }
-    ]
+            interaction_factory: ClippingPlaneInteraction.factory,
+        },
+    ],
 }
 
 function exec_clip_geometry(state: EditorState, world_plane: Plane): EditorState {
@@ -43,7 +43,7 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
         }
 
         const next_brush = brush.shallow_copy()
-        next_brush.vertexes = next_brush.vertexes.map((v,i) => selection.vertexes.indexOf(i) !== -1 ? new BrushVertex(v.position) : v)
+        next_brush.vertexes = next_brush.vertexes.map((v, i) => selection.vertexes.indexOf(i) !== -1 ? new BrushVertex(v.position) : v)
         next_brush.edges = [...next_brush.edges]
         next_brush.polygons = [...next_brush.polygons]
         const result_polygons: BrushPolygon[] = []
@@ -55,8 +55,7 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
 
             // handle simple cases
             {
-                const clipped_vertex_count = poly.vertexes.reduce(
-                    (prev, poly_vertex_index) => is_clipped_vert[poly_vertex_index] ? prev + 1 : prev,0)
+                const clipped_vertex_count = poly.vertexes.reduce((prev, poly_vertex_index) => is_clipped_vert[poly_vertex_index] ? prev + 1 : prev, 0)
     
                 if (clipped_vertex_count === 0) {
                     result_polygons.push(poly)

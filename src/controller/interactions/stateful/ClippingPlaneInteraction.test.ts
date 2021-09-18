@@ -1,16 +1,15 @@
-import { Plane } from "../../../model/Plane";
-import { Vector } from "../../../model/Vector";
-import { ViewportEvent } from "../../../model/ViewportEvent";
-import { ViewportMode } from "../../../model/ViewportMode";
-import { ClippingPlaneInteraction } from "../ClippingPlaneInteraction";
-
+import { Plane } from "../../../model/Plane"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { ClippingPlaneInteraction } from "./ClippingPlaneInteraction"
 
 const data: [ViewportMode, Vector, Plane][] = [
     [ViewportMode.Top, new Vector(-1, 0, 0), Plane.XZ],
     [ViewportMode.Top, new Vector(0, -1, 0), Plane.YZ],
     [ViewportMode.Front, new Vector(0, -1, 0), Plane.XY],
     [ViewportMode.Front, new Vector(0, 0, -1), Plane.XZ],
-    [ViewportMode.Top, new Vector(1,1,0), new Plane(new Vector(-1,1,0), 0)]
+    [ViewportMode.Top, new Vector(1, 1, 0), new Plane(new Vector(-1, 1, 0), 0)],
 ]
 
 data.forEach(([mode, vector, expected]) =>
@@ -26,5 +25,4 @@ data.forEach(([mode, vector, expected]) =>
         expect(interaction.result.normal.with_positive_zeroes()).toEqual(expected.normal)
         expect(interaction.result.distance).toBeCloseTo(expected.distance, 10)
 
-    })
-)
+    }))

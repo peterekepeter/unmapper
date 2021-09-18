@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { RotationInteraction } from "../controller/interactions/RotationInteraction"
+import { RotationInteraction } from "../controller/interactions/stateful/RotationInteraction"
 import { BrushVertex } from "../model/BrushVertex"
 import { get_actor_to_world_transform, get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
 import { PivotRotation } from "../model/PivotRotation"
@@ -13,8 +13,8 @@ export const rotate_command: ICommandInfoV2 = {
     args: [
         {
             interaction_factory: RotationInteraction.factory,
-            example_values: [new PivotRotation(new Vector(1, 1, 1), new Rotation(90, 0, 0))]
-        }
+            example_values: [new PivotRotation(new Vector(1, 1, 1), new Rotation(90, 0, 0))],
+        },
     ],
     exec: (state, pivot_rotation: PivotRotation) => {
         const pivot_rotation_transform = pivot_rotation.to_transform_fn()
@@ -24,7 +24,7 @@ export const rotate_command: ICommandInfoV2 = {
                 const world_to_actor = get_world_to_actor_transform(actor)
                 const new_brush = old_brush.shallow_copy()
                 let change = false
-                new_brush.vertexes = new_brush.vertexes.map((v,i) => {
+                new_brush.vertexes = new_brush.vertexes.map((v, i) => {
                     if (selection.vertexes.indexOf(i) !== -1){
                         change = true
                         const world_position = actor_to_world(v.position)
@@ -43,5 +43,5 @@ export const rotate_command: ICommandInfoV2 = {
                 new_obj.rotation = new_obj.rotation.add_rotation(pivot_rotation.rotation)
                 return new_obj
             })
-    }
+    },
 }

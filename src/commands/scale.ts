@@ -1,6 +1,6 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { FromTo, FromToInteraction } from "../controller/interactions/FromToInteraction"
-import { LocationInteraction } from "../controller/interactions/LocationInteraction"
+import { FromTo, FromToInteraction } from "../controller/interactions/stateful/FromToInteraction"
+import { LocationInteraction } from "../controller/interactions/stateful/LocationInteraction"
 import { get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
 import { change_selected_actors, change_selected_brushes, change_selected_vertexes } from "../model/state"
 import { Vector } from "../model/Vector"

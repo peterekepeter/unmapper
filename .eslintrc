@@ -62,7 +62,8 @@
         "simple-import-sort/exports": "warn",
         "spellcheck/spell-checker": ["warn", {
             "skipWords": [
-                "uv"
+                "uv",
+                "stateful"
             ]
         }]
     }

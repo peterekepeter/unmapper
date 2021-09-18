@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { VectorInteraction } from "../controller/interactions/VectorInteraction"
+import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
 import { Vector } from "../model/Vector"
 
 export const measure_command: ICommandInfoV2 = {
@@ -8,15 +8,15 @@ export const measure_command: ICommandInfoV2 = {
     args: [
         {
             interaction_factory: VectorInteraction.factory,
-            example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ]
-        }
+            example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ],
+        },
     ],
     exec: (state, vector: Vector) => ({ 
         ...state, 
         status: { 
             ...state.status, 
             is_error: false, 
-            message: `Distance: ${vector.length()}`
-        }
-    })
+            message: `Distance: ${vector.length()}`,
+        },
+    }),
 }

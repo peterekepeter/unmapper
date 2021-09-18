@@ -1,18 +1,18 @@
-import { EditorError } from "../../model/error/EditorError"
-import { Plane } from "../../model/Plane"
-import { Vector } from "../../model/Vector"
-import { ViewportEvent } from "../../model/ViewportEvent"
-import { ViewportMode } from "../../model/ViewportMode"
-import { Interaction } from "./Interaction"
-import { InteractionRenderState } from "./InteractionRenderState"
+import { EditorError } from "../../../model/error/EditorError"
+import { Plane } from "../../../model/Plane"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { InteractionRenderState } from "../InteractionRenderState"
+import { StatefulInteraction } from "./StatefulInteraction"
 
-export class ClippingPlaneInteraction implements Interaction<Plane>
+export class ClippingPlaneInteraction implements StatefulInteraction<Plane>
 {
     result: Plane
     finished: boolean
     render_state: InteractionRenderState
 
-    static factory = (): Interaction => new ClippingPlaneInteraction();
+    static factory = (): StatefulInteraction => new ClippingPlaneInteraction();
 
     private expecting_second_point = false;
     private first_point = Vector.ZERO;
@@ -27,7 +27,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
         const third = this._get_third_point(event)
         const a = first.subtract_vector(third)
         const b = second.subtract_vector(third)
-        const cross_product = Vector.cross_product(a,b)
+        const cross_product = Vector.cross_product(a, b)
         if (cross_product.equals(Vector.ZERO)){
             return
         }
@@ -38,7 +38,7 @@ export class ClippingPlaneInteraction implements Interaction<Plane>
         EditorError.if(Math.abs(this.result.signed_distance_to_point(third))>1e-9)
         this.render_state = {
             line_from: first,
-            line_to: second
+            line_to: second,
         }
     }
 

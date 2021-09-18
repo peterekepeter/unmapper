@@ -1,13 +1,12 @@
 import { ICommandInfoV2 } from "../controller/command"
+import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces"
-import { EditorError } from "../model/error/EditorError"
 import { EditorState } from "../model/EditorState"
-import { Vector } from "../model/Vector"
+import { EditorError } from "../model/error/EditorError"
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
-import { VectorInteraction } from "../controller/interactions/VectorInteraction"
 import { change_selected_brushes } from "../model/state"
+import { Vector } from "../model/Vector"
 import { is_null_or_empty } from "../util/is_null_or_empty"
-
 
 export const extrude_polygons_command : ICommandInfoV2 = { 
     description: "Extrude selected polygons",
@@ -17,10 +16,10 @@ export const extrude_polygons_command : ICommandInfoV2 = {
         {
             interaction_factory: () => new VectorInteraction(),
             name: "extrusion",
-            example_values: [32, new Vector(32,0,0)],
-            default_value: 32
-        }
-    ]
+            example_values: [32, new Vector(32, 0, 0)],
+            default_value: 32,
+        },
+    ],
 }
 
 function implementation(state: EditorState, extrusion: number | Vector = 32) : EditorState {

@@ -1,15 +1,15 @@
-import { decompose_matrix_rotation } from "../../model/geometry/decompose-matrix"
-import { vector_to_vector_rotation_matrix } from "../../model/geometry/vector-rotation"
-import { PivotRotation } from "../../model/PivotRotation"
-import { Rotation } from "../../model/Rotation"
-import { Vector } from "../../model/Vector"
-import { ViewportEvent } from "../../model/ViewportEvent"
-import { ViewportMode } from "../../model/ViewportMode"
-import { Interaction } from "./Interaction"
-import { ViewportVectorAdjustment } from "./interaction-helpers"
-import { InteractionRenderState } from "./InteractionRenderState"
+import { decompose_matrix_rotation } from "../../../model/geometry/decompose-matrix"
+import { vector_to_vector_rotation_matrix } from "../../../model/geometry/vector-rotation"
+import { PivotRotation } from "../../../model/PivotRotation"
+import { Rotation } from "../../../model/Rotation"
+import { Vector } from "../../../model/Vector"
+import { ViewportEvent } from "../../../model/ViewportEvent"
+import { ViewportMode } from "../../../model/ViewportMode"
+import { InteractionRenderState } from "../InteractionRenderState"
+import { ViewportVectorAdjustment } from "../ViewportVectorAdjustment"
+import { StatefulInteraction } from "./StatefulInteraction"
 
-export class RotationInteraction implements Interaction<PivotRotation>
+export class RotationInteraction implements StatefulInteraction<PivotRotation>
 {
     private state: 'center' | 'from' | 'to' | 'done' = 'center';
     pivot: Vector;
@@ -69,6 +69,6 @@ export class RotationInteraction implements Interaction<PivotRotation>
         this.result = new PivotRotation(this.pivot, rotation)
     }
 
-    static factory = () : Interaction => new RotationInteraction()
+    static factory = () : StatefulInteraction => new RotationInteraction()
 
 }
