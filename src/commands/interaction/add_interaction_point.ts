@@ -1,7 +1,8 @@
 import { ICommandInfoV2 } from "../../controller/command"
 import { EditorState } from "../../model/EditorState"
+import { ImplementationError } from "../../model/error"
 import { Vector } from "../../model/Vector"
-import { ViewportMode } from "../../model/ViewportMode"
+import { ALL_VIEWPORT_MODES, ViewportMode } from "../../model/ViewportMode"
 
 export const add_interaction_point_command: ICommandInfoV2 = { 
     exec: add_interaction_point, 
@@ -9,6 +10,8 @@ export const add_interaction_point_command: ICommandInfoV2 = {
 }
 
 function add_interaction_point(state: EditorState, point: Vector, mode: ViewportMode): EditorState{
+    ImplementationError.if_not(point instanceof Vector)
+    ImplementationError.if(ALL_VIEWPORT_MODES.indexOf(mode) === -1)
     return {
         ...state,
         interaction_buffer: {

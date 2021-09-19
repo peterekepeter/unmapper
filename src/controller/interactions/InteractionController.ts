@@ -4,7 +4,7 @@ import { ViewportEvent } from "../../model/ViewportEvent"
 import { AllViewportQueries } from "../../render/query/AllViewportQueries"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
-import { InteractionRenderState } from "./InteractionRenderState"
+import { BufferedInteractionController } from "./BufferedInteractionController"
 import { SelectionInteractionController } from "./SelectionInteractionController"
 import { StatefulInteractionController } from "./StatefulInteractionController"
 
@@ -17,17 +17,29 @@ export class InteractionController {
     private _viewport_queries = new AllViewportQueries(this._interaction_geometry_cache);
     private _selection = new SelectionInteractionController(this.controller, this._interaction_geometry_cache, this._viewport_queries);
     private _stateful = new StatefulInteractionController(this.controller)
+    private _buffered = new BufferedInteractionController(this.controller)
 
     constructor(private controller: AppController) {
 
     }
     
     interactively_execute(command_info: ICommandInfoV2): void {
-        this._stateful.interactively_execute(command_info)
+        if (command_info.uses_interaction_buffer){
+            this._stateful.reset_state()
+            this._buffered.next_command(command_info)
+        } else {
+            this._buffered.next_command(null)
+            this._stateful.interactively_execute(command_info)
+        }
     }
 
     pointer_up(event: ViewportEvent): void {
-        if (this._stateful.has_interaction) {
+        if (this._buffered.has_interaction){
+            // buffered interaction
+            const [vector, is_snap] = this.get_viewport_event_world_position(event)
+            this._buffered.handle_pointer_click(vector, event)
+        }
+        else if (this._stateful.has_interaction) {
             // stateful interaction
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
             this._stateful.handle_pointer_click(vector, event)
@@ -43,7 +55,12 @@ export class InteractionController {
     }
 
     pointer_move(event: ViewportEvent): void {
-        if (this._stateful.has_interaction) {
+        if (this._buffered.has_interaction) {
+            // stateful interaction
+            const [vector, is_snap] = this.get_viewport_event_world_position(event)
+            this._buffered.handle_pointer_move(vector, event, is_snap)
+        }
+        else if (this._stateful.has_interaction) {
             // stateful interaction
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
             this._stateful.handle_pointer_move(vector, event, is_snap)
@@ -58,11 +75,12 @@ export class InteractionController {
     pointer_down(event: ViewportEvent): void {
         if (this.controller.current_state.options.box_select_mode) {
             this._stateful.reset_state()
+            this._buffered.next_command(null)
             this.box_select_begin = event
         }
     }
 
-    get_viewport_event_world_position(event: ViewportEvent): [Vector, boolean] {
+    private get_viewport_event_world_position(event: ViewportEvent): [Vector, boolean] {
 
         const state = this.controller.current_state
         this._viewport_queries.mode = event.view_mode

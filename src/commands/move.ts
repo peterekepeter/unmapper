@@ -17,7 +17,7 @@ export const move_command: ICommandInfoV2 = {
             example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ],
         },
     ],
-    uses_interaction_buffer: true,
+    uses_interaction_buffer: false,
     exec: (state, motion: Vector) => state.options.vertex_mode 
         ? change_selected_brushes(state, (b, a, s) => {
             const matrix = get_world_to_actor_rotation_scaling(a)
