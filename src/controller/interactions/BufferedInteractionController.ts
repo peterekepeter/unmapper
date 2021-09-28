@@ -1,4 +1,5 @@
 import { add_interaction_point_command } from "../../commands/interaction/add_interaction_point"
+import { replace_last_interaction_point_command } from "../../commands/interaction/replace_last_interaction_point"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
 import { AppController } from "../AppController"
@@ -16,17 +17,16 @@ export class BufferedInteractionController
         
     }
 
-    next_command(command_info: ICommandInfoV2) {
+    next_command(command_info: ICommandInfoV2): void {
         this.command_info = command_info
     }
 
-    handle_pointer_click(vector: Vector, event: ViewportEvent) {
+    handle_pointer_click(vector: Vector, event: ViewportEvent): void {
         this.controller.execute(add_interaction_point_command, vector, event.view_mode)
     }
 
-    handle_pointer_move(vector: Vector, event: ViewportEvent, is_snap: boolean) {
-        throw new Error("Method not implemented.")
-        
+    handle_pointer_move(vector: Vector, event: ViewportEvent): void {
+        this.controller.execute(replace_last_interaction_point_command, vector, event.view_mode)
     }
 
 }
