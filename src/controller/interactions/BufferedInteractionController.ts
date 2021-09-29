@@ -21,6 +21,7 @@ export class BufferedInteractionController
 
     next_command(command_info: ICommandInfoV2): void {
         if (this.command_info != null){
+            this.controller.reset_preview()
             this.controller.execute(this.command_info)
             this.controller.execute(reset_interaction_buffer_command)
         }

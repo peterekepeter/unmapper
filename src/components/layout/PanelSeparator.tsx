@@ -97,6 +97,6 @@ export const PanelSeparator: React.FunctionComponent<{
                 (pointer.current.start_left_height + delta_y) 
                 / (size.left_height + size.right_height)
         }
-        controller.preview(cmd, layoutPath, pointer.current.new_percentage)
+        controller.execute(cmd, layoutPath, pointer.current.new_percentage)
     }
 }

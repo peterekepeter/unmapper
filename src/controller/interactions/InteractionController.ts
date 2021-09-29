@@ -37,7 +37,7 @@ export class InteractionController {
         if (this._buffered.has_interaction){
             // buffered interaction
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
-            this._buffered.handle_pointer_click(vector, event)
+            this._buffered.handle_pointer_click(vector, event, is_snap)
         }
         else if (this._stateful.has_interaction) {
             // stateful interaction
@@ -58,7 +58,7 @@ export class InteractionController {
         if (this._buffered.has_interaction) {
             // stateful interaction
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
-            this._buffered.handle_pointer_move(vector, event)
+            this._buffered.handle_pointer_move(vector, event, is_snap)
         }
         else if (this._stateful.has_interaction) {
             // stateful interaction

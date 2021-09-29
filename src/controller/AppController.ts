@@ -22,6 +22,9 @@ export class AppController {
     geometry_cache = new GeometryCache();
     interaction = new InteractionController(this);
 
+    preview_command: ICommandInfoV2;
+    preview_command_args: unknown[];
+
     history = create_history<UnrealMap>({
         get_state: () => this.current_state.map,
         set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state }),
@@ -56,18 +59,24 @@ export class AppController {
         if (command_info.legacy_handling) {
             return // legacy commands update state_signal & history directly
         }
+
         this.undoable_state_change(next_state)
+
+        if (this.preview_command != null){
+            this.preview(this.preview_command, ...this.preview_command_args)
+        }
+    }
+
+    reset_preview(): void {
+        this.preview_command = null
+        this.preview_command_args = null
+        if (this.current_state !== this.state_signal.value){
+            this.state_signal.value = this.current_state
+        }
     }
 
     preview(command_info: ICommandInfoV2, ...args: unknown[]): void {
-        if (command_info.legacy_handling) {
-            return // legacy commands cannot be previewed
-        }
-        let next_state = command_info.exec(this.current_state, ...args)
-        if (next_state.interaction_render_state) {
-            next_state = { ...next_state, interaction_render_state: null }
-        }
-        this.preview_state_change(next_state)
+        this.preview_command_with_interaction(null, command_info, args)
     }
 
     preview_command_with_interaction(
@@ -75,6 +84,11 @@ export class AppController {
         command_info: ICommandInfoV2,
         args: unknown[],
     ): void {
+        if (command_info.legacy_handling) {
+            return // legacy commands cannot be previewed
+        }
+        this.preview_command = command_info
+        this.preview_command_args = args
         let next_state = command_info.exec(this.current_state, ...args)
         next_state = { ...next_state, interaction_render_state }
         this.preview_state_change(next_state)

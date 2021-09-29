@@ -99,8 +99,8 @@ function VectorProp({
     return <>
         <UiText>{name}</UiText>
         <UiVectorInput value={aggregate} 
-            next_value={value => { console.log('next_value', value); controller.execute(edit_property, name, value)}}
-            preview_value={value => { console.log('preview_value', value); controller.preview(edit_property, name, value)}}
+            next_value={value => { controller.execute(edit_property, name, value) }}
+            preview_value={value => { controller.preview(edit_property, name, value) }}
             />
     </>
 }

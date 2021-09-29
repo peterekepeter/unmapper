@@ -62,6 +62,7 @@ export class StatefulInteractionController {
         }
         if (this.arg_index >= this.args.length) {
             // execute the command
+            this.controller.reset_preview()
             this.controller.execute(this.command_info, ...this.args)
             this.command_info = null
             return
