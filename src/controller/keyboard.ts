@@ -1,6 +1,7 @@
 
 import { ICommandInfoV2 } from "./command"
 
+const handlers : { accepts: (shortcut: string) => boolean, handle: (shortcut: string) => void }[] = []
 const bindings : { [key:string] : ICommandInfoV2 } = {}
 let executor_fn : (cmd : ICommandInfoV2) => void
 
@@ -16,13 +17,23 @@ export function bind_command_executor(exec_fn : (cmd : ICommandInfoV2) => void):
     executor_fn = exec_fn
 }
 
+export function bind_keyboard_handler(accepts_event: (shortcut: string) => boolean, handle_event: (shortcut: string) => void): void {
+    handlers.push({ accepts: accepts_event, handle: handle_event })
+}
+
 const listener = (event : KeyboardEvent) => {
     if (event.target !== document.body){
         // ignore targeted input
         return
     }
     const shortcut = shortcutFromEvent(event)
-    
+    for (const handler of handlers) {
+        if (handler.accepts(shortcut)){
+            handler.handle(shortcut) 
+            event.preventDefault()
+            return
+        }
+    }
     const command = bindings[shortcut]
     if (!command){
         // command not implemented
@@ -46,7 +57,6 @@ function shortcutFromEvent(event : KeyboardEvent){
     result.push(event.key)
     return result.join(' + ').toLowerCase()
 }
-
 
 export function addEventListener(window : Window): void {
     window.addEventListener('keydown', listener)

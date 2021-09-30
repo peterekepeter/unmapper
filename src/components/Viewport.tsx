@@ -220,7 +220,6 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             new_zoom_level ++
         }
         controller.execute(zoom, viewport_index, new_zoom_level)
-        event.preventDefault()
         return false
     }
 

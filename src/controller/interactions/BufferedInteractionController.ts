@@ -1,6 +1,7 @@
 import { add_interaction_point_command } from "../../commands/interaction/add_interaction_point"
 import { replace_last_interaction_point_command } from "../../commands/interaction/replace_last_interaction_point"
 import { reset_interaction_buffer_command } from "../../commands/interaction/reset_interaction_buffer"
+import { DEFAULT_INTERACTION_BUFFER } from "../../model/InteractionBuffer"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
 import { AppController } from "../AppController"
@@ -31,6 +32,11 @@ export class BufferedInteractionController
     handle_pointer_click(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
         this.controller.execute(add_interaction_point_command, vector, event.view_mode)
         this.preview_current_command(vector, is_snap)
+
+        // if command resets the interaction buffer that means should be finalized
+        if (this.controller.state_signal.value.interaction_buffer === DEFAULT_INTERACTION_BUFFER){
+            this.next_command(null)
+        }
     }
 
     handle_pointer_move(vector: Vector, event: ViewportEvent, is_snap: boolean): void {

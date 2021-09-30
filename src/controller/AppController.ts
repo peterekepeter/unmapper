@@ -39,7 +39,12 @@ export class AppController {
     }
 
     interactively_execute(command_info: ICommandInfoV2): void {
-        this.interaction.interactively_execute(command_info)
+        if (command_info && command_info.keep_status_by_default){
+            this.execute(command_info)
+        }
+        else {
+            this.interaction.interactively_execute(command_info)
+        }
     }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {

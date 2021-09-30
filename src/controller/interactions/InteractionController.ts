@@ -24,11 +24,15 @@ export class InteractionController {
     }
     
     interactively_execute(command_info: ICommandInfoV2): void {
-        if (command_info.uses_interaction_buffer){
-            this._stateful.reset_state()
+        this._stateful.reset_state()
+        this._buffered.next_command(null)
+        if (command_info == null){
+            return // noop
+        }
+        else if (command_info.uses_interaction_buffer){
             this._buffered.next_command(command_info)
-        } else {
-            this._buffered.next_command(null)
+        } 
+        else {
             this._stateful.interactively_execute(command_info)
         }
     }

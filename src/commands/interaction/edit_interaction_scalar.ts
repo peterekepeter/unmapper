@@ -1,5 +1,10 @@
+import { ICommandInfoV2 } from "../../controller/command"
 import { EditorState } from "../../model/EditorState"
-import { EditorError } from "../../model/error/EditorError"
+
+export const edit_interaction_scalar_command: ICommandInfoV2 = { 
+    keep_status_by_default: true, 
+    exec: edit_interaction_scalar, 
+}
 
 export function edit_interaction_scalar(state:EditorState, key: string): EditorState {
     let expression = ''

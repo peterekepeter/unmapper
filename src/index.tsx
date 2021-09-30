@@ -1,14 +1,15 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
 
-import { Application } from "./components/Application"
-import * as keyboard from './controller/keyboard'
-import { ICommand } from "./controller/command/ICommand"
-import { install_clipboard_integration } from "./controller/clipboard"
 import { get_all_commands_v2 } from "./commands/all_commands"
+import { edit_interaction_scalar_accepts_key, edit_interaction_scalar_command } from "./commands/interaction/edit_interaction_scalar"
+import { Application } from "./components/Application"
 import { AppController } from "./controller/AppController"
-import { get_initial_level_state } from "./initial_state"
+import { install_clipboard_integration } from "./controller/clipboard"
+import { ICommand } from "./controller/command/ICommand"
 import { install_error_handler } from "./controller/install_error_handler"
+import * as keyboard from './controller/keyboard'
+import { get_initial_level_state } from "./initial_state"
 
 const help = new URL('./help.txt', import.meta.url)
 console.info('additional info avaiable at', help.toString())
@@ -31,6 +32,11 @@ function main() {
         implementation: controller.history.forward,
         shortcut: 'ctrl + y'
     }])
+
+    keyboard.bind_keyboard_handler(
+        shortcut => edit_interaction_scalar_accepts_key(controller.current_state, shortcut), 
+        shortcut => controller.execute(edit_interaction_scalar_command, shortcut),
+    )
 
     const shortcutBindings : { [key:string] : ICommand } = {
         'ctrl + z' : () => controller.history.back(),
