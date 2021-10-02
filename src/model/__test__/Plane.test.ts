@@ -1,8 +1,7 @@
-import { Plane } from "../Plane";
-import { RandomNumberGenerator } from "../random/RandomNumberGenerator";
-import { RandomVectorGenerator } from "../random/RandomVectorGenerator";
-import { Vector } from "../Vector";
-
+import { Plane } from "../Plane"
+import { RandomNumberGenerator } from "../random/RandomNumberGenerator"
+import { RandomVectorGenerator } from "../random/RandomVectorGenerator"
+import { Vector } from "../Vector"
 
 test('equals false', () =>
     expect(Plane.YZ.equals(new Plane(new Vector(1, 0, 0), 1))).toBe(false))
@@ -41,8 +40,8 @@ test('normal cannot be zero vector', () =>
 describe('constructing plane from normal and position', () => {
 
     test('planes are equal if positions are on same plane', () => {
-        expect(new Plane(Vector.UNIT_Z, new Vector(0,0,0)))
-            .toEqual(new Plane(Vector.UNIT_Z, new Vector(1,-4,0)))
+        expect(new Plane(Vector.UNIT_Z, new Vector(0, 0, 0)))
+            .toEqual(new Plane(Vector.UNIT_Z, new Vector(1, -4, 0)))
     })
 
     test('fuzz distance to point is correct', () => {
@@ -61,37 +60,39 @@ describe('constructing plane from normal and position', () => {
 })
 
 test("fuzz correct plane is generated when generating plane from normal and position", () =>{
-    const normal = new Vector(1,1,0).normalize()
+    const normal = new Vector(1, 1, 0).normalize()
     const generator = new RandomNumberGenerator()
     for (let i=0; i<10; i++){
-        const u = generator.next_float_in_range(-1,1)
-        const v = generator.next_float_in_range(-1,1)
-        const distance = generator.next_float_in_range(0,1)
-        const position = new Vector(0,0,1).scale(u)
-            .add_vector(new Vector(-1,1,0).scale(v))
+        const u = generator.next_float_in_range(-1, 1)
+        const v = generator.next_float_in_range(-1, 1)
+        const distance = generator.next_float_in_range(0, 1)
+        const position = new Vector(0, 0, 1).scale(u)
+            .add_vector(new Vector(-1, 1, 0).scale(v))
             .add_vector(normal.scale(distance))
         const plane = new Plane(normal, position)
         expect(plane.distance).toBeCloseTo(distance, 10)
     }
 })
 
+test("plane from points", () => {
+    expect(Plane.from_points(new Vector(1, 0, 0), new Vector(0, 1, 0), new Vector(0, 0, 0)))
+        .toEqual(Plane.XY)
+})
+
 describe('intersect segment', () => {
 
     test('returns null if all points are in front', () => {
-        expect(Plane.XY.intersect_segment(
-            Vector.UNIT_Z.scale(1), Vector.UNIT_Z.scale(2)))
+        expect(Plane.XY.intersect_segment(Vector.UNIT_Z.scale(1), Vector.UNIT_Z.scale(2)))
             .toBe(null)
     })
 
     test('returns null if all points are behind', () => {
-        expect(Plane.XY.intersect_segment(
-            Vector.UNIT_Z.scale(-1), Vector.UNIT_Z.scale(-2)))
+        expect(Plane.XY.intersect_segment(Vector.UNIT_Z.scale(-1), Vector.UNIT_Z.scale(-2)))
             .toBe(null)
     })
 
     test('return instersection point', () => {
-        expect(Plane.XY.intersect_segment(
-            Vector.UNIT_Z.scale(-1), Vector.UNIT_Z.scale(2)))
+        expect(Plane.XY.intersect_segment(Vector.UNIT_Z.scale(-1), Vector.UNIT_Z.scale(2)))
             .toEqual(Vector.ZERO)
     })
 

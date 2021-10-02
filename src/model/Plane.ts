@@ -33,6 +33,10 @@ export class Plane {
         }
     }
 
+    static from_points(a: Vector, b:Vector, c:Vector):Plane {
+        return new Plane(Vector.cross_product(b.subtract_vector(a), c.subtract_vector(a)).normalize(), a)
+    }
+
     equals(other: Plane): boolean {
         return this === other || this.normal.equals(other.normal) && this.distance === other.distance
     }

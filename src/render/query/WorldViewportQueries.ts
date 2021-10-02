@@ -1,8 +1,9 @@
 import { Actor } from "../../model/Actor"
-import { DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
+import { ActorSelection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
 import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
+import { intersect_segments } from "../../model/geometry/intersect_segments"
 import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
@@ -12,7 +13,6 @@ export class WorldViewportQueries {
     public render_transform: ViewTransform
 
     constructor(private geometry_cache: GeometryCache) { }
-
 
     find_selection_at_point(
         state:EditorState,
@@ -49,6 +49,7 @@ export class WorldViewportQueries {
             best_distance = polygon_distance
             selection = { actors: [{ ...DEFAULT_ACTOR_SELECTION, actor_index: polygon_actor, polygons: [polygon] }] }
         }
+
         return selection
     }
     
@@ -370,6 +371,135 @@ export class WorldViewportQueries {
                 }
             }
         }
+        
+        const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16, custom_geometry_cache)
+        if (intersection_point != null && intersection_point_distance < best_distance) {
+            best_match_location = intersection_point
+            best_distance = intersection_point_distance
+        }
+
         return [best_match_location, best_distance]
     }
+
+    find_nearest_intersection(map: UnrealMap, canvas_x: number, canvas_y: number, max_distance: number, custom_geometry_cache: GeometryCache): [Vector|null, number] {
+        const query = this.find_edges_in_radius(map, canvas_x, canvas_y, max_distance, custom_geometry_cache)
+        
+        const segments: { a: Vector, b: Vector, ax: number, ay: number, bx: number, by: number, actor_index: number, edge_index: number }[] =[] 
+        for (const actor_selection of query.actors){
+            const actor_index = actor_selection.actor_index
+            const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
+            const brush = map.actors[actor_index].brushModel
+            for (const edge_index of actor_selection.edges) {
+                const edge = brush.edges[edge_index]
+                const a = world_vertexes[edge.vertexIndexA]
+                const b = world_vertexes[edge.vertexIndexB]
+                const ax = this.render_transform.view_transform_x(a)
+                const ay = this.render_transform.view_transform_y(a)
+                const bx = this.render_transform.view_transform_x(b)
+                const by = this.render_transform.view_transform_y(b)
+                if (!segments.find(s => s.ax === ax && s.ay === ay && s.bx === bx && s.by === by)){
+                    segments.push({ a, b, ax, ay, bx, by, actor_index, edge_index })
+                }
+            }
+        }
+
+        let best_i = -1, best_j = -1, best_distance = Number.MAX_SAFE_INTEGER, best_canvas_intersection = Vector.ZERO
+        for (let i=0; i<segments.length; i++){
+            for (let j=i+1; j<segments.length; j++) {
+                const s0 = segments[i]
+                const s1 = segments[j]
+                const canvas_intersection = intersect_segments(
+                    new Vector(s0.ax, s0.ay, 0), 
+                    new Vector(s0.bx, s0.by, 0), 
+                    new Vector(s1.ax, s1.ay, 0), 
+                    new Vector(s1.bx, s1.by, 0), 
+                )
+                if (canvas_intersection == null){
+                    continue
+                }
+                const distance = distance_2d_to_point(canvas_intersection.x, canvas_intersection.y, canvas_x, canvas_y)
+                if (distance < best_distance){
+                    best_distance = distance
+                    best_i = i
+                    best_j = j
+                    best_canvas_intersection = canvas_intersection
+                }
+            }
+        }
+        if (best_i === -1){
+            // no intersection found 
+            return [null, best_distance]
+        }
+        if (this.render_transform.can_3d_transform){
+            // now find intersection point in 3d
+            const s0 = segments[best_i]
+            const s1 = segments[best_j]
+            return [intersect_segments(s0.a, s0.b, s1.a, s1.b), best_distance]
+        } else {
+            // on 2d views, convert canvas point to a 3d point
+            return [
+                this.render_transform.canvas_to_world_location(best_canvas_intersection.x, best_canvas_intersection.y),
+                best_distance,
+            ]
+        }
+    }
+
+    find_edges_in_radius(
+        map: UnrealMap,
+        canvas_x: number,  
+        canvas_y: number, 
+        max_distance: number,
+        geometry_cache: GeometryCache,
+    ): EditorSelection {
+
+        let result_actors: ActorSelection[] = null
+
+        for (let actor_index = 0; actor_index<map.actors.length; actor_index++) {
+            const actor = map.actors[actor_index]
+            
+            if (actor.brushModel == null) {
+                continue // skip actors which are not selected or don't have a brushModel
+            }
+            let result_edge_list: number[] = null
+            const vertexes = geometry_cache.get_world_transformed_vertexes(actor_index)
+
+            for (let edge_index = 0; edge_index<actor.brushModel.edges.length; edge_index++) {
+                const edge = actor.brushModel.edges[edge_index]
+                const p0 = vertexes[edge.vertexIndexA]
+                const x0 = this.render_transform.view_transform_x(p0)
+                const y0 = this.render_transform.view_transform_y(p0)
+                const p1 = vertexes[edge.vertexIndexB]
+                const x1 = this.render_transform.view_transform_x(p1)
+                const y1 = this.render_transform.view_transform_y(p1)
+                if (!isNaN(x0) && !isNaN(x1)) {
+                    const distance = distance_to_line_segment(canvas_x, canvas_y, x0, y0, x1, y1)
+                    if (distance <= max_distance) {
+                        if (!result_edge_list){
+                            result_edge_list = []
+                        }
+                        result_edge_list.push(edge_index)
+                    }
+                }
+            }
+
+            if (result_edge_list){
+                const result_actor_selection = {
+                    ...DEFAULT_ACTOR_SELECTION, 
+                    actor_index,
+                    edges: result_edge_list,
+                }
+                if (!result_actors){
+                    result_actors = []
+                }
+                result_actors.push(result_actor_selection)
+            }
+        }
+
+        if (!result_actors){
+            return DEFAULT_EDITOR_SELECTION
+        }
+        const editor_selection: EditorSelection = { actors: result_actors }
+        return editor_selection
+    }
+
 }
