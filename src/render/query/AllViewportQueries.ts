@@ -71,13 +71,13 @@ export class AllViewportQueries {
     }
 
     find_nearest_snapping_point(
-        map: UnrealMap,
+        state: EditorState,
         canvas_x: number,
         canvas_y: number,
         custom_geometry_cache: GeometryCache,
     ): [
             Vector, number,
         ] {
-        return this.current.find_nearest_snapping_point(map, canvas_x, canvas_y, custom_geometry_cache)
+        return this.current.find_nearest_snapping_point(state, canvas_x, canvas_y, custom_geometry_cache)
     }
 }

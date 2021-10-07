@@ -1,6 +1,7 @@
 import { Actor } from "../../model/Actor"
 import { ActorSelection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
+import { fast_closest_point_to_line_inside_segment } from "../../model/geometry/closest_point_to_line"
 import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { intersect_segments } from "../../model/geometry/intersect_segments"
@@ -288,13 +289,15 @@ export class WorldViewportQueries {
     }
 
     find_nearest_snapping_point(
-        map: UnrealMap,
+        state: EditorState,
         canvas_x: number,
         canvas_y: number,
         custom_geometry_cache: GeometryCache,
     ): [
             Vector, number,
         ] {
+
+        const map = state.map
 
         let best_vertex_distance = Number.MAX_VALUE
         let best_vertex_location = Vector.ZERO
@@ -304,6 +307,9 @@ export class WorldViewportQueries {
         
         let best_edge_distance = Number.MAX_VALUE
         let best_edge_location = Vector.ZERO
+
+        let best_right_angle_distance = Number.MAX_VALUE
+        let best_right_angle_location = Vector.ZERO
 
         let best_polygon_mean_distance = Number.MAX_VALUE
         let best_polygon_mean_location = Vector.ZERO
@@ -348,6 +354,28 @@ export class WorldViewportQueries {
                 }
             }
 
+            // snap edge so that a right angle is formed
+            if (state.interaction_buffer.points.length >= 2) {
+                // this requires a starting point
+                const first_point = state.interaction_buffer.points[0]
+                for (const edge of actor.brushModel.edges) {
+                    const a = world_vertexes[edge.vertexIndexA]
+                    const b = world_vertexes[edge.vertexIndexB]
+                    const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
+                    if (c == null){
+                        continue // no such point
+                    }
+                    const x = this.render_transform.view_transform_x(c)
+                    const y = this.render_transform.view_transform_y(c)
+
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+                    if (distance < best_right_angle_distance) {
+                        best_right_angle_location = c
+                        best_right_angle_distance = distance
+                    }
+                }
+    
+            }
             // snap to edges
             for (const edge of actor.brushModel.edges) {
                 const a = world_vertexes[edge.vertexIndexA]
@@ -400,6 +428,11 @@ export class WorldViewportQueries {
         if (best_edge_intersection_distance < best_distance){
             best_distance = best_edge_intersection_distance
             best_match_location = best_edge_intersection_location
+        }
+
+        if (best_right_angle_distance < best_distance){
+            best_distance = best_right_angle_distance
+            best_match_location = best_right_angle_location
         }
 
         best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4 - best_distance)

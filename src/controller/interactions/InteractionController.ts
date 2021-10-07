@@ -95,7 +95,7 @@ export class InteractionController {
         this._interaction_geometry_cache.actors = state.map.actors
         
         const [vector, distance]
-            = this._viewport_queries.find_nearest_snapping_point(state.map, event.canvas_x, event.canvas_y, this._interaction_geometry_cache)
+            = this._viewport_queries.find_nearest_snapping_point(state, event.canvas_x, event.canvas_y, this._interaction_geometry_cache)
         if (vector && distance < 16) {
             return [vector, true]
         }

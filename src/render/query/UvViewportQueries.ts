@@ -199,7 +199,7 @@ export class UvViewportQueries {
     }
 
     find_nearest_snapping_point(
-        map: UnrealMap,
+        state: EditorState,
         canvas_x: number,
         canvas_y: number,
         custom_geometry_cache: GeometryCache,
