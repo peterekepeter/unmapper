@@ -295,8 +295,22 @@ export class WorldViewportQueries {
     ): [
             Vector, number,
         ] {
-        let best_match_location: Vector = null
-        let best_distance = Number.MAX_VALUE
+
+        let best_vertex_distance = Number.MAX_VALUE
+        let best_vertex_location = Vector.ZERO
+
+        let best_edge_midpoint_distance = Number.MAX_VALUE
+        let best_edge_midpoint_location = Vector.ZERO
+        
+        let best_edge_distance = Number.MAX_VALUE
+        let best_edge_location = Vector.ZERO
+
+        let best_polygon_mean_distance = Number.MAX_VALUE
+        let best_polygon_mean_location = Vector.ZERO
+
+        let best_edge_intersection_distance = Number.MAX_VALUE
+        let best_edge_intersection_location = Vector.ZERO
+
         for (let actor_index = map.actors.length - 1; actor_index >= 0; actor_index--) {
             const actor = map.actors[actor_index] // reverse iterate to find topmost actor
             if (actor.brushModel == null) {
@@ -311,9 +325,9 @@ export class WorldViewportQueries {
                 const y0 = this.render_transform.view_transform_y(vertex)
                 if (!isNaN(x0) && !isNaN(y0)) {
                     const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
-                    if (distance < best_distance) {
-                        best_match_location = vertex
-                        best_distance = distance
+                    if (distance < best_vertex_distance) {
+                        best_vertex_location = vertex
+                        best_vertex_distance = distance
                     }
                 }
             }
@@ -326,11 +340,10 @@ export class WorldViewportQueries {
                 const x0 = this.render_transform.view_transform_x(midpoint)
                 const y0 = this.render_transform.view_transform_y(midpoint)
                 if (!isNaN(x0) && !isNaN(y0)) {
-                    let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
-                    distance += 2 // HACK: deprioritizes midpoint snap
-                    if (distance < best_distance) {
-                        best_match_location = midpoint
-                        best_distance = distance
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_edge_midpoint_distance) {
+                        best_edge_midpoint_location = midpoint
+                        best_edge_midpoint_distance = distance
                     }
                 }
             }
@@ -344,14 +357,13 @@ export class WorldViewportQueries {
                 const bx = this.render_transform.view_transform_x(b)
                 const by = this.render_transform.view_transform_y(b)
                 if (!isNaN(ax) && !isNaN(bx)) {
-                    let distance = distance_to_line_segment(canvas_x, canvas_y, ax, ay, bx, by)
-                    distance += 4 // HACK: deprioritizes edge snap
-                    if (distance < best_distance) {
+                    const distance = distance_to_line_segment(canvas_x, canvas_y, ax, ay, bx, by)
+                    if (distance < best_edge_distance) {
                         const distance_to_a = distance_2d_to_point(canvas_x, canvas_y, ax, ay)
                         const distance_to_b = distance_2d_to_point(canvas_x, canvas_y, bx, by)
                         const whole = distance_to_a + distance_to_b
-                        best_match_location = a.scale(distance_to_b).add_vector(b.scale(distance_to_a)).scale(1 / whole)
-                        best_distance = distance
+                        best_edge_location = a.scale(distance_to_b).add_vector(b.scale(distance_to_a)).scale(1 / whole)
+                        best_edge_distance = distance
                     }
                 }
             }
@@ -362,20 +374,53 @@ export class WorldViewportQueries {
                 const x0 = this.render_transform.view_transform_x(median)
                 const y0 = this.render_transform.view_transform_y(median)
                 if (!isNaN(x0) && !isNaN(y0)) {
-                    let distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
-                    distance += 2 // HACK: deprioritizes polygon median snap
-                    if (distance < best_distance) {
-                        best_match_location = median
-                        best_distance = distance
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_polygon_mean_distance) {
+                        best_polygon_mean_location = median
+                        best_polygon_mean_distance = distance
                     }
                 }
             }
         }
         
         const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16, custom_geometry_cache)
-        if (intersection_point != null && intersection_point_distance < best_distance) {
-            best_match_location = intersection_point
-            best_distance = intersection_point_distance
+        if (intersection_point != null && intersection_point_distance < best_edge_intersection_distance) {
+            best_edge_intersection_location = intersection_point
+            best_edge_intersection_distance = intersection_point_distance
+        }
+        
+        let best_match_location: Vector = null
+        let best_distance = Number.MAX_VALUE
+
+        if (best_vertex_distance < best_distance){
+            best_distance = best_vertex_distance
+            best_match_location = best_vertex_location
+        }
+
+        if (best_edge_intersection_distance < best_distance){
+            best_distance = best_edge_intersection_distance
+            best_match_location = best_edge_intersection_location
+        }
+
+        best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4 - best_distance)
+
+        if (best_edge_midpoint_distance < best_distance){
+            best_distance = best_edge_midpoint_distance
+            best_match_location = best_edge_midpoint_location
+        }
+        
+        best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4 - best_distance)
+
+        if (best_polygon_mean_distance < best_distance){
+            best_distance = best_polygon_mean_distance
+            best_match_location = best_polygon_mean_location
+        }
+
+        best_edge_distance = Math.max(best_edge_distance, 24 - best_distance)
+
+        if (best_edge_distance < best_distance){
+            best_distance = best_edge_distance
+            best_match_location = best_edge_location
         }
 
         return [best_match_location, best_distance]
