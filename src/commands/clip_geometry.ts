@@ -8,28 +8,45 @@ import { BrushPolygon } from "../model/BrushPolygon"
 import { BrushVertex } from "../model/BrushVertex"
 import { EditorState } from "../model/EditorState"
 import { get_world_to_actor_rotation_scaling, get_world_to_actor_transform_simple } from "../model/geometry/actor-space-transform"
+import { DEFAULT_INTERACTION_BUFFER } from "../model/InteractionBuffer"
 import { Plane } from "../model/Plane"
 import { change_selected_brushes } from "../model/state"
 import { Vector } from "../model/Vector"
+import { ViewportMode } from "../model/ViewportMode"
 
 export const clip_geometry_command: ICommandInfoV2 = {
     description: "Clip geometry",
     shortcut: "c",
     exec: exec_clip_geometry,
-    args: [
-        {
-            name: 'Clipping plane',
-            example_values: [Plane.XY, Plane.YZ, Plane.XZ],
-            interaction_factory: ClippingPlaneInteraction.factory,
-        },
-    ],
+    uses_interaction_buffer: true,
 }
 
-function exec_clip_geometry(state: EditorState, world_plane: Plane): EditorState {
-    if (!world_plane) {
+function exec_clip_geometry(state: EditorState): EditorState {
+    const interaction = state.interaction_buffer
+    const { points, viewport_mode } = interaction
+    let world_plane: Plane = null
+    if (points.length == 2)
+    {
+        if (viewport_mode === ViewportMode.Top){
+            const p = points.map(p => p.scale_components(new Vector(1, 1, 0)))
+            world_plane = Plane.from_points(p[0].add_vector(Vector.UP), p[0], p[1])
+        }
+        else if (viewport_mode === ViewportMode.Front){
+            const p = points.map(p => p.scale_components(new Vector(0, 1, 1)))
+            world_plane = Plane.from_points(p[0].add_vector(Vector.FORWARD), p[0], p[1])
+        }
+        else if (viewport_mode === ViewportMode.Side){
+            const p = points.map(p => p.scale_components(new Vector(1, 0, 1)))
+            world_plane = Plane.from_points(p[0].add_vector(Vector.RIGHT), p[0], p[1])
+        }
+    }
+    else if (points.length === 3){
+        world_plane = Plane.from_points(points[0], points[1], points[2])
+    }
+    if (!world_plane || isNaN(world_plane.distance)) {
         return state
     }
-    return clip_geometry(state, world_plane)
+    return { ...clip_geometry(state, world_plane), interaction_buffer: DEFAULT_INTERACTION_BUFFER }
 }
 
 function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
@@ -50,8 +67,7 @@ function clip_geometry(state: EditorState, world_plane: Plane): EditorState {
         const [intersections, intersection_on_edge] = get_edge_intersection_points(brush, object_plane, is_clipped_vert)
         const new_vertexes = intersections.map(p => next_brush.addVertex(p))
         
-        for (let i = 0; i < brush.polygons.length; i++) {
-            const poly = brush.polygons[i]
+        for (const poly of brush.polygons) {
 
             // handle simple cases
             {
