@@ -1,11 +1,10 @@
-import { ISignal } from "reactive-signals";
-import { EditorState } from "../../model/EditorState";
-
+import { EditorState } from "../../model/EditorState"
+import { Signal } from "../../util/Signal"
 
 export interface ICommand
 {
     () : void | Promise<void>
-    canExecute? : ISignal<boolean>
+    canExecute? : Signal<boolean>
 }
 
 export type ICommandV2 = (state: EditorState, ...args: unknown[]) => EditorState;

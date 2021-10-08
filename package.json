@@ -18,8 +18,7 @@
   "dependencies": {
     "eslint-plugin-spellcheck": "^0.0.19",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "reactive-signals": "^2.0.1"
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",

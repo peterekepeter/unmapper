@@ -1,8 +1,8 @@
-import { createSignal } from "reactive-signals"
+import { Signal } from "../util/Signal"
 
-export const themeColors = createSignal({
-    foreground : '#ccc',
-    background : '#444',
+export const themeColors = new Signal({
+    foreground: '#ccc',
+    background: '#444',
     error: '#a00',
-    accent : '#fa0',
+    accent: '#fa0',
 })

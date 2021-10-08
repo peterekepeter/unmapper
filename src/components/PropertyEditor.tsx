@@ -1,14 +1,15 @@
 import * as React from "react"
-import { SectionTitle } from "../ui/SectionTitle"
+
+import { edit_property_command as edit_property } from "../commands/edit_property"
 import { create_controller } from "../controller/AppController"
 import { Actor } from "../model/Actor"
-import { UiText } from "../ui/UiText"
-import { PolyFlags } from "../model/PolyFlags"
 import { KnownClasses } from "../model/KnownClasses"
+import { PolyFlags } from "../model/PolyFlags"
 import { Vector } from "../model/Vector"
-import { use_signal } from "./useSignal"
+import { SectionTitle } from "../ui/SectionTitle"
+import { UiText } from "../ui/UiText"
 import { UiVectorInput } from "../ui/UiVectorInput"
-import { edit_property_command as edit_property } from "../commands/edit_property"
+import { use_signal } from "./useSignal"
 
 
 export function PropertyEditor({ controller = create_controller() }) {

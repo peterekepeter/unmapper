@@ -1,9 +1,8 @@
-import { createSignal, ISignal } from 'reactive-signals'
-
 import { create_initial_editor_state, EditorState } from '../model/EditorState'
 import { GeometryCache } from '../model/geometry/GeometryCache'
 import { UnrealMap } from '../model/UnrealMap'
 import { deep_freeze } from '../util/deep_freeze'
+import { Signal } from '../util/Signal'
 import { create_command_registry } from './command/command_registry'
 import { ICommandInfoV2 } from "./command/ICommandInfoV2"
 import { create_history } from './history'
@@ -15,10 +14,10 @@ export class AppController {
     /** lastest non-preview state */
     current_state: EditorState;
     /** latest shown state */
-    state_signal: ISignal<EditorState> = createSignal<EditorState>();
+    state_signal = new Signal<EditorState>();
 
     commands = create_command_registry();
-    commands_shown_state = createSignal(false);
+    commands_shown_state = new Signal(false);
     geometry_cache = new GeometryCache();
     interaction = new InteractionController(this);
 
@@ -31,7 +30,7 @@ export class AppController {
     });
 
     constructor(initial_state?: EditorState) {
-        this.state_signal.event(state => {
+        this.state_signal.subscribe(state => {
             this.geometry_cache.actors = state.map.actors
         })
         this.current_state = initial_state ?? create_initial_editor_state()

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
-import { ISignal } from "reactive-signals"
+import { useEffect, useState } from "react"
 
-export function use_signal<T>(signal: ISignal<T>) {
+import { Signal } from "../util/Signal"
+
+export function use_signal<T>(signal: Signal<T>) {
     const [state, set_state] = useState(signal.value)
     useEffect(() => {
         const subscription = signal.subscribe(() => {
