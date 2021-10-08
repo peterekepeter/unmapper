@@ -5,6 +5,7 @@ import { ViewportMode } from "./ViewportMode"
 export interface InteractionBuffer
 {
     points: Vector[]
+    confirmed_points: number;
     viewport_mode: ViewportMode
     scalar: {
         expression: string,
@@ -19,6 +20,7 @@ export interface InteractionBuffer
 
 export const DEFAULT_INTERACTION_BUFFER: InteractionBuffer = deep_freeze({
     points: [],
+    confirmed_points: 0,
     viewport_mode: ViewportMode.Top,
     scalar: null,
     axis_lock: {
