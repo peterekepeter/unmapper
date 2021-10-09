@@ -1,5 +1,6 @@
 import { ICommandInfoV2 } from "../controller/command"
 import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
+import { get_selected_uv_vertex_list } from "../model/algorithms/get_selected_uv_vertex_list"
 import { get_selected_vertex_list } from "../model/algorithms/get_selected_vertex_list"
 import { update_polygon_median_normal } from "../model/algorithms/update_polygon_median_normal"
 import { BrushVertex } from "../model/BrushVertex"
@@ -7,7 +8,7 @@ import { EditorState } from "../model/EditorState"
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
 import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "../model/InteractionBuffer"
 import { Plane } from "../model/Plane"
-import { change_selected_actors, change_selected_brushes } from "../model/state"
+import { change_selected_actors, change_selected_brushes, change_viewport_list } from "../model/state"
 import { get_brush_polygon_vertex_uvs, set_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv"
 import { Vector } from "../model/Vector"
 import { ViewportMode } from "../model/ViewportMode"
@@ -32,7 +33,12 @@ function move_selected(state: EditorState): EditorState {
         return state
     }
     if (state.options.vertex_mode){
-        next = move_selected_vertexes(state, motion)
+        if (state.interaction_buffer.viewport_mode === ViewportMode.UV) {
+            next = move_selected_uv_vertexes(state, motion);
+        }
+        else {
+            next = move_selected_vertexes(state, motion)
+        }
     } else {
         next = move_selected_actors(state, motion)
     }
@@ -114,3 +120,19 @@ function lock_motion_to_viewport(vector: Vector, view_mode: ViewportMode): Vecto
             throw new Error('not implemented')
     }
 }
+
+function move_selected_uv_vertexes(state: EditorState, motion: Vector): EditorState {
+    return change_selected_brushes(state, (brush, actor, selection) => {
+        
+        for (const poly of selection.polygon_vertexes){
+            const uvs = get_brush_polygon_vertex_uvs(brush, poly.polygon_index);
+            const uv_vertexes = get_selected_uv_vertex_list(actor, poly, { edge_to_vertex: true })
+            for (const vertex_index of uv_vertexes){
+                uvs[vertex_index] = uvs[vertex_index].add_vector(motion);
+            }
+            brush = set_brush_polygon_vertex_uvs(brush, poly.polygon_index, uvs);
+        }
+        return brush;
+    })
+}
+
