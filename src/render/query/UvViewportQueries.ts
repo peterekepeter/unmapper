@@ -206,9 +206,33 @@ export class UvViewportQueries {
     ): [
             Vector, number,
         ] {
-        const best_match_location: Vector = null
-        const best_distance = Number.MAX_VALUE
-        // TODO
-        return [best_match_location, best_distance]
+        let best_location: Vector = null
+        let best_distance = Number.MAX_VALUE
+        
+        for (let i = 0; i < state.map.actors.length; i++){
+            const actor_index = i;
+            const actor = state.map.actors[actor_index]
+            const brush = actor.brushModel;
+            if (!brush){
+                continue;
+            }
+            for (let j = 0; j < brush.polygons.length; j++){
+                const polygon_index = j;
+                const polygon_uv = get_brush_polygon_vertex_uvs(brush, polygon_index)
+
+                // snap to uv vertexes
+                for (const uv_vector of polygon_uv){
+                    const x = this.render_transform.view_transform_x(uv_vector)
+                    const y = this.render_transform.view_transform_y(uv_vector)
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+                    if (distance < best_distance){
+                        best_distance = distance
+                        best_location = uv_vector
+                    }
+                }
+
+            }
+        }
+        return [best_location, best_distance]
     }
 }
