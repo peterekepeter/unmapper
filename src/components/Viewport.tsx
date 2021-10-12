@@ -71,16 +71,18 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
     const usePointerLock = false
     const normalDragDirection = true
+    const device_pixel_ratio = window.devicePixelRatio || 1
 
     return <canvas
-        width={width}
-        height={height}
+        width={width*device_pixel_ratio}
+        height={height*device_pixel_ratio}
         onWheel={handle_wheel}
         onContextMenu={handle_context_menu}
         onPointerDown={handle_pointer_down}
         onPointerUp={handle_pointer_up}
         onPointerMove={handle_pointer_move}
-        ref={canvas => render_scene(canvas)} />
+        ref={canvas => render_scene(canvas)} 
+        style={{ width, height }}/>
 
 
     function render_scene(new_canvas: HTMLCanvasElement) {
@@ -141,6 +143,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             s.view_transform.width = s.canvas.width
             s.view_transform.height = s.canvas.height
             s.view_transform.device_size = Math.min(s.canvas.width, s.canvas.height)
+            s.view_transform.device_pixel_ratio = device_pixel_ratio
             need_render = true
         }
 
@@ -253,8 +256,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
         const { canvas } = internal_state.current
         const rects = canvas.getClientRects()
-        const canvas_x = event.pageX - rects[0].x
-        const canvas_y = event.pageY - rects[0].y
+        const canvas_x = (event.pageX - rects[0].x) * device_pixel_ratio
+        const canvas_y = (event.pageY - rects[0].y) * device_pixel_ratio
         return [canvas_x, canvas_y]
     }
 

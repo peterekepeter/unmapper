@@ -20,7 +20,8 @@ export class WorldViewportQueries {
         canvas_x: number,
         canvas_y: number,
     ): EditorSelection {
-        const MAX_DISTANCE = 16
+        const device_pixel_ratio = this.render_transform.device_pixel_ratio
+        const MAX_DISTANCE = 16 * device_pixel_ratio
         const [vertex_actor, vertex, vertex_distance] = 
             this.find_nearest_vertex(state, canvas_x, canvas_y)
         const [edge_actor, edge, raw_edge_distance] = 
@@ -28,7 +29,7 @@ export class WorldViewportQueries {
         const [polygon_actor, polygon, polygon_distance] = 
             this.find_nearest_polygon(state, canvas_x, canvas_y)
         
-        const edge_distance = Math.max(raw_edge_distance, Math.max(16 - vertex_distance, 16 - polygon_distance))
+        const edge_distance = Math.max(raw_edge_distance, Math.max(MAX_DISTANCE - vertex_distance, MAX_DISTANCE - polygon_distance))
 
         let best_distance = Number.MAX_SAFE_INTEGER
         let selection: EditorSelection = DEFAULT_EDITOR_SELECTION
@@ -411,7 +412,7 @@ export class WorldViewportQueries {
             }
         }
         
-        const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16, custom_geometry_cache)
+        const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
         if (intersection_point != null && intersection_point_distance < best_edge_intersection_distance) {
             best_edge_intersection_location = intersection_point
             best_edge_intersection_distance = intersection_point_distance
@@ -419,6 +420,7 @@ export class WorldViewportQueries {
         
         let best_match_location: Vector = null
         let best_distance = Number.MAX_VALUE
+        const device_pixel_ratio = this.render_transform.device_pixel_ratio
 
         if (best_vertex_distance < best_distance){
             best_distance = best_vertex_distance
@@ -435,21 +437,21 @@ export class WorldViewportQueries {
             best_match_location = best_right_angle_location
         }
 
-        best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4 - best_distance)
+        best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_edge_midpoint_distance < best_distance){
             best_distance = best_edge_midpoint_distance
             best_match_location = best_edge_midpoint_location
         }
         
-        best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4 - best_distance)
+        best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_polygon_mean_distance < best_distance){
             best_distance = best_polygon_mean_distance
             best_match_location = best_polygon_mean_location
         }
 
-        best_edge_distance = Math.max(best_edge_distance, 24 - best_distance)
+        best_edge_distance = Math.max(best_edge_distance, 24*device_pixel_ratio - best_distance)
 
         if (best_edge_distance < best_distance){
             best_distance = best_edge_distance

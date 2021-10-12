@@ -147,7 +147,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         const is_selected = state.selection.actors && state.selection.actors.find(s => s.actor_index === index) != null
 
         context.strokeStyle = get_brush_wire_color(actor, is_selected)
-        context.lineWidth = 1.5
+        context.lineWidth = 1.5 * render_transform.device_pixel_ratio
 
         render_wire_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode, actor_selection)
 
@@ -168,7 +168,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             if (!isNaN(x) && !isNaN(y)) {
                 context.fillStyle = is_selected ? vertexSelectedColor : vertexColor
                 context.beginPath()
-                context.rect(x-2, y-2, 5, 5)
+                const size_from_center = 2 * render_transform.device_pixel_ratio
+                const size = size_from_center*2+1
+                context.rect(x - size_from_center, y - size_from_center, size, size)
                 context.fill()
             }
         }
@@ -177,7 +179,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     function render_uv_viewport(state: EditorState) {
         context.strokeStyle = state.options.preserve_vertex_uv
             ? uv_preserve_color : uv_color
-        context.lineWidth = 1.5
+        context.lineWidth = 1.5 * render_transform.device_pixel_ratio
         
         for (const selection of state.selection.actors) {
             const actor = state.map.actors[selection.actor_index]
@@ -276,7 +278,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 if (isNaN(x) || isNaN(y)) { continue }
 
                 context.beginPath()
-                context.arc(x, y, 3, 0, Math.PI * 2)
+                context.arc(x, y, 3 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                 context.fill()
             }
         }
@@ -296,7 +298,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 if (isNaN(x) || isNaN(y)) { continue }
 
                 context.beginPath()
-                context.arc(x, y, 3, 0, Math.PI * 2)
+                context.arc(x, y, 3 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                 context.fill()
             }
         }
@@ -312,7 +314,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             if (!isNaN(x) && !isNaN(y)) {
                 context.fillStyle = is_selected ? vertexSelectedColor : vertexColor
                 context.beginPath()
-                context.arc(x, y, 3, 0, Math.PI * 2)
+                context.arc(x, y, 3 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                 context.fill()
             }
         }
@@ -481,7 +483,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             if (!isNaN(x) && !isNaN(y)) {
                 context.strokeStyle = '#fff'
                 context.beginPath()
-                context.rect(x - 2, y - 2, 5, 5)
+                const size_from_center = 2 * render_transform.device_pixel_ratio
+                const size = size_from_center*2+1
+                context.rect(x - size_from_center, y - size_from_center, size, size)
                 context.stroke()
 
                 if (state.line_to) {
@@ -506,8 +510,8 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     }
 
     const renderer: Renderer = {
-        set_view_transform,
         render_v2: render,
+        set_view_transform,
         set_viewport_index: index => viewport_index = index,
     }
     return renderer

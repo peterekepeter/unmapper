@@ -2,11 +2,11 @@ import { BoundingBox } from "../model/BoundingBox"
 import { Rotation } from "../model/Rotation"
 import { Vector } from "../model/Vector"
 
-
 export interface ViewTransform{
     can_3d_transform: boolean;
     view_center: Vector;
     device_size: number;
+    device_pixel_ratio: number;
     scale: number;
     width: number;
     height: number; 

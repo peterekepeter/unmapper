@@ -1,16 +1,16 @@
 
 import { BoundingBox } from "../../model/BoundingBox"
 import { Matrix3x3 } from "../../model/Matrix3x3"
-import { Rotation } from "../../model/Rotation";
+import { Rotation } from "../../model/Rotation"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
-
 
 export class PerspectiveViewTransform implements ViewTransform {
 
     width: number;
     height: number;
     device_size: number;
+    device_pixel_ratio: number;
     scale: number;
     view_center: Vector;
 
@@ -46,15 +46,15 @@ export class PerspectiveViewTransform implements ViewTransform {
         const negative = forward.get_component(axis) < 0
 
         switch (axis){
-            case 0 :
+            case 0:
                 return negative 
                     ? new BoundingBox({ max_x: this.view_center.x })
                     : new BoundingBox({ min_x: this.view_center.x })
-            case 1 :
+            case 1:
                 return negative 
                     ? new BoundingBox({ min_y: this.view_center.y })
                     : new BoundingBox({ max_y: this.view_center.y })
-            case 2 :
+            case 2:
                 return negative 
                     ? new BoundingBox({ max_z: this.view_center.z })
                     : new BoundingBox({ min_z: this.view_center.z })
@@ -72,7 +72,8 @@ export class PerspectiveViewTransform implements ViewTransform {
         return new Vector(
             this._rotation_matrix.getTransformedX(x, y, z),
             this._rotation_matrix.getTransformedY(x, y, z),
-            this._rotation_matrix.getTransformedZ(x, y, z))
+            this._rotation_matrix.getTransformedZ(x, y, z),
+        )
     }
 
     view_transform_x(v: Vector): number {
@@ -102,7 +103,7 @@ export class PerspectiveViewTransform implements ViewTransform {
         const screen_vector = new Vector(
             distance, 
             +(canvas_x - this.width *.5) / this.device_size * distance,
-            -(canvas_y - this.height *.5) / this.device_size * distance
+            -(canvas_y - this.height *.5) / this.device_size * distance,
         )
         return this._inv_rotation_matrix.apply(screen_vector).add_vector(this.view_center)
     }

@@ -1,15 +1,15 @@
 import { BoundingBox } from "../../model/BoundingBox"
-import { Matrix3x3 } from "../../model/Matrix3x3";
-import { Rotation } from "../../model/Rotation";
+import { Matrix3x3 } from "../../model/Matrix3x3"
+import { Rotation } from "../../model/Rotation"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
-
 
 export class FrontViewTransform implements ViewTransform {
 
     width: number;
     height: number;
     device_size: number;
+    device_pixel_ratio: number;
     view_center: Vector;
     view_rotation: Rotation;
     scale = 1;
@@ -18,8 +18,10 @@ export class FrontViewTransform implements ViewTransform {
         const y_size = this.width / 2 / this.device_size / this.scale
         const z_size = this.height / 2 / this.device_size / this.scale
         return new BoundingBox({
-            min_y: this.view_center.y - y_size, max_y: this.view_center.y + y_size,
-            min_z: this.view_center.z - z_size, max_z: this.view_center.z + z_size
+            min_y: this.view_center.y - y_size,
+            max_y: this.view_center.y + y_size,
+            min_z: this.view_center.z - z_size,
+            max_z: this.view_center.z + z_size,
         })
     }
 
@@ -48,7 +50,7 @@ export class FrontViewTransform implements ViewTransform {
             / this.device_size / this.scale,
 
             this.view_center.z - (canvas_y - this.height / 2)
-            / this.device_size / this.scale
+            / this.device_size / this.scale,
         )
     }
 }
