@@ -35,6 +35,8 @@ export const CommandPalette = ({ controller = create_controller() }) => {
         transform: 'translate(-50%, 0)',
         width: '800px',
         maxWidth: '80%',
+        maxHeight: '80%',
+        overflow: 'hidden',
         margin: '1rem',
         boxShadow: '0px 2px 4px #0008, 0px 8px 32px #0008',
         borderRadius: '2px'
