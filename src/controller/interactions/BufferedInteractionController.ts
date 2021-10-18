@@ -22,11 +22,23 @@ export class BufferedInteractionController
 
     next_command(command_info: ICommandInfoV2): void {
         if (this.command_info != null){
+            // finalize previous command
             this.controller.reset_preview()
             this.controller.execute(this.command_info)
             this.controller.execute(reset_interaction_buffer_command)
         }
+
+        // next command
         this.command_info = command_info
+
+        if (this.command_info != null){
+            const buffer = this.controller.current_state.interaction_buffer
+            if (buffer.points.length === 1)
+            {
+                // start off next command with 1 point
+                this.controller.execute(confirm_interaction_point_command, buffer.points[0], buffer.viewport_mode)
+            }
+        }
     }
 
     handle_pointer_click(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
@@ -35,7 +47,6 @@ export class BufferedInteractionController
 
         // if command resets the interaction buffer that means should be finalized
         if (this.controller.state_signal.value.interaction_buffer === DEFAULT_INTERACTION_BUFFER){
-            console.log('finalize')
             this.next_command(null)
         }
     }
@@ -44,9 +55,14 @@ export class BufferedInteractionController
         this.controller.execute(propose_interaction_point_command, vector, event.view_mode)
         this.preview_current_command(vector, is_snap)
     }
+
     private preview_current_command(vector: Vector, is_snap: boolean) {
-        const state = this.get_interaction_render_state(vector, is_snap)
-        this.controller.preview_command_with_interaction(state, this.command_info, [])
+        const interaction = this.get_interaction_render_state(vector, is_snap)
+        if (this.has_interaction) {
+            this.controller.preview_command_with_interaction(interaction, this.command_info, [])
+        } else {
+            this.controller.preview_interaction_state(interaction)
+        }
     }
 
     private get_interaction_render_state(vector: Vector, is_snap: boolean): InteractionRenderState {

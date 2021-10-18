@@ -59,12 +59,7 @@ export class InteractionController {
     }
 
     pointer_move(event: ViewportEvent): void {
-        if (this._buffered.has_interaction) {
-            // stateful interaction
-            const [vector, is_snap] = this.get_viewport_event_world_position(event)
-            this._buffered.handle_pointer_move(vector, event, is_snap)
-        }
-        else if (this._stateful.has_interaction) {
+        if (this._stateful.has_interaction) {
             // stateful interaction
             const [vector, is_snap] = this.get_viewport_event_world_position(event)
             this._stateful.handle_pointer_move(vector, event, is_snap)
@@ -73,6 +68,10 @@ export class InteractionController {
             && this.box_select_begin != null) {
             // selection interaction
             this._selection.box_selection(this.box_select_begin, event, false)
+        } else {
+            // by default buffered interaction
+            const [vector, is_snap] = this.get_viewport_event_world_position(event)
+            this._buffered.handle_pointer_move(vector, event, is_snap)
         }
     }
 

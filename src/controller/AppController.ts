@@ -83,6 +83,11 @@ export class AppController {
         this.preview_command_with_interaction(null, command_info, args)
     }
 
+    preview_interaction_state(interaction_render_state: InteractionRenderState): void {
+        const next_state = { ...this.current_state, interaction_render_state }
+        this.preview_state_change(next_state)
+    }
+
     preview_command_with_interaction(
         interaction_render_state: InteractionRenderState,
         command_info: ICommandInfoV2,
