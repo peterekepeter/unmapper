@@ -6,6 +6,7 @@ import { clear_status_command } from "./clear_status_command"
 import { clip_geometry_command } from "./clip_geometry"
 import { create_polygon_command } from './create_polygon'
 import { delete_selected_command } from './delete_selected'
+import { duplicate_selected_command } from "./duplicate_selected"
 import { toggle_box_select_command } from "./editor/toggle_box_select"
 import { toggle_editor_layout_command } from "./editor/toggle_editor_layout"
 import { toggle_preserve_vertex_uv_command } from "./editor/toggle_preserve_vertex_uv"
@@ -47,6 +48,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     move_command,
     rotate_command,
     scale_command,
+    duplicate_selected_command,
     apply_transform_command,
     uv_random_map_command,
     set_initial_state,

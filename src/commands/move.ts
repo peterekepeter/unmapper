@@ -26,7 +26,7 @@ export const move_command: ICommandInfoV2 = {
     exec: move_selected,
 }
 
-function move_selected(state: EditorState): EditorState {
+export function move_selected(state: EditorState): EditorState {
     const motion = get_motion_vector(state.interaction_buffer)
     let next: EditorState
     if (motion.equals(Vector.ZERO)){
@@ -34,7 +34,7 @@ function move_selected(state: EditorState): EditorState {
     }
     if (state.options.vertex_mode){
         if (state.interaction_buffer.viewport_mode === ViewportMode.UV) {
-            next = move_selected_uv_vertexes(state, motion);
+            next = move_selected_uv_vertexes(state, motion)
         }
         else {
             next = move_selected_vertexes(state, motion)
@@ -125,14 +125,14 @@ function move_selected_uv_vertexes(state: EditorState, motion: Vector): EditorSt
     return change_selected_brushes(state, (brush, actor, selection) => {
         
         for (const poly of selection.polygon_vertexes){
-            const uvs = get_brush_polygon_vertex_uvs(brush, poly.polygon_index);
+            const uvs = get_brush_polygon_vertex_uvs(brush, poly.polygon_index)
             const uv_vertexes = get_selected_uv_vertex_list(actor, poly, { edge_to_vertex: true })
             for (const vertex_index of uv_vertexes){
-                uvs[vertex_index] = uvs[vertex_index].add_vector(motion);
+                uvs[vertex_index] = uvs[vertex_index].add_vector(motion)
             }
-            brush = set_brush_polygon_vertex_uvs(brush, poly.polygon_index, uvs);
+            brush = set_brush_polygon_vertex_uvs(brush, poly.polygon_index, uvs)
         }
-        return brush;
+        return brush
     })
 }
 
