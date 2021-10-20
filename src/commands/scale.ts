@@ -1,7 +1,7 @@
 import { ICommandInfoV2 } from "../controller/command"
 import { EditorState } from "../model/EditorState"
 import { get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
-import { DEFAULT_INTERACTION_BUFFER } from "../model/InteractionBuffer"
+import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "../model/InteractionBuffer"
 import { change_selected_actors, change_selected_brushes, change_selected_vertexes } from "../model/state"
 import { Vector } from "../model/Vector"
 
@@ -15,28 +15,38 @@ export const scale_command: ICommandInfoV2 = {
 function exec_scale_command(state: EditorState): EditorState {
     const buffer= state.interaction_buffer
     const points = buffer.points
-    if (points.length < 3){
+    const scaling_factor : number = get_scaling_factor(buffer)
+    if (scaling_factor === 1){
         return state
     }
-    const [pivot, from, to] = points
-    const scaled = scale_selected(state, pivot, from, to)
+    const pivot = points[0]
+    const scaled = scale_selected(state, pivot, scaling_factor)
     return {
         ...scaled,
         interaction_buffer: DEFAULT_INTERACTION_BUFFER,
     }
 }
 
-function scale_selected(state: EditorState, pivot: Vector, from: Vector, to: Vector){
-    if (!from || !to || from === to){
+function get_scaling_factor(buffer: InteractionBuffer): number {
+    let scaling_factor = 1
+    if (buffer.scalar){
+        scaling_factor = buffer.scalar.value
+    }
+    else if (buffer.points.length >= 3){
+        const [pivot, from, to] = buffer.points
+        scaling_factor = to.subtract_vector(pivot).length() 
+        / from.subtract_vector(pivot).length()
+    }
+    return scaling_factor
+}
+
+function scale_selected(state: EditorState, pivot: Vector, scaling_factor: number){
+    if (scaling_factor === 1){
         return state
     }
     if (!pivot){
         pivot = Vector.ZERO
     }
-
-    const scaling_factor = to.subtract_vector(pivot).length() 
-        / from.subtract_vector(pivot).length()
-
     if (state.options.vertex_mode){
         return scale_geometry_data(state, pivot, scaling_factor)
     } else {
