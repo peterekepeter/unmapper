@@ -1,22 +1,28 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
-import { Vector } from "../model/Vector"
+import { EditorState } from "../model/EditorState"
+import { DEFAULT_INTERACTION_BUFFER } from "../model/InteractionBuffer"
 
 export const measure_command: ICommandInfoV2 = {
     description: 'Measure distance between two points',
     shortcut: 'm',
-    args: [
-        {
-            interaction_factory: VectorInteraction.factory,
-            example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ],
-        },
-    ],
-    exec: (state, vector: Vector) => ({ 
+    uses_interaction_buffer: true,
+    exec: state => exec_measure(state),
+}
+
+function exec_measure(state: EditorState): EditorState {
+    const buffer = state.interaction_buffer
+    if (buffer.points.length < 2){
+        return state
+    }
+    const vector = buffer.points[0].vector_to_vector(buffer.points[1])
+    return { 
         ...state, 
+        interaction_buffer: DEFAULT_INTERACTION_BUFFER,
         status: { 
             ...state.status, 
             is_error: false, 
             message: `Distance: ${vector.length()}`,
         },
-    }),
+    }
 }
+
