@@ -2,7 +2,7 @@ import { ICommandInfoV2 } from "../controller/command"
 import { DEFAULT_ACTOR_SELECTION } from "../model/EditorSelection"
 import { EditorState } from "../model/EditorState"
 import { EditorError } from "../model/error"
-import { move_selected } from "./move"
+import { move_selected } from "./move_selected"
 
 export const duplicate_selected_command: ICommandInfoV2 = {
     description: 'Duplicate selected actors',

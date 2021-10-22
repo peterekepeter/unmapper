@@ -15,10 +15,10 @@ import { extrude_polygons_command } from './extrude_polygons'
 import { flip_polygon_normal_command } from './flip_polygon_normal'
 import { generate_cube_command } from "./generators/generate_cube"
 import { set_interaction_axis_lock_commands } from "./interaction/set_interaction_axis_lock"
-import { measure_command } from "./measure"
-import { move_command } from "./move"
-import { rotate_command } from "./rotate"
-import { scale_command } from "./scale"
+import { measure_command } from "./measure_distance"
+import { move_command } from "./move_selected"
+import { rotate_command } from "./rotate_selected"
+import { scale_command } from "./scale_selected"
 import { select_all_command } from './selection/select_all'
 import { reset_initial_state, set_initial_state } from "./set_initial_state"
 import { shuffle_brush_polygons_command } from './shuffle_brush_polygons'

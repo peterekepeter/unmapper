@@ -2,16 +2,15 @@ import { ICommandInfoV2 } from "../controller/command"
 import { RotationInteraction } from "../controller/interactions/stateful/RotationInteraction"
 import { ViewportVectorAdjustment } from "../controller/interactions/ViewportVectorAdjustment"
 import { BrushVertex } from "../model/BrushVertex"
-import { EditorState } from "../model/EditorState"
+import { complete_interaction, EditorState } from "../model/EditorState"
 import { get_actor_to_world_transform, get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
 import { decompose_matrix_rotation } from "../model/geometry/decompose-matrix"
 import { vector_to_vector_rotation_matrix } from "../model/geometry/vector-rotation"
-import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "../model/InteractionBuffer"
+import { InteractionBuffer } from "../model/InteractionBuffer"
 import { PivotRotation } from "../model/PivotRotation"
 import { Rotation } from "../model/Rotation"
 import { change_selected_actors, change_selected_brushes } from "../model/state"
 import { Vector } from "../model/Vector"
-import { ViewportMode } from "../model/ViewportMode"
 
 export const rotate_command: ICommandInfoV2 = {
     description: 'Rotate objects or vertexes',
@@ -33,10 +32,7 @@ function exec_rotation_command(state: EditorState): EditorState {
     
     const pivot_rotation = get_rotation_from_interaction(state.interaction_buffer)
     const rotated = apply_rotation_to_selected(state, pivot_rotation)
-    return {
-        ...rotated,
-        interaction_buffer: DEFAULT_INTERACTION_BUFFER,
-    }
+    return complete_interaction(rotated)
 }
 
 function get_rotation_from_interaction(buffer : InteractionBuffer): PivotRotation {

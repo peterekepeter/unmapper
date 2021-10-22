@@ -1,7 +1,7 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { EditorState } from "../model/EditorState"
+import { complete_interaction, EditorState } from "../model/EditorState"
 import { get_world_to_actor_transform } from "../model/geometry/actor-space-transform"
-import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "../model/InteractionBuffer"
+import { InteractionBuffer } from "../model/InteractionBuffer"
 import { change_selected_actors, change_selected_brushes, change_selected_vertexes } from "../model/state"
 import { Vector } from "../model/Vector"
 
@@ -21,10 +21,7 @@ function exec_scale_command(state: EditorState): EditorState {
     }
     const pivot = points[0]
     const scaled = scale_selected(state, pivot, scaling_factor)
-    return {
-        ...scaled,
-        interaction_buffer: DEFAULT_INTERACTION_BUFFER,
-    }
+    return complete_interaction(scaled)
 }
 
 function get_scaling_factor(buffer: InteractionBuffer): number {

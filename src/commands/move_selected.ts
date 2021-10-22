@@ -1,14 +1,12 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
 import { get_selected_uv_vertex_list } from "../model/algorithms/get_selected_uv_vertex_list"
 import { get_selected_vertex_list } from "../model/algorithms/get_selected_vertex_list"
 import { update_polygon_median_normal } from "../model/algorithms/update_polygon_median_normal"
 import { BrushVertex } from "../model/BrushVertex"
-import { EditorState } from "../model/EditorState"
+import { complete_interaction, EditorState } from "../model/EditorState"
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
-import { DEFAULT_INTERACTION_BUFFER, InteractionBuffer } from "../model/InteractionBuffer"
-import { Plane } from "../model/Plane"
-import { change_selected_actors, change_selected_brushes, change_viewport_list } from "../model/state"
+import { InteractionBuffer } from "../model/InteractionBuffer"
+import { change_selected_actors, change_selected_brushes } from "../model/state"
 import { get_brush_polygon_vertex_uvs, set_brush_polygon_vertex_uvs } from "../model/uvmap/vertex_uv"
 import { Vector } from "../model/Vector"
 import { ViewportMode } from "../model/ViewportMode"
@@ -16,12 +14,6 @@ import { ViewportMode } from "../model/ViewportMode"
 export const move_command: ICommandInfoV2 = {
     description: 'Move objects or vertexes',
     shortcut: 'g',
-    args: [
-        {
-            interaction_factory: VectorInteraction.factory,
-            example_values: [ Vector.FORWARD, Vector.RIGHT, Vector.UP ],
-        },
-    ],
     uses_interaction_buffer: true,
     exec: move_selected,
 }
@@ -43,7 +35,7 @@ export function move_selected(state: EditorState): EditorState {
         next = move_selected_actors(state, motion)
     }
     if (state.interaction_buffer.points.length >= 2) {
-        next = { ...next, interaction_buffer: DEFAULT_INTERACTION_BUFFER }
+        next = complete_interaction(next)
     }
     return next
 }
