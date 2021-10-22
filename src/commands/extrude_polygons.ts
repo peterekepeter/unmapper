@@ -1,7 +1,6 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { VectorInteraction } from "../controller/interactions/stateful/VectorInteraction"
 import { extrude_brush_faces } from "../model/algorithms/extrudeBrushFaces"
-import { EditorState } from "../model/EditorState"
+import { complete_interaction, EditorState } from "../model/EditorState"
 import { EditorError } from "../model/error/EditorError"
 import { get_world_to_actor_rotation_scaling } from "../model/geometry/actor-space-transform"
 import { change_selected_brushes } from "../model/state"
@@ -11,18 +10,27 @@ import { is_null_or_empty } from "../util/is_null_or_empty"
 export const extrude_polygons_command : ICommandInfoV2 = { 
     description: "Extrude selected polygons",
     shortcut: 'e',
-    exec: implementation,
-    args: [
-        {
-            interaction_factory: () => new VectorInteraction(),
-            name: "extrusion",
-            example_values: [32, new Vector(32, 0, 0)],
-            default_value: 32,
-        },
-    ],
+    exec: exec_extrude_selected_polygons,
+    uses_interaction_buffer: true,
 }
 
-function implementation(state: EditorState, extrusion: number | Vector = 32) : EditorState {
+function exec_extrude_selected_polygons(state: EditorState) : EditorState {
+    const buffer = state.interaction_buffer
+    let extrusion: Vector | number | null = null
+    if (buffer.scalar) {
+        extrusion = buffer.scalar.value
+    }
+    else if (buffer.points.length >= 2){
+        extrusion = buffer.points[0].vector_to_vector(buffer.points[1])
+    }
+    if (extrusion == null){
+        return state
+    }
+    const extruded = extrude_selected_polygons(state, extrusion)
+    return complete_interaction(extruded)
+}
+
+function extrude_selected_polygons(state: EditorState, extrusion: number | Vector) : EditorState {
     if (!state.options.vertex_mode){
         throw new EditorError('only works in vertex mode')
     }

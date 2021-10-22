@@ -137,3 +137,7 @@ export function get_actor_index(state: EditorState, target: Actor): number
     }
     return index
 }
+
+export function complete_interaction(state: EditorState): EditorState{
+    return { ...state, interaction_buffer: DEFAULT_INTERACTION_BUFFER }
+}
