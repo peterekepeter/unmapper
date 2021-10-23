@@ -1,3 +1,4 @@
+import { EditorSelection } from '../model/EditorSelection'
 import { create_initial_editor_state, EditorState } from '../model/EditorState'
 import { GeometryCache } from '../model/geometry/GeometryCache'
 import { UnrealMap } from '../model/UnrealMap'
@@ -24,9 +25,9 @@ export class AppController {
     preview_command: ICommandInfoV2;
     preview_command_args: unknown[];
 
-    history = create_history<UnrealMap>({
-        get_state: () => this.current_state.map,
-        set_state: new_state => this.direct_state_change({ ...this.current_state, map: new_state }),
+    history = create_history<{ map: UnrealMap, selection: EditorSelection }>({
+        get_state: () => ({ map: this.current_state.map, selection: this.current_state.selection }),
+        set_state: history_state => this.direct_state_change({ ...this.current_state, ...history_state }),
     });
 
     constructor(initial_state?: EditorState) {
