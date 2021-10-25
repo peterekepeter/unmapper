@@ -4,6 +4,7 @@ import { reset_interaction_buffer_command } from "../../commands/interaction/res
 import { DEFAULT_INTERACTION_BUFFER } from "../../model/InteractionBuffer"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
+import { ViewportMode } from "../../model/ViewportMode"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { InteractionRenderState } from "./InteractionRenderState"
@@ -11,6 +12,8 @@ import { InteractionRenderState } from "./InteractionRenderState"
 export class BufferedInteractionController
 {
     private command_info: ICommandInfoV2
+    private last_move_vector: Vector;
+    private last_move_mode: ViewportMode;
 
     get has_interaction(): boolean {
         return this.command_info != null
@@ -33,10 +36,16 @@ export class BufferedInteractionController
 
         if (this.command_info != null){
             const buffer = this.controller.current_state.interaction_buffer
+            // start off next command with 1 point
             if (buffer.points.length === 1)
             {
-                // start off next command with 1 point
                 this.controller.execute(confirm_interaction_point_command, buffer.points[0], buffer.viewport_mode)
+            }
+            else if (this.last_move_vector){
+                this.controller.execute(confirm_interaction_point_command, this.last_move_vector, this.last_move_mode)
+            }
+            else {
+                // no first point :(
             }
         }
     }
@@ -54,6 +63,8 @@ export class BufferedInteractionController
     handle_pointer_move(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
         this.controller.execute(propose_interaction_point_command, vector, event.view_mode)
         this.preview_current_command(vector, is_snap)
+        this.last_move_mode = event.view_mode
+        this.last_move_vector = vector
     }
 
     private preview_current_command(vector: Vector, is_snap: boolean) {

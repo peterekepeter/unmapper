@@ -11,7 +11,7 @@ import { StatefulInteractionController } from "./StatefulInteractionController"
 export class InteractionController {
 
     uses_interaction_buffer: boolean;
-    box_select_begin: ViewportEvent
+    box_select_begin: ViewportEvent;
 
     private _interaction_geometry_cache = new GeometryCache()
     private _viewport_queries = new AllViewportQueries(this._interaction_geometry_cache);
