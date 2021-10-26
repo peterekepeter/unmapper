@@ -73,7 +73,7 @@ function scale_actors(state: EditorState, pivot: Vector, scaling_factor: number)
         const new_actor = old.shallow_copy()
         new_actor.location = new_location
         if (old.brushModel) {
-            const new_component_scaling = Vector.ONES.scale(scaling_factor)
+            const new_component_scaling = Vector.ONES.scale(scaling_factor).scale_components(old.postScale.scale)
             new_actor.postScale = old.postScale.with_scale_vector(new_component_scaling)
         } else {
             // scale object
