@@ -1,7 +1,7 @@
 import { Actor } from "../../model/Actor"
 import { ActorSelection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
-import { fast_closest_point_to_line_inside_segment } from "../../model/geometry/closest_point_to_line"
+import { fast_closest_point_to_line_inside_segment, precise_closest_point_to_line } from "../../model/geometry/closest_point_to_line"
 import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { intersect_segments } from "../../model/geometry/intersect_segments"
@@ -311,6 +311,9 @@ export class WorldViewportQueries {
 
         let best_right_angle_distance = Number.MAX_VALUE
         let best_right_angle_location = Vector.ZERO
+        let best_right_angle_a = Vector.ZERO 
+        let best_right_angle_b = Vector.ZERO
+        let best_right_angle_q = Vector.ZERO
 
         let best_polygon_mean_distance = Number.MAX_VALUE
         let best_polygon_mean_location = Vector.ZERO
@@ -373,6 +376,9 @@ export class WorldViewportQueries {
                     if (distance < best_right_angle_distance) {
                         best_right_angle_location = c
                         best_right_angle_distance = distance
+                        best_right_angle_a = a
+                        best_right_angle_b = b
+                        best_right_angle_q = first_point
                     }
                 }
     
@@ -433,8 +439,22 @@ export class WorldViewportQueries {
         }
 
         if (best_right_angle_distance < best_distance){
-            best_distance = best_right_angle_distance
-            best_match_location = best_right_angle_location
+            // refine snap point for higher precision
+            best_right_angle_location = precise_closest_point_to_line(
+                best_right_angle_a, 
+                best_right_angle_b, 
+                best_right_angle_q,
+            )
+            best_right_angle_distance = distance_2d_to_point(
+                canvas_x, 
+                canvas_y,
+                this.render_transform.view_transform_x(best_right_angle_location), 
+                this.render_transform.view_transform_y(best_right_angle_location),
+            )
+            if (best_right_angle_distance < best_distance){
+                best_distance = best_right_angle_distance
+                best_match_location = best_right_angle_location
+            }
         }
 
         best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
