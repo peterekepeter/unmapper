@@ -6,6 +6,7 @@ import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewportMode } from "../../model/ViewportMode"
 import { ViewTransform } from "../ViewTransform"
+import { SnapResult } from "./SnapResult"
 import { UvViewportQueries } from "./UvViewportQueries"
 import { WorldViewportQueries } from "./WorldViewportQueries"
 
@@ -80,4 +81,19 @@ export class AllViewportQueries {
         ] {
         return this.current.find_nearest_snapping_point(state, canvas_x, canvas_y, custom_geometry_cache)
     }
+
+    query_point(
+        state: EditorState, 
+        canvas_x: number, 
+        canvas_y: number, 
+        custom_geometry_cache: GeometryCache,
+    ): {
+            selection: EditorSelection,
+            location: Vector,
+            snap?: SnapResult 
+        }
+    {
+        throw new Error('not implemented')
+    }
 }
+
