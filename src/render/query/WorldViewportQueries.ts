@@ -8,7 +8,10 @@ import { intersect_segments } from "../../model/geometry/intersect_segments"
 import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
+import { SnapResult } from "./SnapResult"
 import { ViewportPointQueryResult } from "./ViewportPointQueryResult"
+
+type LineIntersectionCandidate = { a: Vector, b: Vector, ax: number, ay: number, bx: number, by: number, actor_index: number, edge_index: number }
 
 export class WorldViewportQueries {
 
@@ -482,10 +485,10 @@ export class WorldViewportQueries {
         return [best_match_location, best_distance]
     }
 
-    find_nearest_intersection(map: UnrealMap, canvas_x: number, canvas_y: number, max_distance: number, custom_geometry_cache: GeometryCache): [Vector|null, number] {
+    find_nearest_intersection(map: UnrealMap, canvas_x: number, canvas_y: number, max_distance: number, custom_geometry_cache: GeometryCache): [Vector|null, number, LineIntersectionCandidate, LineIntersectionCandidate] {
         const query = this.find_edges_in_radius(map, canvas_x, canvas_y, max_distance, custom_geometry_cache)
         
-        const segments: { a: Vector, b: Vector, ax: number, ay: number, bx: number, by: number, actor_index: number, edge_index: number }[] =[] 
+        const segments: LineIntersectionCandidate[] = [] 
         for (const actor_selection of query.actors){
             const actor_index = actor_selection.actor_index
             const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
@@ -529,18 +532,20 @@ export class WorldViewportQueries {
         }
         if (best_i === -1){
             // no intersection found 
-            return [null, best_distance]
+            return [null, best_distance, null, null]
         }
         if (this.render_transform.can_3d_transform){
             // now find intersection point in 3d
             const s0 = segments[best_i]
             const s1 = segments[best_j]
-            return [intersect_segments(s0.a, s0.b, s1.a, s1.b), best_distance]
+            return [intersect_segments(s0.a, s0.b, s1.a, s1.b), best_distance, s0, s1]
         } else {
             // on 2d views, convert canvas point to a 3d point
             return [
                 this.render_transform.canvas_to_world_location(best_canvas_intersection.x, best_canvas_intersection.y),
                 best_distance,
+                segments[best_i],
+                segments[best_j],
             ]
         }
     }
@@ -629,6 +634,8 @@ export class WorldViewportQueries {
         let best_right_angle_a = Vector.ZERO 
         let best_right_angle_b = Vector.ZERO
         let best_right_angle_q = Vector.ZERO
+        let best_right_angle_actor_index = -1
+        let best_right_angle_actor_edge_index = -1
 
         let best_polygon_mean_distance = Number.MAX_VALUE
         let best_polygon_mean_location = Vector.ZERO
@@ -681,7 +688,9 @@ export class WorldViewportQueries {
             if (state.interaction_buffer.points.length >= 2) {
                 // this requires a starting point
                 const first_point = state.interaction_buffer.points[0]
-                for (const edge of actor.brushModel.edges) {
+                for (let i=0; i<actor.brushModel.edges.length; i++) {
+                    const actor_edge_index = i
+                    const edge = actor.brushModel.edges[actor_edge_index]
                     const a = world_vertexes[edge.vertexIndexA]
                     const b = world_vertexes[edge.vertexIndexB]
                     const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
@@ -698,6 +707,8 @@ export class WorldViewportQueries {
                         best_right_angle_a = a
                         best_right_angle_b = b
                         best_right_angle_q = first_point
+                        best_right_angle_actor_index = actor_index
+                        best_right_angle_actor_edge_index = actor_edge_index
                     }
                 }
     
@@ -737,7 +748,7 @@ export class WorldViewportQueries {
             }
         }
         
-        const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
+        const [intersection_point, intersection_point_distance, intersection_a, intersection_b] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
         if (intersection_point != null && intersection_point_distance < best_edge_intersection_distance) {
             best_edge_intersection_location = intersection_point
             best_edge_intersection_distance = intersection_point_distance
@@ -746,15 +757,53 @@ export class WorldViewportQueries {
         let best_match_location: Vector = null
         let best_distance = Number.MAX_VALUE
         const device_pixel_ratio = this.render_transform.device_pixel_ratio
+        let result : ViewportPointQueryResult = null
 
         if (best_vertex_distance < best_distance){
             best_distance = best_vertex_distance
             best_match_location = best_vertex_location
+            result = {
+                location: best_vertex_location,
+                selection: {
+                    actors: [
+                        { 
+                            ...DEFAULT_ACTOR_SELECTION, 
+                            actor_index: best_vertex_actor_index, 
+                            vertexes: [best_vertex_actor_vertex_index], 
+                        },
+                    ], 
+                },
+                snap: { type: "Vertex" },
+            }
         }
 
         if (best_edge_intersection_distance < best_distance){
             best_distance = best_edge_intersection_distance
             best_match_location = best_edge_intersection_location
+            result = {
+                location: best_edge_intersection_location,
+                selection: {
+                    actors: [
+                        { 
+                            ...DEFAULT_ACTOR_SELECTION, 
+                            actor_index: intersection_a.actor_index, 
+                            edges: [intersection_a.edge_index], 
+                        },
+                        {
+                            ...DEFAULT_ACTOR_SELECTION,
+                            actor_index: intersection_b.actor_index,
+                            edges: [intersection_b.edge_index],
+                        },
+                    ], 
+                },
+                snap: { 
+                    type: "LineIntersection", 
+                    line_a_0: intersection_a.a, 
+                    line_a_1: intersection_a.b, 
+                    line_b_0: intersection_b.a, 
+                    line_b_1: intersection_b.b, 
+                },
+            }
         }
 
         if (best_right_angle_distance < best_distance){
@@ -773,12 +822,31 @@ export class WorldViewportQueries {
             if (best_right_angle_distance < best_distance){
                 best_distance = best_right_angle_distance
                 best_match_location = best_right_angle_location
+                result = {
+                    location: best_right_angle_location,
+                    selection: {
+                        actors: [
+                            {
+                                ...DEFAULT_ACTOR_SELECTION,
+                                actor_index: best_right_angle_actor_index,
+                                edges: [best_right_angle_actor_edge_index],
+                            },
+                        ],
+                    },
+                    snap: {
+                        type: 'LineRightAngle',
+                        from: best_right_angle_q,
+                        line_0: best_right_angle_a,
+                        line_1: best_right_angle_b,
+                    },
+                }
             }
         }
 
         best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_edge_midpoint_distance < best_distance){
+            // todo result
             best_distance = best_edge_midpoint_distance
             best_match_location = best_edge_midpoint_location
         }
@@ -786,6 +854,7 @@ export class WorldViewportQueries {
         best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_polygon_mean_distance < best_distance){
+            // todo result
             best_distance = best_polygon_mean_distance
             best_match_location = best_polygon_mean_location
         }
@@ -793,17 +862,12 @@ export class WorldViewportQueries {
         best_edge_distance = Math.max(best_edge_distance, 24*device_pixel_ratio - best_distance)
 
         if (best_edge_distance < best_distance){
+            // todo result
             best_distance = best_edge_distance
             best_match_location = best_edge_location
         }
 
-        return {
-            location: best_match_location, 
-            snap,
-        }
-
-        // return [best_match_location, best_distance]
-
+        return result
     }
 
 }
