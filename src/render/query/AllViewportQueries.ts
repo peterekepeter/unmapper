@@ -6,8 +6,8 @@ import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewportMode } from "../../model/ViewportMode"
 import { ViewTransform } from "../ViewTransform"
-import { SnapResult } from "./SnapResult"
 import { UvViewportQueries } from "./UvViewportQueries"
+import { ViewportPointQueryResult } from "./ViewportPointQueryResult"
 import { WorldViewportQueries } from "./WorldViewportQueries"
 
 export class AllViewportQueries {
@@ -87,13 +87,9 @@ export class AllViewportQueries {
         canvas_x: number, 
         canvas_y: number, 
         custom_geometry_cache: GeometryCache,
-    ): {
-            selection: EditorSelection,
-            location: Vector,
-            snap?: SnapResult 
-        }
+    ): ViewportPointQueryResult
     {
-        throw new Error('not implemented')
+        return this.current.query_point(state, canvas_x, canvas_y, custom_geometry_cache)
     }
 }
 

@@ -7,6 +7,7 @@ import { UnrealMap } from "../../model/UnrealMap"
 import { get_brush_polygon_vertex_uvs } from "../../model/uvmap/vertex_uv"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
+import { ViewportPointQueryResult } from "./ViewportPointQueryResult"
 
 export class UvViewportQueries {
 
@@ -210,14 +211,14 @@ export class UvViewportQueries {
         let best_distance = Number.MAX_VALUE
         
         for (let i = 0; i < state.map.actors.length; i++){
-            const actor_index = i;
+            const actor_index = i
             const actor = state.map.actors[actor_index]
-            const brush = actor.brushModel;
+            const brush = actor.brushModel
             if (!brush){
-                continue;
+                continue
             }
             for (let j = 0; j < brush.polygons.length; j++){
-                const polygon_index = j;
+                const polygon_index = j
                 const polygon_uv = get_brush_polygon_vertex_uvs(brush, polygon_index)
 
                 // snap to uv vertexes
@@ -234,5 +235,15 @@ export class UvViewportQueries {
             }
         }
         return [best_location, best_distance]
+    }
+    
+    query_point(
+        state: EditorState, 
+        canvas_x: number, 
+        canvas_y: number, 
+        custom_geometry_cache: GeometryCache,
+    ): ViewportPointQueryResult
+    {
+        throw new Error("not implemented")
     }
 }

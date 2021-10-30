@@ -8,6 +8,7 @@ import { intersect_segments } from "../../model/geometry/intersect_segments"
 import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
+import { ViewportPointQueryResult } from "./ViewportPointQueryResult"
 
 export class WorldViewportQueries {
 
@@ -600,6 +601,209 @@ export class WorldViewportQueries {
         }
         const editor_selection: EditorSelection = { actors: result_actors }
         return editor_selection
+    }
+    
+    query_point(
+        state: EditorState, 
+        canvas_x: number, 
+        canvas_y: number, 
+        custom_geometry_cache: GeometryCache,
+    ): ViewportPointQueryResult
+    {
+
+        const map = state.map
+
+        let best_vertex_distance = Number.MAX_VALUE
+        let best_vertex_location = Vector.ZERO
+        let best_vertex_actor_index = -1
+        let best_vertex_actor_vertex_index = -1
+
+        let best_edge_midpoint_distance = Number.MAX_VALUE
+        let best_edge_midpoint_location = Vector.ZERO
+        
+        let best_edge_distance = Number.MAX_VALUE
+        let best_edge_location = Vector.ZERO
+
+        let best_right_angle_distance = Number.MAX_VALUE
+        let best_right_angle_location = Vector.ZERO
+        let best_right_angle_a = Vector.ZERO 
+        let best_right_angle_b = Vector.ZERO
+        let best_right_angle_q = Vector.ZERO
+
+        let best_polygon_mean_distance = Number.MAX_VALUE
+        let best_polygon_mean_location = Vector.ZERO
+
+        let best_edge_intersection_distance = Number.MAX_VALUE
+        let best_edge_intersection_location = Vector.ZERO
+
+        for (let actor_index = map.actors.length - 1; actor_index >= 0; actor_index--) {
+            const actor = map.actors[actor_index] // reverse iterate to find topmost actor
+            if (actor.brushModel == null) {
+                continue // skip actors don't have a brushModel
+            }
+
+            const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
+
+            // snap to vertexes
+            for (let i=0; i<world_vertexes.length; i++) {
+                const actor_vertex_index = i
+                const vertex = world_vertexes[actor_vertex_index]
+                const x0 = this.render_transform.view_transform_x(vertex)
+                const y0 = this.render_transform.view_transform_y(vertex)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_vertex_distance) {
+                        best_vertex_location = vertex
+                        best_vertex_distance = distance
+                        best_vertex_actor_index = actor_index
+                        best_vertex_actor_vertex_index = actor_vertex_index
+                    }
+                }
+            }
+
+            // snap edge midpoint
+            for (const edge of actor.brushModel.edges) {
+                const a = world_vertexes[edge.vertexIndexA]
+                const b = world_vertexes[edge.vertexIndexB]
+                const midpoint = a.add_vector(b).scale(0.5)
+                const x0 = this.render_transform.view_transform_x(midpoint)
+                const y0 = this.render_transform.view_transform_y(midpoint)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_edge_midpoint_distance) {
+                        best_edge_midpoint_location = midpoint
+                        best_edge_midpoint_distance = distance
+                    }
+                }
+            }
+
+            // snap edge so that a right angle is formed
+            if (state.interaction_buffer.points.length >= 2) {
+                // this requires a starting point
+                const first_point = state.interaction_buffer.points[0]
+                for (const edge of actor.brushModel.edges) {
+                    const a = world_vertexes[edge.vertexIndexA]
+                    const b = world_vertexes[edge.vertexIndexB]
+                    const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
+                    if (c == null){
+                        continue // no such point
+                    }
+                    const x = this.render_transform.view_transform_x(c)
+                    const y = this.render_transform.view_transform_y(c)
+
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+                    if (distance < best_right_angle_distance) {
+                        best_right_angle_location = c
+                        best_right_angle_distance = distance
+                        best_right_angle_a = a
+                        best_right_angle_b = b
+                        best_right_angle_q = first_point
+                    }
+                }
+    
+            }
+            // snap to edges
+            for (const edge of actor.brushModel.edges) {
+                const a = world_vertexes[edge.vertexIndexA]
+                const b = world_vertexes[edge.vertexIndexB]
+                const ax = this.render_transform.view_transform_x(a)
+                const ay = this.render_transform.view_transform_y(a)
+                const bx = this.render_transform.view_transform_x(b)
+                const by = this.render_transform.view_transform_y(b)
+                if (!isNaN(ax) && !isNaN(bx)) {
+                    const distance = distance_to_line_segment(canvas_x, canvas_y, ax, ay, bx, by)
+                    if (distance < best_edge_distance) {
+                        const distance_to_a = distance_2d_to_point(canvas_x, canvas_y, ax, ay)
+                        const distance_to_b = distance_2d_to_point(canvas_x, canvas_y, bx, by)
+                        const whole = distance_to_a + distance_to_b
+                        best_edge_location = a.scale(distance_to_b).add_vector(b.scale(distance_to_a)).scale(1 / whole)
+                        best_edge_distance = distance
+                    }
+                }
+            }
+
+            // snap polygon median
+            for (const polygon of actor.brushModel.polygons) {
+                const median = polygon.median
+                const x0 = this.render_transform.view_transform_x(median)
+                const y0 = this.render_transform.view_transform_y(median)
+                if (!isNaN(x0) && !isNaN(y0)) {
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
+                    if (distance < best_polygon_mean_distance) {
+                        best_polygon_mean_location = median
+                        best_polygon_mean_distance = distance
+                    }
+                }
+            }
+        }
+        
+        const [intersection_point, intersection_point_distance] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
+        if (intersection_point != null && intersection_point_distance < best_edge_intersection_distance) {
+            best_edge_intersection_location = intersection_point
+            best_edge_intersection_distance = intersection_point_distance
+        }
+        
+        let best_match_location: Vector = null
+        let best_distance = Number.MAX_VALUE
+        const device_pixel_ratio = this.render_transform.device_pixel_ratio
+
+        if (best_vertex_distance < best_distance){
+            best_distance = best_vertex_distance
+            best_match_location = best_vertex_location
+        }
+
+        if (best_edge_intersection_distance < best_distance){
+            best_distance = best_edge_intersection_distance
+            best_match_location = best_edge_intersection_location
+        }
+
+        if (best_right_angle_distance < best_distance){
+            // refine snap point for higher precision
+            best_right_angle_location = precise_closest_point_to_line(
+                best_right_angle_a, 
+                best_right_angle_b, 
+                best_right_angle_q,
+            )
+            best_right_angle_distance = distance_2d_to_point(
+                canvas_x, 
+                canvas_y,
+                this.render_transform.view_transform_x(best_right_angle_location), 
+                this.render_transform.view_transform_y(best_right_angle_location),
+            )
+            if (best_right_angle_distance < best_distance){
+                best_distance = best_right_angle_distance
+                best_match_location = best_right_angle_location
+            }
+        }
+
+        best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
+
+        if (best_edge_midpoint_distance < best_distance){
+            best_distance = best_edge_midpoint_distance
+            best_match_location = best_edge_midpoint_location
+        }
+        
+        best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4*device_pixel_ratio - best_distance)
+
+        if (best_polygon_mean_distance < best_distance){
+            best_distance = best_polygon_mean_distance
+            best_match_location = best_polygon_mean_location
+        }
+
+        best_edge_distance = Math.max(best_edge_distance, 24*device_pixel_ratio - best_distance)
+
+        if (best_edge_distance < best_distance){
+            best_distance = best_edge_distance
+            best_match_location = best_edge_location
+        }
+
+        return {
+            location: best_match_location, 
+            snap,
+        }
+
+        // return [best_match_location, best_distance]
+
     }
 
 }
