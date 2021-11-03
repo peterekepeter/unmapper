@@ -7,4 +7,5 @@ export type SnapResult = { type: 'Vertex'; }
 | { type: 'ActorOrigin'; actor_index: number; }
 | { type: 'LineIntersection'; line_a_0: Vector, line_a_1: Vector, line_b_0: Vector, line_b_1: Vector }
 | { type: 'LineRightAngle'; line_0: Vector, line_1: Vector, from: Vector }
+| { type: 'PolygonMean'; }
     

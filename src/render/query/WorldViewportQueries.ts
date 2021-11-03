@@ -625,9 +625,17 @@ export class WorldViewportQueries {
 
         let best_edge_midpoint_distance = Number.MAX_VALUE
         let best_edge_midpoint_location = Vector.ZERO
+        let best_edge_midpoint_actor_index = -1
+        let best_edge_midpoint_actor_edge_index = -1
+        const best_edge_midpoint_vertex_a = Vector.ZERO
+        const best_edge_midpoint_vertex_b = Vector.ZERO
         
         let best_edge_distance = Number.MAX_VALUE
         let best_edge_location = Vector.ZERO
+        let best_edge_actor_index = -1
+        let best_edge_actor_edge_index = -1
+        let best_edge_vertex_a = Vector.ZERO
+        let best_edge_vertex_b = Vector.ZERO
 
         let best_right_angle_distance = Number.MAX_VALUE
         let best_right_angle_location = Vector.ZERO
@@ -639,6 +647,8 @@ export class WorldViewportQueries {
 
         let best_polygon_mean_distance = Number.MAX_VALUE
         let best_polygon_mean_location = Vector.ZERO
+        let best_polygon_mean_actor_index = -1
+        let best_polygon_mean_actor_polygon_index = -1
 
         let best_edge_intersection_distance = Number.MAX_VALUE
         let best_edge_intersection_location = Vector.ZERO
@@ -669,7 +679,9 @@ export class WorldViewportQueries {
             }
 
             // snap edge midpoint
-            for (const edge of actor.brushModel.edges) {
+            for (let i=0; i<actor.brushModel.edges.length; i++) {
+                const actor_edge_index = i
+                const edge = actor.brushModel.edges[actor_edge_index]
                 const a = world_vertexes[edge.vertexIndexA]
                 const b = world_vertexes[edge.vertexIndexB]
                 const midpoint = a.add_vector(b).scale(0.5)
@@ -678,6 +690,8 @@ export class WorldViewportQueries {
                 if (!isNaN(x0) && !isNaN(y0)) {
                     const distance = distance_2d_to_point(canvas_x, canvas_y, x0, y0)
                     if (distance < best_edge_midpoint_distance) {
+                        best_edge_midpoint_actor_index = actor_index
+                        best_edge_midpoint_actor_edge_index = actor_edge_index
                         best_edge_midpoint_location = midpoint
                         best_edge_midpoint_distance = distance
                     }
@@ -714,7 +728,9 @@ export class WorldViewportQueries {
     
             }
             // snap to edges
-            for (const edge of actor.brushModel.edges) {
+            for (let i=0; i<actor.brushModel.edges.length; i++) {
+                const actor_edge_index = i
+                const edge = actor.brushModel.edges[actor_edge_index]
                 const a = world_vertexes[edge.vertexIndexA]
                 const b = world_vertexes[edge.vertexIndexB]
                 const ax = this.render_transform.view_transform_x(a)
@@ -729,12 +745,18 @@ export class WorldViewportQueries {
                         const whole = distance_to_a + distance_to_b
                         best_edge_location = a.scale(distance_to_b).add_vector(b.scale(distance_to_a)).scale(1 / whole)
                         best_edge_distance = distance
+                        best_edge_actor_index = actor_index
+                        best_edge_actor_edge_index = actor_edge_index
+                        best_edge_vertex_a = a
+                        best_edge_vertex_b = b
                     }
                 }
             }
 
             // snap polygon median
-            for (const polygon of actor.brushModel.polygons) {
+            for (let i=0; i<actor.brushModel.polygons.length; i++) {
+                const polygon_index = i
+                const polygon = actor.brushModel.polygons[polygon_index]
                 const median = polygon.median
                 const x0 = this.render_transform.view_transform_x(median)
                 const y0 = this.render_transform.view_transform_y(median)
@@ -743,6 +765,8 @@ export class WorldViewportQueries {
                     if (distance < best_polygon_mean_distance) {
                         best_polygon_mean_location = median
                         best_polygon_mean_distance = distance
+                        best_polygon_mean_actor_index = actor_index
+                        best_polygon_mean_actor_polygon_index = polygon_index
                     }
                 }
             }
@@ -846,25 +870,69 @@ export class WorldViewportQueries {
         best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_edge_midpoint_distance < best_distance){
-            // todo result
             best_distance = best_edge_midpoint_distance
             best_match_location = best_edge_midpoint_location
+            result = {
+                location: best_edge_midpoint_location,
+                selection: {
+                    actors: [
+                        {
+                            ...DEFAULT_ACTOR_SELECTION,
+                            actor_index: best_edge_midpoint_actor_index,
+                            edges: [best_edge_midpoint_actor_edge_index],
+                        },
+                    ],
+                },
+                snap: {
+                    type: 'EdgeMidpoint',
+                    vertex_a: best_edge_midpoint_vertex_a,
+                    vertex_b: best_edge_midpoint_vertex_b,
+                },
+            }
         }
         
         best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_polygon_mean_distance < best_distance){
-            // todo result
             best_distance = best_polygon_mean_distance
             best_match_location = best_polygon_mean_location
+            result = {
+                location: best_polygon_mean_location,
+                selection: {
+                    actors: [
+                        {
+                            ...DEFAULT_ACTOR_SELECTION,
+                            actor_index: best_polygon_mean_actor_index,
+                            polygons: [best_polygon_mean_actor_polygon_index],
+                        },
+                    ],
+                },
+                snap: { type: 'PolygonMean' },
+            }
         }
 
-        best_edge_distance = Math.max(best_edge_distance, 24*device_pixel_ratio - best_distance)
+        best_edge_distance = Math.max(best_edge_distance, 4*device_pixel_ratio - best_distance)
 
         if (best_edge_distance < best_distance){
-            // todo result
             best_distance = best_edge_distance
             best_match_location = best_edge_location
+            result = {
+                location: best_edge_location,
+                selection: {
+                    actors: [
+                        {
+                            ...DEFAULT_ACTOR_SELECTION,
+                            actor_index: best_edge_actor_index,
+                            edges: [best_edge_actor_edge_index],
+                        },
+                    ],
+                },
+                snap: {
+                    type: "Edge",
+                    vertex_a: best_edge_vertex_a, 
+                    vertex_b: best_edge_vertex_b,
+                },
+            }
         }
 
         return result
