@@ -5,6 +5,7 @@ import { DEFAULT_INTERACTION_BUFFER } from "../../model/InteractionBuffer"
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
 import { ViewportMode } from "../../model/ViewportMode"
+import { ViewportPointQueryResult } from "../../render/query/ViewportPointQueryResult"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { InteractionRenderState } from "./InteractionRenderState"
@@ -50,9 +51,9 @@ export class BufferedInteractionController
         }
     }
 
-    handle_pointer_click(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
-        this.controller.execute(confirm_interaction_point_command, vector, event.view_mode)
-        this.preview_current_command(vector, is_snap)
+    handle_pointer_click(query: ViewportPointQueryResult, event: ViewportEvent): void {
+        this.controller.execute(confirm_interaction_point_command, query.location, event.view_mode)
+        this.preview_current_command(query)
 
         // if command resets the interaction buffer that means should be finalized
         if (this.controller.state_signal.value.interaction_buffer === DEFAULT_INTERACTION_BUFFER){
@@ -60,15 +61,15 @@ export class BufferedInteractionController
         }
     }
 
-    handle_pointer_move(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
-        this.controller.execute(propose_interaction_point_command, vector, event.view_mode)
-        this.preview_current_command(vector, is_snap)
+    handle_pointer_move(query: ViewportPointQueryResult, event: ViewportEvent): void {
+        this.controller.execute(propose_interaction_point_command, query.location, event.view_mode)
+        this.preview_current_command(query)
         this.last_move_mode = event.view_mode
-        this.last_move_vector = vector
+        this.last_move_vector = query.location
     }
 
-    private preview_current_command(vector: Vector, is_snap: boolean) {
-        const interaction = this.get_interaction_render_state(vector, is_snap)
+    private preview_current_command(query: ViewportPointQueryResult) {
+        const interaction = this.get_interaction_render_state(query)
         if (this.has_interaction) {
             this.controller.preview_command_with_interaction(interaction, this.command_info, [])
         } else {
@@ -76,8 +77,8 @@ export class BufferedInteractionController
         }
     }
 
-    private get_interaction_render_state(vector: Vector, is_snap: boolean): InteractionRenderState {
-        return { snap_location: is_snap ? vector : null }
+    private get_interaction_render_state(query: ViewportPointQueryResult): InteractionRenderState {
+        return { snap_location: query.location }
     }
     
 }

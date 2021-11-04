@@ -9,8 +9,8 @@ export const toggle_actor_selected_command: ICommandInfoV2 = {
     exec: toggle_actor_selected,
 }
 
-function toggle_actor_selected(state: EditorState, target: Actor) : EditorState {
-    const actor_index = get_actor_index(state, target)
+function toggle_actor_selected(state: EditorState, target: Actor | number) : EditorState {
+    const actor_index = typeof target === 'number' ? target : get_actor_index(state, target)
     return change_actor_selection(
         state, 
         actor_index,

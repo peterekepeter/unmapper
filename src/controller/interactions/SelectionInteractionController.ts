@@ -60,7 +60,8 @@ export class SelectionInteractionController
         if (vertex_mode) {
             this.point_select_in_vertex_mode(event)
         } else {
-            const actor = this._viewport_queries.find_nearest_actor(state.map, event.canvas_x, event.canvas_y)
+            const query = this._viewport_queries.query_point(state, event.canvas_x, event.canvas_y)
+            const actor = query.selection?.actors[0]?.actor_index
             if (event.ctrl_key) {
                 controller.execute(toggle_actor_selected_command, actor)
             } else {

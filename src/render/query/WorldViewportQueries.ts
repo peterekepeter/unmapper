@@ -8,7 +8,7 @@ import { intersect_segments } from "../../model/geometry/intersect_segments"
 import { UnrealMap } from "../../model/UnrealMap"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
-import { SnapResult } from "./SnapResult"
+import { DEFAULT_SNAP_RESULT } from "./SnapResult"
 import { ViewportPointQueryResult } from "./ViewportPointQueryResult"
 
 type LineIntersectionCandidate = { a: Vector, b: Vector, ax: number, ay: number, bx: number, by: number, actor_index: number, edge_index: number }
@@ -614,7 +614,9 @@ export class WorldViewportQueries {
         canvas_y: number, 
         custom_geometry_cache: GeometryCache,
     ): ViewportPointQueryResult
-    {
+    {        
+        const device_pixel_ratio = this.render_transform.device_pixel_ratio
+        const MAX_SNAP_DISTANCE = 32 * device_pixel_ratio
 
         const map = state.map
 
@@ -780,10 +782,11 @@ export class WorldViewportQueries {
         
         let best_match_location: Vector = null
         let best_distance = Number.MAX_VALUE
-        const device_pixel_ratio = this.render_transform.device_pixel_ratio
         let result : ViewportPointQueryResult = null
 
-        if (best_vertex_distance < best_distance){
+        if (best_vertex_distance < best_distance && 
+            best_vertex_distance < MAX_SNAP_DISTANCE)
+        {
             best_distance = best_vertex_distance
             best_match_location = best_vertex_location
             result = {
@@ -801,7 +804,9 @@ export class WorldViewportQueries {
             }
         }
 
-        if (best_edge_intersection_distance < best_distance){
+        if (best_edge_intersection_distance < best_distance&& 
+            best_edge_intersection_distance < MAX_SNAP_DISTANCE)
+        {
             best_distance = best_edge_intersection_distance
             best_match_location = best_edge_intersection_location
             result = {
@@ -830,7 +835,9 @@ export class WorldViewportQueries {
             }
         }
 
-        if (best_right_angle_distance < best_distance){
+        if (best_right_angle_distance < best_distance&& 
+            best_right_angle_distance < MAX_SNAP_DISTANCE)
+        {
             // refine snap point for higher precision
             best_right_angle_location = precise_closest_point_to_line(
                 best_right_angle_a, 
@@ -869,7 +876,9 @@ export class WorldViewportQueries {
 
         best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
 
-        if (best_edge_midpoint_distance < best_distance){
+        if (best_edge_midpoint_distance < best_distance&& 
+            best_edge_midpoint_distance < MAX_SNAP_DISTANCE)
+        {
             best_distance = best_edge_midpoint_distance
             best_match_location = best_edge_midpoint_location
             result = {
@@ -893,7 +902,9 @@ export class WorldViewportQueries {
         
         best_polygon_mean_distance = Math.max(best_polygon_mean_distance, 4*device_pixel_ratio - best_distance)
 
-        if (best_polygon_mean_distance < best_distance){
+        if (best_polygon_mean_distance < best_distance && 
+            best_polygon_mean_distance < MAX_SNAP_DISTANCE)
+        {
             best_distance = best_polygon_mean_distance
             best_match_location = best_polygon_mean_location
             result = {
@@ -911,9 +922,11 @@ export class WorldViewportQueries {
             }
         }
 
-        best_edge_distance = Math.max(best_edge_distance, 4*device_pixel_ratio - best_distance)
+        best_edge_distance = Math.max(best_edge_distance, 24*device_pixel_ratio - best_distance)
 
-        if (best_edge_distance < best_distance){
+        if (best_edge_distance < best_distance && 
+            best_edge_distance < MAX_SNAP_DISTANCE)
+        {
             best_distance = best_edge_distance
             best_match_location = best_edge_location
             result = {
@@ -932,6 +945,15 @@ export class WorldViewportQueries {
                     vertex_a: best_edge_vertex_a, 
                     vertex_b: best_edge_vertex_b,
                 },
+            }
+        }
+
+        if (best_distance >= MAX_SNAP_DISTANCE || result == null)
+        {
+            result = {
+                location: this.render_transform.canvas_to_world_location(canvas_x, canvas_y),
+                selection: DEFAULT_EDITOR_SELECTION,
+                snap: DEFAULT_SNAP_RESULT,
             }
         }
 

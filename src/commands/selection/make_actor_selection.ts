@@ -10,11 +10,11 @@ export const make_actor_selection_command : ICommandInfoV2 = {
     exec: make_actor_selection,
 }
 
-function make_actor_selection(state: EditorState, to_select : Actor): EditorState {
-    if (to_select == null){
+function make_actor_selection(state: EditorState, target : Actor | number): EditorState {
+    if (target == null){
         return clear_selection(state)
     }
-    const actor_index = get_actor_index(state, to_select)
+    const actor_index = typeof target === 'number' ? target : get_actor_index(state, target)
     const new_selection = [create_actor_selection(actor_index)]
     return replace_actor_selection(state, new_selection)
 }

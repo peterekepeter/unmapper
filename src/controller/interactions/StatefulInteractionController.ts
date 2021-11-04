@@ -1,5 +1,6 @@
 import { Vector } from "../../model/Vector"
 import { ViewportEvent } from "../../model/ViewportEvent"
+import { ViewportPointQueryResult } from "../../render/query/ViewportPointQueryResult"
 import { AppController } from "../AppController"
 import { ICommandInfoV2 } from "../command"
 import { InteractionRenderState } from "./InteractionRenderState"
@@ -20,18 +21,18 @@ export class StatefulInteractionController {
         return this.interaction != null
     }
 
-    handle_pointer_click(vector: Vector, event: ViewportEvent): void {
-        this.interaction.set_pointer_world_location(vector, event)
+    handle_pointer_click(query: ViewportPointQueryResult, event: ViewportEvent): void {
+        this.interaction.set_pointer_world_location(query.location, event)
         this.interaction.pointer_click()
         this.try_complete_execution()
     }
 
-    handle_pointer_move(vector: Vector, event: ViewportEvent, is_snap: boolean): void {
-        this.interaction.set_pointer_world_location(vector, event)
+    handle_pointer_move(query: ViewportPointQueryResult, event: ViewportEvent): void {
+        this.interaction.set_pointer_world_location(query.location, event)
         this.args[this.arg_index] = this.interaction.result
         const interaction_render_state: InteractionRenderState = {
             ...this.interaction.render_state,
-            snap_location: is_snap ? vector : null,
+            snap_location: query.snap.type != "None" ? query.location : null,
         }
 
         this.controller.preview_command_with_interaction(interaction_render_state, this.command_info, this.args)

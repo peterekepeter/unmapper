@@ -34,6 +34,7 @@ export class AllViewportQueries {
         return this.use_uv_queries ? this.uv_queries : this.world_queries
     }
 
+    /** @deprecated use point_query */
     find_nearest_actor(
         map: UnrealMap,
         canvas_x: number,
@@ -42,6 +43,7 @@ export class AllViewportQueries {
         return this.current.find_nearest_actor(map, canvas_x, canvas_y)
     }
 
+    /** @deprecated use point_query */
     find_selection_at_point(
         state: EditorState,
         canvas_x: number,
@@ -50,6 +52,7 @@ export class AllViewportQueries {
         return this.current.find_selection_at_point(state, canvas_x, canvas_y)
     }
     
+    /** @deprecated use point_query */
     find_actors_in_box(
         map: UnrealMap,
         canvas_x0: number,
@@ -71,6 +74,7 @@ export class AllViewportQueries {
         return this.current.find_vertexes_of_selected_actors_in_box(state, canvas_x0, canvas_y0, canvas_x1, canvas_y1, custom_geometry_cache)
     }
 
+    /** @deprecated use point_query */
     find_nearest_snapping_point(
         state: EditorState,
         canvas_x: number,
@@ -86,10 +90,10 @@ export class AllViewportQueries {
         state: EditorState, 
         canvas_x: number, 
         canvas_y: number, 
-        custom_geometry_cache: GeometryCache,
+        custom_geometry_cache?: GeometryCache,
     ): ViewportPointQueryResult
     {
-        return this.current.query_point(state, canvas_x, canvas_y, custom_geometry_cache)
+        return this.current.query_point(state, canvas_x, canvas_y, custom_geometry_cache ?? this.geometry_cache)
     }
 }
 

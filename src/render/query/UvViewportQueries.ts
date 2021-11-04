@@ -1,6 +1,7 @@
 import { Actor } from "../../model/Actor"
 import { DEFAULT_ACTOR_POLYGON_SELECTION, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
+import { NotImplementedError } from "../../model/error/NotImplementedError"
 import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { UnrealMap } from "../../model/UnrealMap"
@@ -244,6 +245,6 @@ export class UvViewportQueries {
         custom_geometry_cache: GeometryCache,
     ): ViewportPointQueryResult
     {
-        throw new Error("not implemented")
+        throw new NotImplementedError()
     }
 }
