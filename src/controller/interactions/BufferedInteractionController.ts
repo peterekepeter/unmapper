@@ -78,7 +78,49 @@ export class BufferedInteractionController
     }
 
     private get_interaction_render_state(query: ViewportPointQueryResult): InteractionRenderState {
-        return { snap_location: query.location }
+        const snap = query.snap
+        switch(snap.type){
+            case "None": 
+                return { shapes: [{ type: "Point", shape: 'TinyDot', location: query.location }] }
+            case "Vertex": 
+                return { shapes: [{ type: "Point", shape: 'Rectangle', location: query.location }] }
+            case "Edge":
+                return {
+                    shapes: [
+                        { type: "Point", shape: "SmallDot", location: query.location },
+                        { type: "Line", from: snap.vertex_a, to: snap.vertex_b },
+                    ], 
+                }
+            
+            case "EdgeMidpoint":
+                return {
+                    shapes: [
+                        { type: "Point", shape: "Dot", location: query.location },
+                        { type: "Line", from: snap.vertex_a, to: snap.vertex_b },
+                    ], 
+                }
+            
+            case "LineIntersection":
+                return {
+                    shapes: [
+                        { type: "Point", shape: "X", location: query.location },
+                        { type: "Line", from: snap.line_a_0, to: snap.line_a_1 },
+                        { type: "Line", from: snap.line_b_0, to: snap.line_b_1 },
+                    ], 
+                }
+            case "LineRightAngle":
+                return {
+                    shapes: [
+                        { type: "Point", shape: "Dot", location: query.location },
+                        { type: "Line", from: snap.line_0, to: snap.line_1 },
+                        { type: "Line", shape: "Arrow", from: snap.from, to: query.location },
+                    ], 
+                }
+                
+            default: 
+                return { shapes: [{ type: "Point", shape: "SmallDot", location: query.location }] }
+                
+        }
     }
     
 }

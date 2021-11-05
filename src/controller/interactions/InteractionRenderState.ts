@@ -7,4 +7,9 @@ export interface InteractionRenderState {
     snap_location?: Vector;
     viewport_box_index?: number;
     viewport_box?: BoundingBox;
+    shapes?: DebugShape[];
 }
+
+export type DebugShape 
+    = { type: 'Point', location: Vector, shape?: 'Dot' | 'Rectangle' | 'X' | 'TinyDot' | 'SmallDot' } 
+    | { type: 'Line', from: Vector, to: Vector, shape?: 'Arrow' | 'Line' }

@@ -503,6 +503,100 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             }
 
         }
+
+        if (state.shapes){
+            context.strokeStyle = '#fff'
+            context.fillStyle = '#fff'
+            for (const shape of state.shapes){
+                if (shape.type === 'Point') {
+                    const x = render_transform.view_transform_x(shape.location)
+                    const y = render_transform.view_transform_y(shape.location)
+                    
+                    if (!isNaN(x) && !isNaN(y)) {
+                        switch (shape.shape){
+                            case "Dot":
+                                context.beginPath()
+                                context.arc(x, y, 3 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.fill()
+                                break
+                            case "SmallDot":
+                                context.beginPath()
+                                context.arc(x, y, 2 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.fill()
+                                break
+                            case "TinyDot":
+                                context.beginPath()
+                                context.arc(x, y, 1 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.fill()
+                                break
+                            case "X": {
+                                context.beginPath()
+                                const size_from_center = 2 * render_transform.device_pixel_ratio
+                                const size = size_from_center*2+1
+                                context.moveTo(x - size, y - size)
+                                context.lineTo(x + size, y + size)
+                                context.moveTo(x + size, y - size)
+                                context.lineTo(x - size, y + size)
+                                context.stroke()
+                                break
+                            }
+                            default:
+                            case "Rectangle": {
+                                context.beginPath()
+                                const size_from_center = 2 * render_transform.device_pixel_ratio
+                                const size = size_from_center*2+1
+                                context.rect(x - size_from_center, y - size_from_center, size, size)
+                                context.stroke()
+                                break
+                            }
+                        }
+                    }
+                }
+                else if (shape.type === "Line"){
+                    const a = shape.from
+                    const b = shape.to
+        
+                    const x0 = render_transform.view_transform_x(a), y0 = render_transform.view_transform_y(a)
+                    const x1 = render_transform.view_transform_x(b), y1 = render_transform.view_transform_y(b)
+                    const invalid0 = isNaN(x0) || isNaN(y0)
+                    const invalid1 = isNaN(x1) || isNaN(y1)
+        
+                    if (!invalid0 && !invalid1) {
+                        switch (shape.shape){
+                            case "Arrow": {
+                                const dx = x1 - x0, dy = y1 - y0
+                                const len = Math.sqrt(dx * dx + dy * dy)
+                                const nx = dx / len, ny = dy / len
+                                const rx = ny, ry = -nx
+                                context.beginPath()
+                                // line
+                                context.moveTo(x0, y0)
+                                context.lineTo(x1, y1)
+                                // tail
+                                context.moveTo(x0 - rx * 2, y0 - ry * 2)
+                                context.lineTo(x0 + rx * 2, y0 + ry * 2)
+                                // arrowhead
+                                context.moveTo(x1 + 6 * (-rx - nx), y1 + 6 * (-ry - ny))
+                                context.lineTo(x1, y1)
+                                context.lineTo(x1 + 6 * (+rx - nx), y1 + 6 * (+ry - ny))
+                                context.stroke()
+                                break
+                            }
+                            default:
+                            case "Line": {
+                                context.beginPath()
+                                // line
+                                context.moveTo(x0, y0)
+                                context.lineTo(x1, y1)
+                                context.stroke()
+                                break
+                            }
+                                
+                        }
+                    }
+                }
+            }
+        }
     }
 
     function set_view_transform(transform: ViewTransform): void {
