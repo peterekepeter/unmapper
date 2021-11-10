@@ -804,6 +804,12 @@ export class WorldViewportQueries {
             }
         }
 
+        // prioritize vertex snap a bit over edge_intersection
+        best_edge_intersection_distance = Math.max(
+            best_edge_intersection_distance, 
+            4*device_pixel_ratio - best_distance,
+        ) + 1*device_pixel_ratio
+
         if (best_edge_intersection_distance < best_distance&& 
             best_edge_intersection_distance < MAX_SNAP_DISTANCE)
         {
@@ -834,6 +840,9 @@ export class WorldViewportQueries {
                 },
             }
         }
+
+        // lower priority on right angle compared to intersection and vertex
+        best_right_angle_distance += 2*device_pixel_ratio
 
         if (best_right_angle_distance < best_distance&& 
             best_right_angle_distance < MAX_SNAP_DISTANCE)
@@ -874,7 +883,11 @@ export class WorldViewportQueries {
             }
         }
 
-        best_edge_midpoint_distance = Math.max(best_edge_midpoint_distance, 4*device_pixel_ratio - best_distance)
+        // edge midpoint should have a lot lower priority
+        best_edge_midpoint_distance = Math.max(
+            best_edge_midpoint_distance, 
+            4*device_pixel_ratio - best_distance,
+        ) + 4*device_pixel_ratio
 
         if (best_edge_midpoint_distance < best_distance&& 
             best_edge_midpoint_distance < MAX_SNAP_DISTANCE)
