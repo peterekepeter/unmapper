@@ -1,75 +1,75 @@
-import { BrushPolygonData } from "../../BrushPolygonData";
-import { makeParser } from "./parser-helper";
-import { Parser } from "./Parser";
-import { importVector } from "./import-vector";
+import { BrushPolygonData } from "../../BrushPolygonData"
+import { GenericParser } from "../common/GenericParser"
+import { importVector } from "./import-vector"
+import { makeParser } from "./parser-helper"
 
-export function importPolygon(arg : string | Parser) : BrushPolygonData {
-    const parser = makeParser(arg);
-    const result = new BrushPolygonData();
+export function importPolygon(arg : string | GenericParser) : BrushPolygonData {
+    const parser = makeParser(arg)
+    const result = new BrushPolygonData()
 
-    parser.acceptAndMoveToNext("Begin");
-    parser.acceptAndMoveToNext("Polygon");
+    parser.accept_and_move_to_next("Begin")
+    parser.accept_and_move_to_next("Polygon")
 
     while(true){
-        const key = parser.getCurrentToken();
+        const key = parser.get_current_token()
         if (key == "End"){
-            break;
+            break
         }
-        parser.moveToNext();
+        parser.move_to_next()
         switch(key){
             case "Flags": 
-                parser.acceptAndMoveToNext("=");
-                result.flags = parser.parseIntAndMoveToNext();
-                break;
+                parser.accept_and_move_to_next("=")
+                result.flags = parser.parse_int_and_move_to_next()
+                break
             case "Link": 
-                parser.acceptAndMoveToNext("=");
-                result.link = parser.parseIntAndMoveToNext();
-                break;
+                parser.accept_and_move_to_next("=")
+                result.link = parser.parse_int_and_move_to_next()
+                break
             case "Item":
-                parser.acceptAndMoveToNext("=");
-                result.item = parser.getCurrentTokenAndMoveToNext();
-                break;
+                parser.accept_and_move_to_next("=")
+                result.item = parser.get_current_token_and_move_to_next()
+                break
             case "Texture":
-                parser.acceptAndMoveToNext("=");
-                result.texture = parser.getCurrentTokenAndMoveToNext();
+                parser.accept_and_move_to_next("=")
+                result.texture = parser.get_current_token_and_move_to_next()
                 break
             case "Origin":
-                result.origin = importVector(parser, 0);
-                break;
+                result.origin = importVector(parser, 0)
+                break
             case "Normal":
-                result.normal = importVector(parser, 0);
-                break;
+                result.normal = importVector(parser, 0)
+                break
             case "TextureU":
-                result.textureU = importVector(parser, 0);
-                break;
+                result.textureU = importVector(parser, 0)
+                break
             case "TextureV":
-                result.textureV = importVector(parser, 0);
-                break;
+                result.textureV = importVector(parser, 0)
+                break
             case "Vertex":
-                result.vertexes.push(importVector(parser, 0));
-                break;
+                result.vertexes.push(importVector(parser, 0))
+                break
             case "Pan":
                 for (let i=0; i<2; i++){ //excepting a U and a V (2 props)
-                    const token = parser.getCurrentToken();
+                    const token = parser.get_current_token()
                     if (token === "U"){
-                        parser.moveToNext();
-                        parser.acceptAndMoveToNext("=");
-                        result.panU = parser.parseFloatAndMoveToNext();
+                        parser.move_to_next()
+                        parser.accept_and_move_to_next("=")
+                        result.panU = parser.parse_float_and_move_to_next()
                     } 
                     else if (token === "V") {
-                        parser.moveToNext();
-                        parser.acceptAndMoveToNext("=");
-                        result.panV = parser.parseFloatAndMoveToNext();
+                        parser.move_to_next()
+                        parser.accept_and_move_to_next("=")
+                        result.panV = parser.parse_float_and_move_to_next()
                     }
-                    else break; // for
+                    else break // for
                 }
-                break; // switch
+                break // switch
             default:
-                throw "Unknown polygon property: " + key;
+                throw "Unknown polygon property: " + key
         }
     }
-    parser.acceptAndMoveToNext("End");
-    parser.acceptAndMoveToNext("Polygon");
-    return result;
+    parser.accept_and_move_to_next("End")
+    parser.accept_and_move_to_next("Polygon")
+    return result
 }
 

@@ -1,9 +1,9 @@
-import { Parser } from "./Parser";
-import { tokenize } from "./tokenizer";
+import { GenericParser } from "../common/GenericParser"
+import { tokenize } from "./tokenizer"
 
-export function makeParser(arg : string | Parser){
+export function makeParser(arg : string | GenericParser){
     if (typeof arg === 'string'){
-        return new Parser(tokenize(arg));
+        return new GenericParser(tokenize(arg))
     }
-    return arg;
+    return arg
 }

@@ -1,4 +1,5 @@
-const test_data_obj_plane = `# Blender v2.92.0 OBJ File: ''
+/* eslint-disable spellcheck/spell-checker */
+export const test_data_obj_plane = `# Blender v2.92.0 OBJ File: ''
 # www.blender.org
 mtllib untitled.mtl
 o Cube
