@@ -61,6 +61,18 @@ describe("importing test_data_obj_plane", () => {
         expect(brush.polygons[0].edges).toHaveLength(4)
     })
 
+    test("origin", () => {
+        expect(brush.polygons[0].origin).toEqual({ x: 1, y: 0, z: 1 })
+    })
+
+    test("textureU", () => {
+        expect(brush.polygons[0].textureU).toEqual({ x: -0.25, y: 0, z: 0 })
+    })
+    
+    test("textureV", () => {
+        expect(brush.polygons[0].textureV).toEqual({ x: 0, y: 0, z: -0.25 })
+    })
+
 })
 
 describe("importing cube", () => {
@@ -124,7 +136,13 @@ describe("importing cube", () => {
     test("actor has brush model", () => 
         expect(map.actors[0].brushModel).not.toBeNull())
 
-    test("has 4 vertexes", () => 
-        expect(brush.vertexes).toHaveLength(4))
+    test("has 8 vertexes", () => 
+        expect(brush.vertexes).toHaveLength(8))
+
+    test("has 12 edges", () => 
+        expect(brush.edges).toHaveLength(12))
+
+    test("has 6 polygons", () => 
+        expect(brush.polygons).toHaveLength(6))
 
 })

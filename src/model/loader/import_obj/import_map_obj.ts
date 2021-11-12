@@ -7,7 +7,6 @@ import { BrushVertex } from "../../BrushVertex"
 import { KnownClasses } from "../../KnownClasses"
 import { UnrealMap } from "../../UnrealMap"
 import { polygon_uv_from_vertex_uvs } from "../../uvmap/polygon_uv_from_vertex_uvs"
-import { set_brush_polygon_vertex_uvs } from "../../uvmap/vertex_uv"
 import { Vector } from "../../Vector"
 import { GenericParser } from "../common/GenericParser"
 import { tokenize_wavefront_obj, WavefrontCommandToken as T } from "./tokenize_wavefront_obj"
@@ -169,6 +168,8 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
         }
         token = parser.get_current_token()
     }
+    next_line(parser)
+
     const polygon = new BrushPolygon()
     polygon.vertexes = vertex_index
     polygon.texture = texture
@@ -182,7 +183,7 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
     if (normal_index.length === vertex_index.length) {
         let x=0, y=0, z=0
         for (const i of normal_index){
-            const vertex_normal = normal_data[normal_index[i]]
+            const vertex_normal = normal_data[i]
             x += vertex_normal.x
             y += vertex_normal.y
             z += vertex_normal.z
@@ -194,7 +195,9 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
 
     // UV
     if (texture_index.length === vertex_index.length){
-        const polygon_uv = polygon_uv_from_vertex_uvs(vertex_data, texture_index.map(i => uv_data[i]))
+        const vertexes = vertex_index.map(i => vertex_data[i])
+        const uvs = texture_index.map(i => uv_data[i])
+        const polygon_uv = polygon_uv_from_vertex_uvs(vertexes, uvs)
         polygon.textureU = polygon_uv.textureU
         polygon.textureV = polygon_uv.textureV
         polygon.panU = polygon_uv.panU

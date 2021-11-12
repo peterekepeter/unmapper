@@ -118,6 +118,7 @@
                     "tokenization",
                     "tokenize",
                     "uv",
+                    "uvs",
                     "Wavefront",
                     "whitespace"
                 ]
