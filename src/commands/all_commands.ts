@@ -15,6 +15,7 @@ import { extrude_polygons_command } from './extrude_polygons'
 import { flip_polygon_normal_command } from './flip_polygon_normal'
 import { generate_cube_command } from "./generators/generate_cube"
 import { set_interaction_axis_lock_commands } from "./interaction/set_interaction_axis_lock"
+import { get_io_commands } from "./io"
 import { measure_command } from "./measure_distance"
 import { move_command } from "./move_selected"
 import { rotate_command } from "./rotate_selected"
@@ -59,6 +60,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     smooth_vertexes_command,
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
+    ...get_io_commands(),
 ] }
 
 function get_generate_commands(): ICommandInfoV2[] { return [generate_cube_command] }

@@ -8,3 +8,7 @@ export interface ICommand
 }
 
 export type ICommandV2 = (state: EditorState, ...args: unknown[]) => EditorState;
+
+export type AsyncCommand = (merge_fn: StateMergeFn) => PromiseLike<void>
+
+export type StateMergeFn = (callback: (state: EditorState) => EditorState) => void;

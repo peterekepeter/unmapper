@@ -1,9 +1,10 @@
 import { StatefulInteraction } from "../interactions/stateful/StatefulInteraction"
-import { ICommandV2 } from "./ICommand"
+import { AsyncCommand, ICommandV2 } from "./ICommand"
 
 export interface ICommandInfoV2 {
     description?: string;
     exec?: ICommandV2;
+    execAsync?: AsyncCommand;
     shortcut?: string;
     /** old commands don't return new state */
     legacy_handling?: boolean;

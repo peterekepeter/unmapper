@@ -39,12 +39,31 @@ export class AppController {
     }
 
     interactively_execute(command_info: ICommandInfoV2): void {
-        if (command_info && command_info.keep_status_by_default){
+        if (!command_info){
+            return // noop
+        }
+        if (command_info.execAsync){
+            this.executeAsync(command_info)
+        }
+        else if (command_info.keep_status_by_default) {
             this.execute(command_info)
         }
         else {
             this.interaction.interactively_execute(command_info)
         }
+    }
+
+    executeAsync(command_info: ICommandInfoV2): PromiseLike<void>{
+        // async execution can stream results via callback
+        return command_info.execAsync(fn => {
+            const prev_state = this.current_state
+            const next_state = fn(prev_state)
+            this.undoable_state_change(next_state)
+            // reapply command preview
+            if (this.preview_command != null){
+                this.preview(this.preview_command, ...this.preview_command_args)
+            }
+        })
     }
 
     execute(command_info: ICommandInfoV2, ...args: unknown[]): void {
@@ -67,6 +86,7 @@ export class AppController {
 
         this.undoable_state_change(next_state)
 
+        // reapply command preview
         if (this.preview_command != null){
             this.preview(this.preview_command, ...this.preview_command_args)
         }
