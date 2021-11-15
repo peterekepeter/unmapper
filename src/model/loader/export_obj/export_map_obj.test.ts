@@ -1,32 +1,31 @@
+/* eslint-disable spellcheck/spell-checker */
+import { editor_state_from_actors, EditorState } from "../../EditorState"
 import { UnrealMap } from "../../UnrealMap"
 import { import_map_obj } from "../import_obj/import_map_obj"
+import { export_map_obj } from "./export_map_obj"
 
 describe("exporting imported plane", () => {
-    const wavefront_obj_data = `
-        # Blender v2.92.0 OBJ File: ''
-        # www.blender.org
-        mtllib plane.mtl
-        o Plane
-        v 1.000000 0.000000 -1.000000
-        v 1.000000 0.000000 1.000000
-        v -1.000000 0.000000 -1.000000
-        v -1.000000 0.000000 1.000000
-        vt 0.000000 0.500000
-        vt 0.000000 0.000000
-        vt 0.500000 0.500000
-        vt 0.500000 0.000000
-        vn 0.0000 1.0000 0.0000
-        usemtl Material
-        s off
-        f 1/1/1 3/3/1 4/4/1 2/2/1
-    `
+    const wavefront_obj_data = `# unmapper OBJ export v1
+o Plane
+v 1 0 -1
+v 1 0 1
+v -1 0 -1
+v -1 0 1
+vt 0 0.5
+vt 0.5 0.5
+vt 0.5 0
+vt 0 0
+vn 0 1 0
+f 1/1/1 3/2/1 4/3/1 2/4/1`
 
-    let state: UnrealMap
+    let map: UnrealMap
     let exported: string
+    let state: EditorState
 
     beforeAll(() => {
         // first make sure import works!
-        state = import_map_obj(wavefront_obj_data)
+        map = import_map_obj(wavefront_obj_data)
+        state = editor_state_from_actors(map.actors)
         exported = export_map_obj(state, false)
     })
 
@@ -34,8 +33,11 @@ describe("exporting imported plane", () => {
         expect(exported.length).toBeGreaterThan(100)
     })
 
-    test('expoted contains vertexes', () => {
+    test('exported contains vertexes', () => {
         expect(exported.includes("v")).toBe(true)
     })
+
+    test('export equals imported string', () => 
+        expect(exported).toBe(wavefront_obj_data))
     
 })
