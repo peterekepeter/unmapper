@@ -4,21 +4,24 @@ import { EditorState } from "../../EditorState"
 import { get_actor_to_world_rotation_scaling, get_actor_to_world_transform } from "../../geometry/actor-space-transform"
 import { get_vertex_uv } from "../../uvmap/vertex_uv"
 import { Vector } from "../../Vector"
+import { DEFAULT_WAVEFRONT_OBJ_SETTINGS, switch_up_axis, WavefrontObjSettings } from "../WavefrontObjSettings"
 
 type WavefrontExportState = {
     vertex_count: number;
     vertex_texture_count: number;
     vertex_normal_count: number;
     out_lines: string[];
+    settings: WavefrontObjSettings;
 }
 
-export function export_map_obj(state: EditorState, only_selected: boolean): string {
+export function export_map_obj(state: EditorState, only_selected: boolean, settings = DEFAULT_WAVEFRONT_OBJ_SETTINGS): string {
     const export_state: WavefrontExportState = {
         vertex_count: 0,
         vertex_normal_count: 0,
         vertex_texture_count: 0,
         // eslint-disable-next-line spellcheck/spell-checker
         out_lines: ["# unmapper OBJ export v1"],
+        settings,
     }
     generate_wavefront_obj_from_state(state, only_selected, export_state)
     return export_state.out_lines.join("\n")
@@ -46,21 +49,22 @@ function generate_wavefront_from_actor(actor: Actor, export_state: WavefrontExpo
 function generate_wavefront_obj_from_brush(actor: Actor, brush: BrushModel, export_state: WavefrontExportState) {
     const actor_to_world = get_actor_to_world_transform(actor)
     const actor_to_world_scale_rotate = get_actor_to_world_rotation_scaling(actor)
+    const settings = export_state.settings
     // generate vertexes in world space
     for (const vertex of brush.vertexes){
-        const world_position: Vector = actor_to_world(vertex.position)
+        const world_position: Vector = switch_up_axis(actor_to_world(vertex.position).scale(settings.world_scale), settings)
         export_state.out_lines.push(`v ${world_position.x} ${world_position.y} ${world_position.z}`)
     }
     // generate vertex texture coord for each vertex of each polygon
     for (const polygon of brush.polygons){
         for (const polygon_vertex_index of polygon.vertexes){
-            const uv: Vector = get_vertex_uv(polygon, brush.vertexes[polygon_vertex_index].position)
+            const uv: Vector = get_vertex_uv(polygon, brush.vertexes[polygon_vertex_index].position).scale(settings.uv_scale)
             export_state.out_lines.push(`vt ${uv.x} ${uv.y}`)
         }
     }
     // generate 1 normal for each polygon
     for (const polygon of brush.polygons){
-        const normal: Vector = actor_to_world_scale_rotate.apply(polygon.normal).normalize()
+        const normal: Vector = switch_up_axis(actor_to_world_scale_rotate.apply(polygon.normal).normalize(), settings)
         export_state.out_lines.push(`vn ${normal.x} ${normal.y} ${normal.z}`)
     }
     // polygon assembly
@@ -83,4 +87,3 @@ function generate_wavefront_obj_from_brush(actor: Actor, brush: BrushModel, expo
     export_state.vertex_normal_count += brush.polygons.length
     export_state.vertex_texture_count += total_polygon_vertex_counter
 }
-

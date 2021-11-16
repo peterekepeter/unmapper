@@ -9,19 +9,21 @@ import { UnrealMap } from "../../UnrealMap"
 import { polygon_uv_from_vertex_uvs } from "../../uvmap/polygon_uv_from_vertex_uvs"
 import { Vector } from "../../Vector"
 import { GenericParser } from "../common/GenericParser"
+import { DEFAULT_WAVEFRONT_OBJ_SETTINGS, switch_up_axis, WavefrontObjSettings } from "../WavefrontObjSettings"
 import { tokenize_wavefront_obj, WavefrontCommandToken as T } from "./tokenize_wavefront_obj"
 
 type ObjParserState = {
     parser: GenericParser,
     result: UnrealMap,
+    settings: WavefrontObjSettings
 };
 
-export function import_map_obj(obj_data: string): UnrealMap {
+export function import_map_obj(obj_data: string, settings = DEFAULT_WAVEFRONT_OBJ_SETTINGS): UnrealMap {
     const result = new UnrealMap()
     result.actors = []
     const tokens = tokenize_wavefront_obj(obj_data)
     const parser = new GenericParser(tokens)
-    parse_map_obj({ result, parser })
+    parse_map_obj({ result, parser, settings })
 
     return result
 }
@@ -31,7 +33,7 @@ function parse_map_obj(state: ObjParserState) {
     while (has_tokens){
         switch(state.parser.get_current_token()){
             case T.BeginObject:
-                state.result.actors.push(parse_obj_actor(state.parser))
+                state.result.actors.push(parse_obj_actor(state))
                 break
             default:
                 next_line(state.parser)
@@ -44,7 +46,8 @@ function parse_map_obj(state: ObjParserState) {
 
 }
 
-function parse_obj_actor(parser: GenericParser): Actor {
+function parse_obj_actor(state: ObjParserState): Actor {
+    const parser = state.parser
     parser.accept_and_move_to_next(T.BeginObject)
     const actor = new Actor()
     actor.className = KnownClasses.Brush
@@ -67,13 +70,13 @@ function parse_obj_actor(parser: GenericParser): Actor {
                 texture = parse_obj_texture(parser, texture)
                 break
             case T.BeginVertexTexture:
-                uv_data.push(parse_obj_vertex_uv(parser))
+                uv_data.push(parse_obj_vertex_uv(parser).divide_by_scalar(state.settings.uv_scale))
                 break
             case T.BeginVertexNormal:
-                normal_data.push(parse_obj_vertex_normal(parser))
+                normal_data.push(parse_obj_vertex_normal(parser, state.settings))
                 break
             case T.BeginVertex:
-                brush.vertexes.push(parse_obj_vertex_position(parser))
+                brush.vertexes.push(parse_obj_vertex_position(parser, state.settings))
                 break
             case T.BeginPolygon:
                 brush.polygons.push(parse_obj_polygon(parser, brush, texture, uv_data, normal_data))
@@ -109,9 +112,9 @@ function next_line(parser: GenericParser) {
     }
 }
 
-function parse_obj_vertex_normal(parser: GenericParser): Vector {
+function parse_obj_vertex_normal(parser: GenericParser, settings: WavefrontObjSettings): Vector {
     parser.accept_and_move_to_next(T.BeginVertexNormal)
-    const normal = parse_vector(parser)
+    const normal = switch_up_axis(parse_vector(parser), settings)
     next_line(parser)
     return normal.normalize()
 }
@@ -123,9 +126,9 @@ function parse_obj_vertex_uv(parser: GenericParser): Vector {
     return result
 }
 
-function parse_obj_vertex_position(parser: GenericParser): BrushVertex {
+function parse_obj_vertex_position(parser: GenericParser, settings: WavefrontObjSettings): BrushVertex {
     parser.accept_and_move_to_next(T.BeginVertex)
-    const result = parse_vector(parser)
+    const result = switch_up_axis(parse_vector(parser).divide_by_scalar(settings.world_scale), settings)
     next_line(parser)
     return new BrushVertex(result)
 }

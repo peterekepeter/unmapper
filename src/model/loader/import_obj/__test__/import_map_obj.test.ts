@@ -1,6 +1,7 @@
 import { BrushModel } from "../../../BrushModel"
 import { UnrealMap } from "../../../UnrealMap"
 import { Vector } from "../../../Vector"
+import { DEFAULT_WAVEFRONT_OBJ_SETTINGS } from "../../WavefrontObjSettings"
 import { import_map_obj as fn } from "../import_map_obj"
 
 describe("importing test_data_obj_plane", () => {
@@ -29,7 +30,7 @@ describe("importing test_data_obj_plane", () => {
     let brush: BrushModel
 
     beforeAll(() => {
-        map = fn(wavefront_obj_data)
+        map = fn(wavefront_obj_data, { ...DEFAULT_WAVEFRONT_OBJ_SETTINGS, up_axis: 'z' })
         brush = map?.actors[0]?.brushModel
     })
 
@@ -43,7 +44,7 @@ describe("importing test_data_obj_plane", () => {
         expect(brush.vertexes).toHaveLength(4))
 
     test("first vertex is 1, 0, -1", () => 
-        expect(brush.vertexes[0].position).toEqual(new Vector(1, 0, -1)))
+        expect(brush.vertexes[0].position).toEqual(new Vector(256, 0, -256)))
 
     test("plane has 1 polygon", () => {
         expect(brush.polygons).toHaveLength(1)
@@ -62,7 +63,7 @@ describe("importing test_data_obj_plane", () => {
     })
 
     test("origin", () => {
-        expect(brush.polygons[0].origin).toEqual({ x: 1, y: 0, z: 1 })
+        expect(brush.polygons[0].origin).toEqual({ x: 256, y: 0, z: 256 })
     })
 
     test("textureU", () => {
