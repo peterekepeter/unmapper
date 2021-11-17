@@ -1,12 +1,12 @@
-import { get_all_commands_v2 } from "../all_commands"
 import { ICommandInfoV2 } from "../../controller/command"
-import { EditorError } from "../../model/error/EditorError"
-import { create_initial_editor_state, EditorState } from "../../model/EditorState"
+import { get_default_args } from "../../controller/command/command_args"
 import { Actor } from "../../model/Actor"
 import { BrushModel } from "../../model/BrushModel"
-import { get_default_args } from "../../controller/command/command_args"
 import { BrushModelBuilder } from "../../model/BrushModelBuilder"
 import { create_actor_selection } from "../../model/EditorSelection"
+import { create_initial_editor_state, EditorState } from "../../model/EditorState"
+import { EditorError } from "../../model/error/EditorError"
+import { get_all_commands_v2 } from "../all_commands"
 
 /**
  * all commands must pass a few tests to make sure they don't wreck the whole system
@@ -19,11 +19,11 @@ const all_commands = get_all_commands_v2()
 function build_test_states(){
 
     const builder = new BrushModelBuilder()
-    builder.add_vertex_coords(0,0,0)
-    builder.add_vertex_coords(1,0,0)
-    builder.add_vertex_coords(1,1,0)
-    builder.add_vertex_coords(0,1,0)
-    builder.add_polygon(0,1,2,3)
+    builder.add_vertex_coords(0, 0, 0)
+    builder.add_vertex_coords(1, 0, 0)
+    builder.add_vertex_coords(1, 1, 0)
+    builder.add_vertex_coords(0, 1, 0)
+    builder.add_polygon(0, 1, 2, 3)
     const brush_with_single_poly = builder.build()
     
     const actor_0 = new Actor()
@@ -40,32 +40,32 @@ function build_test_states(){
         ...initial_state,
         map: {
             ...initial_state.map,
-            actors: [actor_0, actor_1]
+            actors: [actor_0, actor_1],
         },
         options: {
             ...initial_state.options,
-            vertex_mode: false
+            vertex_mode: false,
         },
         selection: {
             actors: [
                 {
                     ...create_actor_selection(0),
-                    vertexes: [0,1,2,3]
+                    vertexes: [0, 1, 2, 3],
                 },
                 {
                     ...create_actor_selection(1),
-                    vertexes: [0,1,2,3]
-                }
-            ]
-        }
+                    vertexes: [0, 1, 2, 3],
+                },
+            ],
+        },
     }
     
     const state_vertex_mode: EditorState = {
         ...state,
         options: {
             ...state.options,
-            vertex_mode: true
-        }
+            vertex_mode: true,
+        },
     }
     
     return [
@@ -75,13 +75,13 @@ function build_test_states(){
         },
         {
             state: state_vertex_mode,
-            description: 'vertex mode state'
-        }
+            description: 'vertex mode state',
+        },
     ]
 }
 
 all_commands.forEach(command => describe(format_label(command), () => {
-    for (const [args,args_description] of iterate_args_test_cases(command)){
+    for (const [args, args_description] of iterate_args_test_cases(command)){
         describe(args_description, () => {
             build_test_states().forEach(test_state => describe(test_state.description, () => {
                 command_test_case(command, test_state.state, args)
@@ -91,6 +91,10 @@ all_commands.forEach(command => describe(format_label(command), () => {
 }))
 
 function command_test_case(command:ICommandInfoV2, state: EditorState, args:unknown[]) {
+
+    if (command.execAsync || command.description.includes("Export")){
+        return // not supported 
+    }
 
     const initially_serialized = serialize(state)
     let next_state : EditorState
@@ -132,7 +136,6 @@ function command_test_case(command:ICommandInfoV2, state: EditorState, args:unkn
         expect(serialize(state)).toBe(initially_serialized)
     })
 }
-
 
 function* iterate_args_test_cases(command: ICommandInfoV2): Iterable<[unknown[], string]>{
     const args = get_default_args(command)

@@ -12,10 +12,13 @@ import { GenericParser } from "../common/GenericParser"
 import { DEFAULT_WAVEFRONT_OBJ_SETTINGS, switch_up_axis, WavefrontObjSettings } from "../WavefrontObjSettings"
 import { tokenize_wavefront_obj, WavefrontCommandToken as T } from "./tokenize_wavefront_obj"
 
-type ObjParserState = {
+type WavefrontImportState = {
     parser: GenericParser,
     result: UnrealMap,
     settings: WavefrontObjSettings
+    position_data: BrushVertex[],
+    uv_data: Vector[],
+    normal_data: Vector[],
 };
 
 export function import_map_obj(obj_data: string, settings = DEFAULT_WAVEFRONT_OBJ_SETTINGS): UnrealMap {
@@ -23,12 +26,18 @@ export function import_map_obj(obj_data: string, settings = DEFAULT_WAVEFRONT_OB
     result.actors = []
     const tokens = tokenize_wavefront_obj(obj_data)
     const parser = new GenericParser(tokens)
-    parse_map_obj({ result, parser, settings })
-
+    parse_map_obj({
+        result,
+        parser,
+        settings, 
+        position_data: [],
+        uv_data: [],
+        normal_data: [], 
+    })
     return result
 }
 
-function parse_map_obj(state: ObjParserState) {
+function parse_map_obj(state: WavefrontImportState) {
     let has_tokens = true
     while (has_tokens){
         switch(state.parser.get_current_token()){
@@ -46,7 +55,7 @@ function parse_map_obj(state: ObjParserState) {
 
 }
 
-function parse_obj_actor(state: ObjParserState): Actor {
+function parse_obj_actor(state: WavefrontImportState): Actor {
     const parser = state.parser
     parser.accept_and_move_to_next(T.BeginObject)
     const actor = new Actor()
@@ -58,10 +67,9 @@ function parse_obj_actor(state: ObjParserState): Actor {
         actor.name = "Brush"
     }
     const brush = new BrushModel()
-    const uv_data: Vector[] = []
-    const normal_data: Vector[] = []
     actor.brushModel = brush
     let texture: string|null = null
+    const start_index = state.position_data.length
     
     let parsing_object = true
     while (parsing_object){
@@ -70,16 +78,19 @@ function parse_obj_actor(state: ObjParserState): Actor {
                 texture = parse_obj_texture(parser, texture)
                 break
             case T.BeginVertexTexture:
-                uv_data.push(parse_obj_vertex_uv(parser).divide_by_scalar(state.settings.uv_scale))
+                state.uv_data.push(parse_obj_vertex_uv(parser).divide_by_scalar(state.settings.uv_scale))
                 break
             case T.BeginVertexNormal:
-                normal_data.push(parse_obj_vertex_normal(parser, state.settings))
+                state.normal_data.push(parse_obj_vertex_normal(parser, state.settings))
                 break
-            case T.BeginVertex:
-                brush.vertexes.push(parse_obj_vertex_position(parser, state.settings))
+            case T.BeginVertex: {
+                const brush_vertex = parse_obj_vertex_position(parser, state.settings)
+                state.position_data.push(brush_vertex)
+                brush.vertexes.push(brush_vertex)
+            }
                 break
             case T.BeginPolygon:
-                brush.polygons.push(parse_obj_polygon(parser, brush, texture, uv_data, normal_data))
+                brush.polygons.push(parse_obj_polygon(parser, brush, texture, state, start_index))
                 break
             default: 
                 next_line(parser)
@@ -150,7 +161,7 @@ function parse_vector(parser: GenericParser): Vector {
     return new Vector(x, y, z)
 }
 
-function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: string, uv_data: Vector[], normal_data: Vector[]): BrushPolygon {
+function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: string, state: WavefrontImportState, start_index: number): BrushPolygon {
     parser.accept_and_move_to_next(T.BeginPolygon)
     const vertex_index = []
     const texture_index = []
@@ -174,7 +185,7 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
     next_line(parser)
 
     const polygon = new BrushPolygon()
-    polygon.vertexes = vertex_index
+    polygon.vertexes = vertex_index.map(i => i - start_index)
     polygon.texture = texture
 
     const vertex_data = brush.vertexes.map(v => v.position)
@@ -183,30 +194,48 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
     polygon.median = calculate_polygon_center(brush.vertexes, polygon)
 
     // normal
+    let did_normal = false
     if (normal_index.length === vertex_index.length) {
-        let x=0, y=0, z=0
-        for (const i of normal_index){
-            const vertex_normal = normal_data[i]
-            x += vertex_normal.x
-            y += vertex_normal.y
-            z += vertex_normal.z
+        try {
+            let x=0, y=0, z=0
+            for (const i of normal_index){
+                const vertex_normal = state.normal_data[i]
+                x += vertex_normal.x
+                y += vertex_normal.y
+                z += vertex_normal.z
+            }
+            polygon.normal = new Vector(x, y, z).normalize()
+            did_normal = true
         }
-        polygon.normal = new Vector(x, y, z).normalize()
-    } else {
+        catch (error) {
+            // failed to maintain normal
+        }
+    } 
+    if (!did_normal) {
+        // fallback normal
         polygon.normal = calculate_polygon_normal(brush.vertexes, polygon)
     }
 
     // UV
+    let did_uv = false
     if (texture_index.length === vertex_index.length){
-        const vertexes = vertex_index.map(i => vertex_data[i])
-        const uvs = texture_index.map(i => uv_data[i])
-        const polygon_uv = polygon_uv_from_vertex_uvs(vertexes, uvs)
-        polygon.textureU = polygon_uv.textureU
-        polygon.textureV = polygon_uv.textureV
-        polygon.panU = polygon_uv.panU
-        polygon.panV = polygon_uv.panV
-        polygon.origin = polygon_uv.origin
-    } else {
+        try {
+            const vertexes = vertex_index.map(i => state.position_data[i].position)
+            const uvs = texture_index.map(i => state.uv_data[i])
+            const polygon_uv = polygon_uv_from_vertex_uvs(vertexes, uvs)
+            polygon.textureU = polygon_uv.textureU
+            polygon.textureV = polygon_uv.textureV
+            polygon.panU = polygon_uv.panU
+            polygon.panV = polygon_uv.panV
+            polygon.origin = polygon_uv.origin
+            did_uv = true
+        }
+        catch (error){
+            // failed to maintain UV
+        }
+    }
+    if (!did_uv) {
+        // fallback UV strategy
         polygon.origin = polygon.median
         polygon.panU = 0
         polygon.panV = 0
