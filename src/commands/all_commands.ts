@@ -28,6 +28,7 @@ import { triangulate_mesh_polygons_command } from './triangulate_mesh_polygons'
 import { uv_random_map_command } from "./uv_random_map"
 import { uv_triplanar_map_command } from './uv_triplanar_map'
 import { vertex_noise_command } from "./vertex_noise"
+import { get_world_grid_commands } from "./viewport/set_world_grid"
 
 export function get_all_commands_v2(): ICommandInfoV2[] { return [
     select_all_command,
@@ -61,6 +62,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
     ...get_io_commands(),
+    ...get_world_grid_commands(),
 ] }
 
 function get_generate_commands(): ICommandInfoV2[] { return [generate_cube_command] }

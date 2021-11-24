@@ -1,4 +1,5 @@
 import { Actor } from "../../model/Actor"
+import { align_to_grid } from "../../model/algorithms/alignToGrid"
 import { ActorSelection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
 import { fast_closest_point_to_line_inside_segment, precise_closest_point_to_line } from "../../model/geometry/closest_point_to_line"
@@ -963,8 +964,13 @@ export class WorldViewportQueries {
 
         if (best_distance >= MAX_SNAP_DISTANCE || result == null)
         {
+            let canvas_location = this.render_transform.canvas_to_world_location(canvas_x, canvas_y)
+            if (state.options.grid > 0){
+                const g = state.options.grid
+                canvas_location = align_to_grid(canvas_location, new Vector(g, g, g))
+            }
             result = {
-                location: this.render_transform.canvas_to_world_location(canvas_x, canvas_y),
+                location: canvas_location,
                 selection: DEFAULT_EDITOR_SELECTION,
                 snap: DEFAULT_SNAP_RESULT,
             }

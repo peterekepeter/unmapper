@@ -27,6 +27,7 @@ export interface EditorOptions {
     preserve_vertex_uv: boolean;
     editor_layout: number;
     box_select_mode: boolean;
+    grid: number;
     layout: PanelLayout
 }
 
@@ -65,6 +66,7 @@ export function create_initial_editor_state() : EditorState{
             vertex_mode: false,
             preserve_vertex_uv: false,
             editor_layout: 0,
+            grid: 0,
             box_select_mode: false,
             layout: {
                 split_direction: PanelSplitDirection.Horizontal,

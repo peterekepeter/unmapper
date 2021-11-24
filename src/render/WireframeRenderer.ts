@@ -1,11 +1,13 @@
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
 import { Actor } from "../model/Actor"
+import { align_to_grid } from "../model/algorithms/alignToGrid"
 import { BoundingBox } from "../model/BoundingBox"
 import { BrushModel } from "../model/BrushModel"
 import { Color } from "../model/Color"
 import { CsgOperation } from "../model/CsgOperation"
 import { ActorSelection } from "../model/EditorSelection"
 import { EditorState } from "../model/EditorState"
+import { fmod } from "../model/ExtendedMath"
 import { GeometryCache } from "../model/geometry/GeometryCache"
 import { intersect_segment_with_plane } from "../model/geometry/intersect_segment_with_plane"
 import { PolyFlags } from "../model/PolyFlags"
@@ -124,6 +126,9 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             context.fillStyle = backgroundColor + '8'
             context.fillRect(0, 0, width, height)
         }
+        if (state.options.grid > 0){
+            render_grid(state)
+        }
         if (state.selection.actors){
             for (const selected_actor of state.selection.actors) {
                 const actor = map.actors[selected_actor.actor_index]
@@ -132,6 +137,57 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         }
     }
 
+    function render_grid(state: EditorState) {
+        const viewport = state.viewports[viewport_index]
+        const grid_size = state.options.grid
+        const grid = new Vector(grid_size, grid_size, grid_size)
+        let step_3d: Vector = null
+        switch(viewport.mode){
+            case ViewportMode.Front:
+                step_3d = new Vector(0, grid_size, grid_size)
+                break
+            case ViewportMode.Side:
+                step_3d = new Vector(grid_size, 0, grid_size)
+                break
+            default:
+                step_3d = new Vector(grid_size, grid_size, 0)
+        }
+        switch (viewport.mode){
+            case ViewportMode.Front:
+            case ViewportMode.Side:
+            case ViewportMode.Top:
+            case ViewportMode.UV: {
+                const top_left_world = render_transform.canvas_to_world_location(0, 0)
+                const w_00 = align_to_grid(top_left_world, grid)
+                const w_11 = w_00.add_vector(step_3d)
+                let x = render_transform.view_transform_x(w_00)
+                let y = render_transform.view_transform_y(w_00)
+                const x_step = Math.abs(render_transform.view_transform_x(w_11) - x)
+                const y_step = Math.abs(render_transform.view_transform_y(w_11) - y)
+                if (x_step < 8){
+                    return
+                }
+                if(y_step < 8){
+                    return
+                }
+                context.strokeStyle = `rgba(192,192,192,${Math.min((y_step-7)*0.01, 0.1)})`
+                context.beginPath()
+                for (; x<width; x+=x_step){
+                    context.moveTo(x, 0)
+                    context.lineTo(x, height)
+                }
+                for (; y<height; y+=y_step){
+                    context.moveTo(0, y)
+                    context.lineTo(width, y)
+                }
+                context.stroke()
+                break
+            }
+            default:
+                break
+        }
+    }
+    
     function render_actor(state: EditorState, actor: Actor, index: number, view_bounding_box: BoundingBox) {
         if (actor.brushModel == null) {
             return
