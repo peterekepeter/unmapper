@@ -66,7 +66,7 @@ export function create_initial_editor_state() : EditorState{
             vertex_mode: false,
             preserve_vertex_uv: false,
             editor_layout: 0,
-            grid: 0,
+            grid: 16,
             box_select_mode: false,
             layout: {
                 split_direction: PanelSplitDirection.Horizontal,
