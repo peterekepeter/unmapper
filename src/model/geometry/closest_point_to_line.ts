@@ -1,32 +1,6 @@
 import { Vector } from "../Vector"
 
 /**
- * Returns closest point to line but only if point is inside segment
- */
-export function precise_closest_point_to_line_inside_segment(line_point_a: Vector, line_point_b: Vector, query_location: Vector): Vector | null {
-    const closest = precise_closest_point_to_line(line_point_a, line_point_b, query_location)
-    const dist_q_a = distance_squared(query_location, line_point_a)
-    const dist_q_b = distance_squared(query_location, line_point_b)
-    const dist_q_c = distance_squared(query_location, closest)
-    if (dist_q_c < dist_q_a && dist_q_c < dist_q_b) {
-        return closest
-    }
-}
-
-/**
- * Returns closest point to line but only if point is inside segment
- */
-export function fast_closest_point_to_line_inside_segment(line_point_a: Vector, line_point_b: Vector, query_location: Vector): Vector | null {
-    const closest = fast_closest_point_to_line(line_point_a, line_point_b, query_location)
-    const dist_q_a = distance_squared(query_location, line_point_a)
-    const dist_q_b = distance_squared(query_location, line_point_b)
-    const dist_q_c = distance_squared(query_location, closest)
-    if (dist_q_c < dist_q_a && dist_q_c < dist_q_b) {
-        return closest
-    }
-}
-
-/**
  * Returns closest point to line defined by two points.
  */
 export function precise_closest_point_to_line(line_point_a: Vector, line_point_b: Vector, query_location: Vector): Vector{

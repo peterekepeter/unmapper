@@ -42,6 +42,7 @@ describe("precise_closest_point_to_line", () => {
     ).toEqual(v(0.2, 0.1)))
     
 })
+
 describe("fast_closest_point_to_line", () => {
     const fn = fast_closest_point_to_line
 

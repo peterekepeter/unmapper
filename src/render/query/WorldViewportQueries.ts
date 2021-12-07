@@ -2,7 +2,7 @@ import { Actor } from "../../model/Actor"
 import { align_to_grid } from "../../model/algorithms/alignToGrid"
 import { ActorSelection, DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION, EditorSelection } from "../../model/EditorSelection"
 import { EditorState } from "../../model/EditorState"
-import { fast_closest_point_to_line_inside_segment, precise_closest_point_to_line } from "../../model/geometry/closest_point_to_line"
+import { fast_closest_point_to_line, precise_closest_point_to_line } from "../../model/geometry/closest_point_to_line"
 import { distance_2d_to_point, distance_to_line_segment } from "../../model/geometry/distance-functions"
 import { GeometryCache } from "../../model/geometry/GeometryCache"
 import { intersect_segments } from "../../model/geometry/intersect_segments"
@@ -316,9 +316,9 @@ export class WorldViewportQueries {
 
         let best_right_angle_distance = Number.MAX_VALUE
         let best_right_angle_location = Vector.ZERO
-        let best_right_angle_a = Vector.ZERO 
-        let best_right_angle_b = Vector.ZERO
-        let best_right_angle_q = Vector.ZERO
+        const best_right_angle_a = Vector.ZERO 
+        const best_right_angle_b = Vector.ZERO
+        const best_right_angle_q = Vector.ZERO
 
         let best_polygon_mean_distance = Number.MAX_VALUE
         let best_polygon_mean_location = Vector.ZERO
@@ -364,30 +364,30 @@ export class WorldViewportQueries {
             }
 
             // snap edge so that a right angle is formed
-            if (state.interaction_buffer.points.length >= 2) {
-                // this requires a starting point
-                const first_point = state.interaction_buffer.points[0]
-                for (const edge of actor.brushModel.edges) {
-                    const a = world_vertexes[edge.vertexIndexA]
-                    const b = world_vertexes[edge.vertexIndexB]
-                    const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
-                    if (c == null){
-                        continue // no such point
-                    }
-                    const x = this.render_transform.view_transform_x(c)
-                    const y = this.render_transform.view_transform_y(c)
+            // if (state.interaction_buffer.points.length >= 2) {
+            //     // this requires a starting point
+            //     const first_point = state.interaction_buffer.points[0]
+            //     for (const edge of actor.brushModel.edges) {
+            //         const a = world_vertexes[edge.vertexIndexA]
+            //         const b = world_vertexes[edge.vertexIndexB]
+            //         const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
+            //         if (c == null){
+            //             continue // no such point
+            //         }
+            //         const x = this.render_transform.view_transform_x(c)
+            //         const y = this.render_transform.view_transform_y(c)
 
-                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
-                    if (distance < best_right_angle_distance) {
-                        best_right_angle_location = c
-                        best_right_angle_distance = distance
-                        best_right_angle_a = a
-                        best_right_angle_b = b
-                        best_right_angle_q = first_point
-                    }
-                }
-    
-            }
+            //         const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+            //         if (distance < best_right_angle_distance) {
+            //             best_right_angle_location = c
+            //             best_right_angle_distance = distance
+            //             best_right_angle_a = a
+            //             best_right_angle_b = b
+            //             best_right_angle_q = first_point
+            //         }
+            //     }
+            // }
+
             // snap to edges
             for (const edge of actor.brushModel.edges) {
                 const a = world_vertexes[edge.vertexIndexA]
@@ -486,8 +486,15 @@ export class WorldViewportQueries {
         return [best_match_location, best_distance]
     }
 
-    find_nearest_intersection(map: UnrealMap, canvas_x: number, canvas_y: number, max_distance: number, custom_geometry_cache: GeometryCache): [Vector|null, number, LineIntersectionCandidate, LineIntersectionCandidate] {
-        const query = this.find_edges_in_radius(map, canvas_x, canvas_y, max_distance, custom_geometry_cache)
+    find_nearest_intersection(
+        map: UnrealMap, 
+        canvas_x: number, 
+        canvas_y: number, 
+        max_distance: number, 
+        custom_geometry_cache: GeometryCache, 
+        edges_nearby:EditorSelection = null,
+    ): [Vector|null, number, LineIntersectionCandidate, LineIntersectionCandidate] {
+        const query = edges_nearby ?? this.find_edges_in_radius(map, canvas_x, canvas_y, max_distance, custom_geometry_cache)
         
         const segments: LineIntersectionCandidate[] = [] 
         for (const actor_selection of query.actors){
@@ -700,36 +707,7 @@ export class WorldViewportQueries {
                     }
                 }
             }
-
-            // snap edge so that a right angle is formed
-            if (state.interaction_buffer.points.length >= 2) {
-                // this requires a starting point
-                const first_point = state.interaction_buffer.points[0]
-                for (let i=0; i<actor.brushModel.edges.length; i++) {
-                    const actor_edge_index = i
-                    const edge = actor.brushModel.edges[actor_edge_index]
-                    const a = world_vertexes[edge.vertexIndexA]
-                    const b = world_vertexes[edge.vertexIndexB]
-                    const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
-                    if (c == null){
-                        continue // no such point
-                    }
-                    const x = this.render_transform.view_transform_x(c)
-                    const y = this.render_transform.view_transform_y(c)
-
-                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
-                    if (distance < best_right_angle_distance) {
-                        best_right_angle_location = c
-                        best_right_angle_distance = distance
-                        best_right_angle_a = a
-                        best_right_angle_b = b
-                        best_right_angle_q = first_point
-                        best_right_angle_actor_index = actor_index
-                        best_right_angle_actor_edge_index = actor_edge_index
-                    }
-                }
-    
-            }
+            
             // snap to edges
             for (let i=0; i<actor.brushModel.edges.length; i++) {
                 const actor_edge_index = i
@@ -775,7 +753,45 @@ export class WorldViewportQueries {
             }
         }
         
-        const [intersection_point, intersection_point_distance, intersection_a, intersection_b] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
+        const edges_nearby = this.find_edges_in_radius(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache)
+
+        if (state.interaction_buffer.points.length >= 2) {
+            // this requires a starting point
+            for (const edges_nearby_actor of edges_nearby.actors)
+            {
+                const actor_index = edges_nearby_actor.actor_index
+                const actor = map.actors[edges_nearby_actor.actor_index]
+                const world_vertexes = custom_geometry_cache.get_world_transformed_vertexes(actor_index)
+                // snap edge so that a right angle is formed
+                
+                const first_point = state.interaction_buffer.points[0]
+                for (let i=0; i<edges_nearby_actor.edges.length; i++) {
+                    const actor_edge_index = i
+                    const edge = actor.brushModel.edges[actor_edge_index]
+                    const a = world_vertexes[edge.vertexIndexA]
+                    const b = world_vertexes[edge.vertexIndexB]
+                    const c = fast_closest_point_to_line(a, b, first_point)
+                    if (c == null){
+                        continue // no such point
+                    }
+                    const x = this.render_transform.view_transform_x(c)
+                    const y = this.render_transform.view_transform_y(c)
+        
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+                    if (distance < best_right_angle_distance) {
+                        best_right_angle_location = c
+                        best_right_angle_distance = distance
+                        best_right_angle_a = a
+                        best_right_angle_b = b
+                        best_right_angle_q = first_point
+                        best_right_angle_actor_index = actor_index
+                        best_right_angle_actor_edge_index = actor_edge_index
+                    }
+                }
+            }
+        }
+        
+        const [intersection_point, intersection_point_distance, intersection_a, intersection_b] = this.find_nearest_intersection(map, canvas_x, canvas_y, 16*this.render_transform.device_pixel_ratio, custom_geometry_cache, edges_nearby)
         if (intersection_point != null && intersection_point_distance < best_edge_intersection_distance) {
             best_edge_intersection_location = intersection_point
             best_edge_intersection_distance = intersection_point_distance
@@ -843,7 +859,7 @@ export class WorldViewportQueries {
         }
 
         // lower priority on right angle compared to intersection and vertex
-        best_right_angle_distance += 2*device_pixel_ratio
+        best_right_angle_distance += 4*device_pixel_ratio
 
         if (best_right_angle_distance < best_distance&& 
             best_right_angle_distance < MAX_SNAP_DISTANCE)
