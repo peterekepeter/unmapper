@@ -1,5 +1,4 @@
-import { fmod, clamp, sin_degrees, cos_degrees } from "../ExtendedMath"
-
+import { clamp, cos_degrees, fmod, nearest_power_of_two, round_to_precision, sin_degrees } from "../ExtendedMath"
 
 describe('ExtendedMath', () => {
 
@@ -12,10 +11,10 @@ describe('ExtendedMath', () => {
             [10, 360, 10],
             [-10, 360, 350],
         ]
-        .forEach(([input, modulo, result]) =>
-            test(`fmod(${input}, ${modulo}) is ${result}`, () =>
-                expect(fmod(input, modulo))
-                    .toBe(result)))
+            .forEach(([input, modulo, result]) =>
+                test(`fmod(${input}, ${modulo}) is ${result}`, () =>
+                    expect(fmod(input, modulo))
+                        .toBe(result)))
     })
 
     describe('clamp', () => {
@@ -26,10 +25,10 @@ describe('ExtendedMath', () => {
             [0, 2, 2, 2],
             [0, 3, 2, 2],
         ]
-        .forEach(([min, value, max, result]) =>
-            test(`clamp(${min}, ${value}, ${max}) is ${result}`, () =>
-                expect(clamp(min, value, max))
-                    .toBe(result)))
+            .forEach(([min, value, max, result]) =>
+                test(`clamp(${min}, ${value}, ${max}) is ${result}`, () =>
+                    expect(clamp(min, value, max))
+                        .toBe(result)))
     })
 
     // high precision approximations from wolfram alpha:
@@ -44,7 +43,7 @@ describe('ExtendedMath', () => {
             // common angles
             [0, 0],
             [11.25, sin11dot25],  // 1/32
-            [22.5, sin22dot5],// 1/16
+            [22.5, sin22dot5], // 1/16
             [30, 0.5],   // 1/12
             [45, sin45], // 1/8
             [60, sin60], // 1/6
@@ -60,9 +59,9 @@ describe('ExtendedMath', () => {
             [-360 + 45, sin45], 
             [-360 + 135, sin45], 
         ]
-        .forEach(([degrees, result]) =>
-            test(`sinDegrees(${degrees}) is ${result}`, () =>
-                expect(sin_degrees(degrees)).toEqual(result)))
+            .forEach(([degrees, result]) =>
+                test(`sinDegrees(${degrees}) is ${result}`, () =>
+                    expect(sin_degrees(degrees)).toEqual(result)))
     })
 
     describe('cosDegrees', () => {
@@ -75,9 +74,52 @@ describe('ExtendedMath', () => {
             [270, -0],
             [360 + 60, 0.5],
         ]
-        .forEach(([degrees, result]) =>
-            test(`cosDegrees(${degrees}) is ${result}`, () =>
-                expect(cos_degrees(degrees)).toEqual(result)))
+            .forEach(([degrees, result]) =>
+                test(`cosDegrees(${degrees}) is ${result}`, () =>
+                    expect(cos_degrees(degrees)).toEqual(result)))
     })
 
-});
+    describe('nearest_power_of_two', () => {
+        const fn = nearest_power_of_two
+
+        test("returns itself if power of two", () => {
+            expect(fn(0.25)).toBe(0.25)
+            expect(fn(0.5)).toBe(0.5)
+            expect(fn(1)).toBe(1)
+            expect(fn(2)).toBe(2)
+            expect(fn(4)).toBe(4)
+        })
+
+        test("return itself for negative powers of two", () => {
+            expect(fn(-0.25)).toBe(-0.25)
+            expect(fn(-4)).toBe(-4)
+        })
+
+        test("return zero for zero", () => expect(fn(0)).toBe(0))
+
+        test("return NaN for Nan", () => expect(fn(NaN)).toBe(NaN))
+
+        test("return -Inf for -Inf", () => expect(fn(-Infinity)).toBe(-Infinity))
+        
+        test("return +Inf for +Inf", () => expect(fn(+Infinity)).toBe(+Infinity))
+
+        test("rounds to nearest power", () => {
+            expect(fn(2.01)).toBe(2)
+            expect(fn(1.99)).toBe(2)
+        })
+
+        test("rounds to nearest negative power", () => {
+            expect(fn(-2.01)).toBe(-2)
+            expect(fn(-1.99)).toBe(-2)
+        })
+    })
+
+    describe('round_to_precision', () => {
+        const fn = round_to_precision
+        
+        test("round to integer", () => expect(fn(16.24, 1.0)).toBe(16.0) )
+        
+        test("round to fractional", () => expect(fn(16.24, 0.25)).toBe(16.25) )
+    })
+
+})

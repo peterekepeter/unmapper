@@ -18,6 +18,7 @@ import { set_interaction_axis_lock_commands } from "./interaction/set_interactio
 import { get_io_commands } from "./io"
 import { measure_command } from "./measure_distance"
 import { move_command } from "./move_selected"
+import { recalculate_brush_center_command } from "./recalculate_brush_center"
 import { rotate_command } from "./rotate_selected"
 import { scale_command } from "./scale_selected"
 import { select_all_command } from './selection/select_all'
@@ -59,6 +60,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     clear_status_command,
     vertex_noise_command,
     smooth_vertexes_command,
+    recalculate_brush_center_command,
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
     ...get_io_commands(),

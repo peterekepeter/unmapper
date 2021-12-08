@@ -49,3 +49,26 @@ export function acos_degrees(a: number): number {
 export function atan_degrees(y: number, x: number): number {
     return Math.atan2(y, x) / Math.PI * DEGREES_HALF_TURN
 }
+
+export function nearest_power_of_two(x: number): number {
+    const s = Math.sign(x)
+    const m = Math.abs(x)
+    let n = 1.0
+    while (n < m){
+        n *= 2.0
+    }
+    const over = n
+    while (n > m){
+        n *= 0.5
+    }
+    const under = n
+    if (Math.abs(over-m) < Math.abs(under-m)){
+        n = over
+    }
+    return n*s
+}
+
+export function round_to_precision(x: number, precision: number): number
+{
+    return Math.round(x/precision)*precision
+}
