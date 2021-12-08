@@ -23,8 +23,14 @@ export function bind_keyboard_handler(accepts_event: (shortcut: string) => boole
 
 const listener = (event : KeyboardEvent) => {
     if (event.target !== document.body){
-        // ignore targeted input
-        return
+        if (event.key === 'F1' || event.key === 'Escape'){
+            // special handling to allow these to work globally
+            document.body.focus()
+        }
+        else {
+            // ignore targeted input
+            return
+        }
     }
     const shortcut = shortcutFromEvent(event)
     for (const handler of handlers) {

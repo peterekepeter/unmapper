@@ -28,7 +28,15 @@ export class BufferedInteractionController
         if (this.command_info != null){
             // finalize previous command
             this.controller.reset_preview()
-            this.controller.execute(this.command_info)
+            try
+            {
+                this.controller.execute(this.command_info)
+            }
+            catch (e){
+                // previous command can be a failing command
+                // in case it fails just log it and let the app recover
+                console.error(e)
+            }
             this.controller.execute(reset_interaction_buffer_command)
         }
 
