@@ -959,8 +959,16 @@ export class WorldViewportQueries {
         {
             best_distance = best_edge_distance
             best_match_location = best_edge_location
+            
+            if (state.options.grid > 0)
+            {
+                const g = state.options.grid
+                best_match_location = align_to_grid(best_match_location, new Vector(g, g, g))
+                best_match_location = precise_closest_point_to_line(best_edge_vertex_a, best_edge_vertex_b, best_match_location)
+            }
+
             result = {
-                location: best_edge_location,
+                location: best_match_location,
                 selection: {
                     actors: [
                         {
