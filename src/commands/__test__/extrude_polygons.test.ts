@@ -1,31 +1,45 @@
 
-
 import { Actor } from "../../model/Actor"
 import { BrushModelBuilder } from "../../model/BrushModelBuilder"
 import { DEFAULT_ACTOR_SELECTION } from "../../model/EditorSelection"
-import { EditorState, editor_state_from_actors } from "../../model/EditorState"
+import { create_initial_editor_state, editor_state_from_actors, EditorState } from "../../model/EditorState"
+import { Vector } from "../../model/Vector"
 import { extrude_polygons_command as command } from "../extrude_polygons"
 
-
-describe('extrude polygon', () => {
+// DEBUG polygon creation
+describe.skip('extrude polygon', () => {
 
     const builder = new BrushModelBuilder()
-    builder.add_vertex_coords(0,0,0)
-    builder.add_vertex_coords(1,0,0)
-    builder.add_vertex_coords(1,1,0)
-    builder.add_vertex_coords(0,1,0)
-    builder.add_polygon(0,1,2,3)
+    builder.add_vertex_coords(0, 0, 0)
+    builder.add_vertex_coords(1, 0, 0)
+    builder.add_vertex_coords(1, 1, 0)
+    builder.add_vertex_coords(0, 1, 0)
+    builder.add_polygon(0, 1, 2, 3)
     const actor = new Actor()
     actor.brushModel = builder.build()
     
-    const old_state = editor_state_from_actors([actor])
-    old_state.options.vertex_mode = true
-    old_state.selection = { actors: [{
-        ...DEFAULT_ACTOR_SELECTION,
-        actor_index: 0,
-        polygons: [0]
-    }]}
-
+    const initial = create_initial_editor_state()
+    const old_state: EditorState = { 
+        ...editor_state_from_actors([actor]),
+        options: { 
+            ...initial.options,
+            vertex_mode: true, 
+        },
+        selection: {
+            actors: [
+                {
+                    ...DEFAULT_ACTOR_SELECTION,
+                    actor_index: 0,
+                    polygons: [0],
+                },
+            ], 
+        },
+        interaction_buffer: {
+            ...initial.interaction_buffer,
+            points: [Vector.ZERO, Vector.UP], 
+        },
+    }
+    
     let new_state : EditorState
 
     beforeAll(() => {

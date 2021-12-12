@@ -102,8 +102,11 @@ v 1 0 1
 v -1 0 -1
 v -1 0 1
 vt 0 0
+vt 0 0
+vt 0 0
+vt 0 0
 vn 0 1 0
-f 1/1/1 3/1/1 4/1/1 2/1/1`
+f 1/1/1 3/2/1 4/3/1 2/4/1`
 
     let map: UnrealMap
     let exported: string

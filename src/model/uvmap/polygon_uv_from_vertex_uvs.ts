@@ -6,12 +6,15 @@ import { get_vertex_uv } from "./vertex_uv"
 const abs = Math.abs
 
 export function polygon_uv_from_vertex_uvs(vertexes: Vector[], uvs: Vector[]): BrushPolygonUvData {
-    return impl_v3(vertexes, uvs)
+    return implemenation_v3(vertexes, uvs)
 }
 
-export function impl_v3(verts: Vector[], vertex_uvs: Vector[]): BrushPolygonUvData {
+export function implemenation_v3(verts: Vector[], vertex_uvs: Vector[]): BrushPolygonUvData {
     EditorError.if(verts.length != vertex_uvs.length)
-    const v1 = impl_v1(verts, vertex_uvs) // assumes v1 finds origin correctly
+    const v1 = implementation_v1(verts, vertex_uvs)
+    if (v1.fully_handled){
+        return { ...v1, panU: 0, panV: 0 }
+    }
     const origin = v1.origin
 
     let pvs = verts.map(v => v.subtract_vector(origin))
@@ -38,7 +41,7 @@ export function impl_v3(verts: Vector[], vertex_uvs: Vector[]): BrushPolygonUvDa
 
         // compare each vector
         const lengths = pvs.map(p => p.length())
-        const max_length = lengths.reduce((a,c) => c > a ? c : a,lengths[0])
+        const max_length = lengths.reduce((a, c) => c > a ? c : a, lengths[0])
         const normalized_lengths = lengths.map(l => l/max_length)
         const normalized_pvs = pvs.map(p => p.normalize())
         let worst_score = 1
@@ -63,38 +66,39 @@ export function impl_v3(verts: Vector[], vertex_uvs: Vector[]): BrushPolygonUvDa
 
     // add normal with Z UV
     const normal = verts[1].subtract_vector(verts[0]).cross(
-        verts[2].subtract_vector(verts[0])).normalize()
+        verts[2].subtract_vector(verts[0]),
+    ).normalize()
     pvs.push(normal)
     uvs = [...uvs, Vector.UNIT_Z]
 
     // row operations
-    if (abs(pvs[0].x) < abs(pvs[1].x)) swap(0,1)
-    if (abs(pvs[0].x) < abs(pvs[2].x)) swap(0,2)
+    if (abs(pvs[0].x) < abs(pvs[1].x)) swap(0, 1)
+    if (abs(pvs[0].x) < abs(pvs[2].x)) swap(0, 2)
 
     EditorError.if(pvs[0].x === 0)
     
-    divide(0,pvs[0].x)
-    add(0,1,-pvs[1].x)
-    add(0,2,-pvs[2].x)
+    divide(0, pvs[0].x)
+    add(0, 1, -pvs[1].x)
+    add(0, 2, -pvs[2].x)
 
-    if (abs(pvs[1].y) < abs(pvs[2].y)) swap(1,2)
+    if (abs(pvs[1].y) < abs(pvs[2].y)) swap(1, 2)
 
     EditorError.if(pvs[1].y === 0)
 
-    divide(1,pvs[1].y)
-    add(1,0,-pvs[0].y)
-    add(1,2,-pvs[2].y)
+    divide(1, pvs[1].y)
+    add(1, 0, -pvs[0].y)
+    add(1, 2, -pvs[2].y)
 
     EditorError.if(pvs[2].z === 0)
 
-    divide(2,pvs[2].z)
-    add(2,1,-pvs[1].z)
-    add(2,0,-pvs[0].z)
+    divide(2, pvs[2].z)
+    add(2, 1, -pvs[1].z)
+    add(2, 0, -pvs[0].z)
 
     // debug_print(pvs, uvs)
     
-    const textureU = new Vector(uvs[0].x,uvs[1].x,uvs[2].x)
-    const textureV = new Vector(uvs[0].y,uvs[1].y,uvs[2].y)
+    const textureU = new Vector(uvs[0].x, uvs[1].x, uvs[2].x)
+    const textureV = new Vector(uvs[0].y, uvs[1].y, uvs[2].y)
 
     return { origin, textureU, textureV, panU: 0, panV: 0 }
     
@@ -122,7 +126,7 @@ export function impl_v3(verts: Vector[], vertex_uvs: Vector[]): BrushPolygonUvDa
     // }
 }
 
-export function impl_v2(vertexes: Vector[], uvs: Vector[]): BrushPolygonUvData {
+export function implementation_v2(vertexes: Vector[], uvs: Vector[]): BrushPolygonUvData {
     EditorError.if(vertexes.length != uvs.length)
     const [posA, posB, posC] = vertexes
     const [uvA, uvB, uvC] = uvs
@@ -227,7 +231,7 @@ export function impl_v2(vertexes: Vector[], uvs: Vector[]): BrushPolygonUvData {
     textureV = new Vector(ua.y, ub.y, uc.y)
 
     // origin should be the world position where UV is ZERO
-    const v1 = impl_v1(vertexes, uvs);
+    const v1 = implementation_v1(vertexes, uvs)
 
     // this algorithm applies panning by moving the origin
     // so there is no need for these additional pans
@@ -240,13 +244,13 @@ export function impl_v2(vertexes: Vector[], uvs: Vector[]): BrushPolygonUvData {
     result.panU = uvA.x - uv.x
     result.panV = uvA.y - uv.y
 
-    return result;
+    return result
 }
 
-function impl_v1(vertexes: Vector[], uvs: Vector[]) {
+function implementation_v1(vertexes: Vector[], uvs: Vector[]) {
     EditorError.if(vertexes.length != uvs.length)
-    const [posA, posB, posC] = vertexes
-    const [uvA, uvB, uvC] = uvs
+    const [p_a, p_b, p_c] = vertexes
+    const [uv_a, uv_b, uv_c] = uvs
 
     let textureU: Vector, textureV: Vector
 
@@ -254,10 +258,10 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
 
     // find polygon UV vectors textureU and textureV
     {
-        let dpAB = posB.subtract_vector(posA)
-        let dpAC = posC.subtract_vector(posA)
-        let duAB = uvB.subtract_vector(uvA)
-        let duAC = uvC.subtract_vector(uvA)
+        let dpAB = p_b.subtract_vector(p_a)
+        let dpAC = p_c.subtract_vector(p_a)
+        let duAB = uv_b.subtract_vector(uv_a)
+        let duAC = uv_c.subtract_vector(uv_a)
 
         // debug_print()
 
@@ -268,7 +272,7 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
         // debug_print()
 
         if (duAC.x !== 0) {
-            EditorError.if(duAB.x === 0, 'polygon has degenerate vertex UV')
+            if (duAB.x === 0) return handle_degenerate()
             const reduct01 = duAC.x / duAB.x
             dpAC = dpAC.subtract_vector(dpAB.scale(reduct01))
             duAC = duAC.subtract_vector(duAB.scale(reduct01))
@@ -277,6 +281,7 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
         // debug_print()
 
         if (duAB.y !== 0) {
+            if (duAC.y === 0) return handle_degenerate()
             EditorError.if(duAC.y === 0, 'polygon has degenerate vertex UV')
             const reduct10 = duAB.y / duAC.y
             dpAB = dpAB.subtract_vector(dpAC.scale(reduct10))
@@ -286,6 +291,7 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
         // debug_print()
 
         if (duAB.x !== 1) {
+            if (duAB.x === 0) return handle_degenerate()
             const scaleAB = 1 / duAB.x
             dpAB = dpAB.scale(scaleAB)
             duAB = duAB.scale(scaleAB)
@@ -294,6 +300,7 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
         // debug_print()
 
         if (duAC.y !== 1) {
+            if (duAC.y === 0) return handle_degenerate()
             const scaleAC = 1 / duAC.y
             dpAC = dpAC.scale(scaleAC)
             duAC = duAC.scale(scaleAC)
@@ -306,21 +313,35 @@ function impl_v1(vertexes: Vector[], uvs: Vector[]) {
         // function debug_print(){
         //     console.table([
         //         [dpAB.x, dpAB.y, dpAB.z, duAB.x, duAB.y, duAB.z].map(format),
-        //         [dpAC.x, dpAC.y, dpAC.z, duAC.x, duAC.y, duAC.z].map(format)
+        //         [dpAC.x, dpAC.y, dpAC.z, duAC.x, duAC.y, duAC.z].map(format),
         //     ])
         // }
         
         // function format(n: number) {
         //     return Number(n.toPrecision(4))
         // }
+
+        function handle_degenerate(){
+            if (uv_a.equals(uv_b) && uv_b.equals(uv_c)){
+                return {
+                    origin: uv_a,
+                    textureU: Vector.ZERO,
+                    textureV: Vector.ZERO,
+                    fully_handled: true,
+                }
+            }
+            else {
+                throw new EditorError("polygon has degenerate UVs")
+            }
+        }
     }
 
     // origin should be the world position where UV is ZERO
-    const origin = posA
-        .subtract_vector(textureU.scale(uvA.x))
-        .subtract_vector(textureV.scale(uvA.y))
+    const origin = p_a
+        .subtract_vector(textureU.scale(uv_a.x))
+        .subtract_vector(textureV.scale(uv_a.y))
 
-    return {origin, textureU, textureV}
+    return { origin, textureU, textureV, fully_handled: false }
 
 }
 
@@ -328,6 +349,6 @@ function printTable(pa: Vector, ua: Vector, pb: Vector, ub: Vector, pc: Vector, 
     console.table([
         [pa.x, pa.y, pa.z, ua.x, ua.y],
         [pb.x, pb.y, pb.z, ub.x, ub.y],
-        [pc.x, pc.y, pc.z, uc.x, uc.y]
+        [pc.x, pc.y, pc.z, uc.x, uc.y],
     ])
 }
