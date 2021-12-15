@@ -25,6 +25,7 @@ import { select_all_command } from './selection/select_all'
 import { reset_initial_state, set_initial_state } from "./set_initial_state"
 import { shuffle_brush_polygons_command } from './shuffle_brush_polygons'
 import { smooth_vertexes_command } from "./smooth_vertexes"
+import { sort_brushes_command } from "./sort_brushes"
 import { triangulate_mesh_polygons_command } from './triangulate_mesh_polygons'
 import { uv_random_map_command } from "./uv_random_map"
 import { uv_triplanar_map_command } from './uv_triplanar_map'
@@ -42,6 +43,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     align_vertexes_to_16_grid,
     align_vertexes_to_8_grid,
     flip_polygon_normal_command,
+    sort_brushes_command,
     shuffle_brush_polygons_command,
     triangulate_mesh_polygons_command,
     uv_triplanar_map_command,
