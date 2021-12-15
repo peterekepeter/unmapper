@@ -56,9 +56,15 @@ function recalculate_brush_center(state: EditorState): EditorState {
             
             const new_center  = new Vector(center_x, center_y, center_z)
             const new_vertexes = b.vertexes.map(v => new BrushVertex(v.position.subtract_vector(new_center)))
+            const new_polygons = b.polygons.map(p => {
+                const new_p = p.shallow_copy()
+                new_p.origin = new_p.origin.subtract_vector(new_center)
+                return new_p
+            })
             
             const new_brush = b.shallow_copy()
             new_brush.vertexes = new_vertexes
+            new_brush.polygons = new_polygons
             const new_actor = a.shallow_copy()
             new_actor.brushModel = new_brush
 

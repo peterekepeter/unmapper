@@ -70,5 +70,8 @@ export function nearest_power_of_two(x: number): number {
 
 export function round_to_precision(x: number, precision: number): number
 {
+    if (-Number.EPSILON <= precision && precision <= Number.EPSILON){
+        return x
+    }
     return Math.round(x/precision)*precision
 }

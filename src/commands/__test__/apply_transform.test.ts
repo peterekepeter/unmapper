@@ -74,7 +74,7 @@ function expect_apply_transform_maintains_uv(mutate_actor_fn: (a: Actor) => void
     })
 }
 
-function expect_maintains_uv(fn: (state:EditorState) => EditorState){
+export function expect_maintains_uv(fn: (state:EditorState) => EditorState): void {
     const state : EditorState = {
         ...create_initial_editor_state(),
         map: load_map_from_string(plane_brush), 
@@ -92,5 +92,5 @@ function expect_maintains_uv(fn: (state:EditorState) => EditorState){
     const next_state = fn(state)
     const next_uvs = get_brush_polygon_vertex_uvs(next_state.map.actors[0].brushModel, 0)
 
-    expect(initial_uvs).toEqual(next_uvs)
+    expect(next_uvs).toEqual(initial_uvs)
 }

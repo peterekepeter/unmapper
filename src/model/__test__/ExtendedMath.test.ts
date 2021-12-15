@@ -120,6 +120,8 @@ describe('ExtendedMath', () => {
         test("round to integer", () => expect(fn(16.24, 1.0)).toBe(16.0) )
         
         test("round to fractional", () => expect(fn(16.24, 0.25)).toBe(16.25) )
+
+        test("round to infinite precision returns same number", () => expect(fn(3.14159, 0)).toBe(3.14159))
     })
 
 })
