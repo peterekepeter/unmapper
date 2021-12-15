@@ -2,7 +2,6 @@ import { Actor } from "../Actor"
 import { Matrix3x3 } from "../Matrix3x3"
 import { Vector } from "../Vector"
 
-
 export const get_actor_to_world_transform = get_actor_to_world_transform_optimized
 
 export const get_world_to_actor_transform = get_world_to_actor_transform_simple
@@ -25,9 +24,17 @@ export function get_actor_to_world_rotation_scaling(actor: Actor): Matrix3x3 {
         .multiply(mainScale.to_matrix())
 }
 
+export function get_actor_to_world_rotation_with_inverse_scaling(actor: Actor): Matrix3x3 {
+
+    const { postScale, rotation, mainScale } = actor
+
+    return postScale.to_inv_matrix()
+        .multiply(rotation.to_matrix())
+        .multiply(mainScale.to_inv_matrix())
+}
 
 export function get_world_to_actor_transform_simple(
-    actor: Actor
+    actor: Actor,
 ): (v: Vector) => Vector {
 
     const pivot = actor.prePivot || Vector.ZERO
@@ -40,7 +47,7 @@ export function get_world_to_actor_transform_simple(
 }
 
 export function get_actor_to_world_transform_simple(
-    actor: Actor
+    actor: Actor,
 ): (v: Vector) => Vector {
 
     const matrix = get_actor_to_world_rotation_scaling(actor)
@@ -52,7 +59,7 @@ export function get_actor_to_world_transform_simple(
 }
 
 export function get_actor_to_world_transform_optimized(
-    actor: Actor
+    actor: Actor,
 ): (v: Vector) => Vector {
 
     const matrix = get_actor_to_world_rotation_scaling(actor)
@@ -63,7 +70,7 @@ export function get_actor_to_world_transform_optimized(
     {
         if (matrix.equals(Matrix3x3.IDENTITY)){
             // matrix math not required
-            const translate = location.subtract_vector(pivot);
+            const translate = location.subtract_vector(pivot)
             if (translate.equals(Vector.ZERO)){
                 // identity transnform detected!
                 return v => v
