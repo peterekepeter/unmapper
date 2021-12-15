@@ -164,7 +164,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     }
 
     function get_ortoho_scale(zoom_level: number){
-        const levels_per_double = 4
+        const levels_per_double = 2
         const scale = 1/4096*Math.pow(2, zoom_level/levels_per_double) 
         return scale
     }
