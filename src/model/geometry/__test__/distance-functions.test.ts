@@ -26,8 +26,8 @@ describe('distance_to_line_segment', () => {
     })
 
     test('distance to line at 45 degrees', () => {
-        x0=-1, y0=-1
-        x1=+1, y1=+1
+        x0=-1; y0=-1
+        x1=+1; y1=+1
         expect(distance(-1, +1)).toBe(Math.sqrt(2))
     })
 

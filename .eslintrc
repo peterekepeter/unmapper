@@ -78,7 +78,9 @@
         "no-multiple-empty-lines": [
             "warn",
             {
-                "max": 1
+                "max": 2,
+                "maxEOF": 0,
+                "maxBOF": 0
             }
         ],
         "function-paren-newline": [
@@ -123,6 +125,7 @@
                     "whitespace",
                     "coord",
                     "coords",
+                    "csg" // constructive solid geometry
                 ]
             }
         ]

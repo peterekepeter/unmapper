@@ -364,29 +364,29 @@ export class WorldViewportQueries {
             }
 
             // snap edge so that a right angle is formed
-            // if (state.interaction_buffer.points.length >= 2) {
-            //     // this requires a starting point
-            //     const first_point = state.interaction_buffer.points[0]
-            //     for (const edge of actor.brushModel.edges) {
-            //         const a = world_vertexes[edge.vertexIndexA]
-            //         const b = world_vertexes[edge.vertexIndexB]
-            //         const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
-            //         if (c == null){
-            //             continue // no such point
-            //         }
-            //         const x = this.render_transform.view_transform_x(c)
-            //         const y = this.render_transform.view_transform_y(c)
+            /*if (state.interaction_buffer.points.length >= 2) {
+                // this requires a starting point
+                const first_point = state.interaction_buffer.points[0]
+                for (const edge of actor.brushModel.edges) {
+                    const a = world_vertexes[edge.vertexIndexA]
+                    const b = world_vertexes[edge.vertexIndexB]
+                    const c = fast_closest_point_to_line_inside_segment(a, b, first_point)
+                    if (c == null){
+                        continue // no such point
+                    }
+                    const x = this.render_transform.view_transform_x(c)
+                    const y = this.render_transform.view_transform_y(c)
 
-            //         const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
-            //         if (distance < best_right_angle_distance) {
-            //             best_right_angle_location = c
-            //             best_right_angle_distance = distance
-            //             best_right_angle_a = a
-            //             best_right_angle_b = b
-            //             best_right_angle_q = first_point
-            //         }
-            //     }
-            // }
+                    const distance = distance_2d_to_point(canvas_x, canvas_y, x, y)
+                    if (distance < best_right_angle_distance) {
+                        best_right_angle_location = c
+                        best_right_angle_distance = distance
+                        best_right_angle_a = a
+                        best_right_angle_b = b
+                        best_right_angle_q = first_point
+                    }
+                }
+            }*/
 
             // snap to edges
             for (const edge of actor.brushModel.edges) {

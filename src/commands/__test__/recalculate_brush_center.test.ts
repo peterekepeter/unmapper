@@ -6,10 +6,13 @@ import { Vector } from "../../model/Vector"
 import { recalculate_brush_center_command } from "../recalculate_brush_center"
 import { expect_maintains_uv } from "./apply_transform.test"
 
+
 describe("maintains vertex uv", () => {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    test("default case", () => expect_recalculate_maintains_uv(() => {}))
+    test("default case", () => expect_recalculate_maintains_uv((actor) => {
+        actor.location = Vector.ZERO
+    }))
 
     test("translated brush", () => expect_recalculate_maintains_uv(actor => {
         actor.location = new Vector(16, 16, 16)

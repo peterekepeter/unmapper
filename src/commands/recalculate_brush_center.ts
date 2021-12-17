@@ -16,7 +16,6 @@ export const recalculate_brush_center_command: ICommandInfoV2 = {
 function recalculate_brush_center(state: EditorState): EditorState {
     const generator = new RandomVectorGenerator()
     generator.seed = Date.now()
-    BoundingBox.from_vectors
     return change_selected_actors(
         state, 
         a => {

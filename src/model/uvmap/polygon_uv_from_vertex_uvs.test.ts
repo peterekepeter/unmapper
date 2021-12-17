@@ -67,7 +67,7 @@ describe('UV origin for random triangle, origin at median', () => {
         random.seed = seed
         const vertexes = random_triangle()
         const origin = vertexes[0].add_vector(vertexes[1]).add_vector(vertexes[2]).scale(1/3)
-        const uvs = vertexes.map(v => get_vertex_uv({ origin, textureU: Vector.UNIT_X, textureV: Vector.UNIT_Y, panU: 0, panV: 0 }, v))
+        const uvs = vertexes.map(r => get_vertex_uv({ origin, textureU: Vector.UNIT_X, textureV: Vector.UNIT_Y, panU: 0, panV: 0 }, r))
         const result = fn(vertexes, uvs).origin
         expect_vector_close_to(result, origin)
     }
@@ -84,7 +84,7 @@ describe('UV vectors for random triangle', () => {
         const vertexes = random_triangle()
         const uvs = [Vector.ZERO, Vector.UNIT_X, Vector.UNIT_Y]
         const polygon_uv = fn(vertexes, uvs)
-        const result_uvs = vertexes.map(v => get_vertex_uv(polygon_uv, v))
+        const result_uvs = vertexes.map(r => get_vertex_uv(polygon_uv, r))
 
         try {
             vertexes.forEach((_, i) => expect_vector_close_to(result_uvs[i], uvs[i]))
