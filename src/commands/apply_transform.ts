@@ -12,6 +12,10 @@ export const apply_transform_command: ICommandInfoV2 = {
     description: "Apply object transformation to brush vertexes",
 
     exec: state => change_selected_actors(state, old_actor => {
+        if (old_actor.brushModel == null) {
+            // not a brush
+            return old_actor
+        }
         const transform_fn = get_actor_to_world_transform(old_actor)
         const rotate_with_inverse_scale = get_actor_to_world_rotation_with_inverse_scaling(old_actor)
         const rotate_scale = get_actor_to_world_rotation_scaling(old_actor)
