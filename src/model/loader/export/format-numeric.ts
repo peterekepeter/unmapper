@@ -1,4 +1,4 @@
-import { UNREAL_FULL_TURN, DEGREES_FULL_TURN } from "../../ExtendedMath"
+import { DEGREES_FULL_TURN, UNREAL_FULL_TURN } from "../../ExtendedMath"
 
 export function format_angle(angleDegrees: number): string {
     return format_int(angleDegrees
@@ -22,14 +22,15 @@ function format_numeric(
     alwaysShowSign: boolean,
     padLeft: number,
     padRight: number,
-    precision: number): string {
+    precision: number,
+): string {
     const sign = x < 0 ? '-' : alwaysShowSign ? '+' : ''
-    const power = Math.pow(10, precision)
+    const power = 10**precision
     const absolute = Math.abs(x) * power
     const rounded = Math.round(absolute)
-    const string = rounded.toString()
+    const string = rounded.toString().padStart(precision + 1, '0')
     const digits = string.length
-    const whole = string.substr(0, digits - precision).padStart(padLeft,'0')
-    const fract = string.substr(digits - precision).padEnd(padRight, '0')
-    return `${sign}${whole}.${fract}`
+    const whole = string.substr(0, digits - precision).padStart(padLeft, '0')
+    const fractional = string.substr(digits - precision).padEnd(padRight, '0')
+    return `${sign}${whole}.${fractional}`
 }

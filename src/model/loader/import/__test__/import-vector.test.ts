@@ -26,18 +26,23 @@ test("smallest supported fractional", () => parseAndCheck(
     new Vector(10.000001, 20.000001, 30.000001),
 ))
 
+test("values close to zero", () => parseAndCheck(
+    "+00000.000077,+00000.000044,-00001.000000", 
+    new Vector(0.000077, 0.000044, -1.000000),
+))
+
 test("can parse object format", () => parseAndCheck(
     "(X=1488.000000,Y=-1376.000000,Z=-176.000000)", 
     new Vector(1488, -1376, -176),
 ))
 
-test("backfills missing value with default", () => parseAndCheck(
+test("back fill missing value with default", () => parseAndCheck(
     "(Y=-1376.000000)", 
     new Vector(42, -1376, 42),
     42,
 ))
 
-test("can parse object format when wrapped in paranthesis", () => parseAndCheck(
+test("can parse object format when wrapped in parenthesis", () => parseAndCheck(
     "(X=1488.000000,Y=-1376.000000,Z=-176.000000)", 
     new Vector(1488, -1376, -176),
 ))

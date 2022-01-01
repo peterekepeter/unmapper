@@ -1,4 +1,4 @@
-import { format_int, format_angle, format_float, format_padded_float } from "../format-numeric"
+import { format_angle, format_float, format_int, format_padded_float } from "../format-numeric"
 
 test('export int positive', () =>
     expect(format_int(4)).toBe('4'))
@@ -9,34 +9,34 @@ test('export int negative', () =>
 test('export int performs rounding', () =>
     expect(format_int(-4.2)).toBe('-4'))
 
-test('exportAngleDegrees converts units', () =>
+test('format_angle converts units', () =>
     expect(format_angle(360)).toBe("65536"))
 
-test('exportAngleDegrees performs rounding', () =>
+test('format_angle performs rounding', () =>
     expect(format_angle(60)).toBe("10923"))
 
-test('exportAngleDegrees negative', () =>
+test('format_angle negative', () =>
     expect(format_angle(-90)).toBe("-16384"))
 
-test('exportFloat', () =>
+test('format_float', () =>
     expect(format_float(144)).toBe("144.000000"))
 
-test('exportFloat negative', () =>
+test('format_float negative', () =>
     expect(format_float(-16)).toBe("-16.000000"))
 
 // TODO: verify how infinity should be serialized
 test.skip('exportFloat negative infinity', () =>
     expect(format_float(-Infinity)).toBe("-INF.000000"))
 
-test('exportPaddedFloat', () =>
+test('format_padded_float', () =>
     expect(format_padded_float(85.218842))
         .toBe("+00085.218842"))
 
-test('exportPaddedFloat negative', () =>
+test('format_padded_float negative', () =>
     expect(format_padded_float(-75.256027))
         .toBe("-00075.256027"))
 
-test('exportPaddedFloat zero', () =>
+test('format_padded_float zero', () =>
     expect(format_padded_float(0))
         .toBe("+00000.000000"))
 
@@ -60,5 +60,12 @@ test.skip('clamp to max value', () =>
 test.skip('clamp to min value', () =>
     expect(format_padded_float(-1e31))
         .toBe("-99999.999999"))
+        
     
 // TODO: see if we can have additional numeric precision beyond value padding
+
+test('format_float close to zero', () =>
+    expect(format_float(0.000044)).toBe("0.000044"))
+
+test('format_float somewhat close to zero', () =>
+    expect(format_float(0.001044)).toBe("0.001044"))

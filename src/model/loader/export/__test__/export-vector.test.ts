@@ -18,8 +18,13 @@ test('fractional numbers', () => {
 })
 
 test('numbers close to integer', () => {
-    expect(exporting(new Vector(128.000000000084217, 127.99999999998,128.0000001)))
+    expect(exporting(new Vector(128.000000000084217, 127.99999999998, 128.0000001)))
         .toBe("+00128.000000,+00128.000000,+00128.000000")
+})
+
+test('numbers close to zero', () => {
+    expect(exporting(new Vector(0.000088, -0.000044, 0.0000001)))
+        .toBe("+00000.000088,-00000.000044,+00000.000000")
 })
 
 function exporting(vector : Vector) : string {

@@ -1,10 +1,11 @@
-import { load_map_from_string, store_map_to_string } from '..';
+/* eslint-disable spellcheck/spell-checker */
+import { load_map_from_string, store_map_to_string } from '..'
 
 // these tests check that after importing and exporting the map, 
 // the importer reads back the same map, ensures no properties are lost
 // during the export phase
 
-test_reimport("a light",`Begin Map
+test("a light", () => check_reimport(`Begin Map
 Begin Actor Class=Light Name=Light0
     bDynamicLight=True
     Level=LevelInfo'MyLevel.LevelInfo0'
@@ -16,9 +17,9 @@ Begin Actor Class=Light Name=Light0
     Name=Light0
 End Actor
 End Map
-`);
+`))
 
-test_reimport("plane brush", `Begin Map
+test("plane brush", () => check_reimport(`Begin Map
 Begin Actor Class=Brush Name=Brush1
     CsgOper=CSG_Add
     MainScale=(SheerAxis=SHEER_ZX)
@@ -45,9 +46,9 @@ Begin Actor Class=Brush Name=Brush1
     Name=Brush1
 End Actor
 End Map
-`);
+`))
 
-test_reimport("brush with scale rotate and shear", `Begin Map
+test("brush with scale rotate and shear", () => check_reimport(`Begin Map
     Begin Actor Class=Brush Name=Brush96
        CsgOper=CSG_Add
        MainScale=(Scale=(X=2.000000),SheerAxis=SHEER_ZX)
@@ -77,13 +78,34 @@ test_reimport("brush with scale rotate and shear", `Begin Map
        Name=Brush96
     End Actor
 End Map
-`);
+`))
 
-function test_reimport(name : string, input : string){
-    test(name, () => {
-        const loaded = load_map_from_string(input);
-        const reExported = store_map_to_string(loaded);
-        const reLoaded = load_map_from_string(reExported);
-        expect(reLoaded).toEqual(loaded);
-    })
+test("brush with UV components close to zero", () => check_reimport(`Begin Map
+Begin Actor Class=Brush Name=Brush428
+    Location=(X=2480.000000,Y=368.000000,Z=992.000000)
+    OldLocation=(X=2496.000000,Y=384.000000,Z=992.000000)
+    Begin Brush Name=Model430
+       Begin PolyList
+          Begin Polygon Item=OUTSIDE Texture=rbrick Link=4
+             Origin   +00585.099609,-00438.228577,-00992.000000
+             Normal   +00000.500000,-00000.866025,+00000.000000
+             TextureU -00000.866025,-00000.500000,+00000.000009
+             TextureV +00000.000077,+00000.000044,-00001.000000
+             Vertex   +00585.042603,-00438.261566,-00384.000000
+             Vertex   +00585.048401,-00438.258209,+00384.000000
+             Vertex   +00141.643127,-00694.258362,+00384.000000
+             Vertex   +00141.643417,-00694.258179,-00384.000000
+          End Polygon
+       End PolyList
+    End Brush
+    Brush=Model'MyLevel.Model430'
+End Actor
+End Map
+`))
+
+function check_reimport(input : string){
+    const loaded = load_map_from_string(input)
+    const reExported = store_map_to_string(loaded)
+    const reLoaded = load_map_from_string(reExported)
+    expect(reLoaded).toEqual(loaded)
 }
