@@ -1,7 +1,7 @@
-
 import { ICommandInfoV2 } from "../controller/command"
 import { align_vertexes_to_8_grid, align_vertexes_to_16_grid, align_vertexes_to_32_grid } from './align_vertexes_to_grid'
 import { apply_transform_command } from "./apply_transform"
+import { apply_transform_center_command } from "./apply_transform_center"
 import { clear_status_command } from "./clear_status_command"
 import { clip_geometry_command } from "./clip_geometry"
 import { create_polygon_command } from './create_polygon'
@@ -63,6 +63,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     vertex_noise_command,
     smooth_vertexes_command,
     recalculate_brush_center_command,
+    apply_transform_center_command,
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
     ...get_io_commands(),
