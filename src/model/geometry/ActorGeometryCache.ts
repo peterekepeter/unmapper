@@ -22,7 +22,6 @@ export class ActorGeometryCache {
         const brushModel = this._actor.brushModel
         const fn = get_actor_to_world_transform(this._actor)
         const vertexes = brushModel.vertexes.map(v => fn(v.position))
-
         this._cached_world_vertexes = vertexes
         return this._cached_world_vertexes
     }
@@ -54,4 +53,3 @@ export class ActorGeometryCache {
     }
 
 }
-    
