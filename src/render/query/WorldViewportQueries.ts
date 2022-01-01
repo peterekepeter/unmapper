@@ -243,6 +243,9 @@ export class WorldViewportQueries {
         const result: EditorSelection = { actors: [] }
         for (const selected_actor of state.selection.actors) {
             const actor_index = selected_actor.actor_index
+            if (!state.map.actors[actor_index].brushModel){
+                continue // only brushes have vertexes
+            }
             const vertex_selection_result = []
             const polygon_selection_result = []
             const edge_selection_result = []
