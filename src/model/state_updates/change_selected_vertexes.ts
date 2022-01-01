@@ -25,7 +25,7 @@ export function change_selected_vertexes(subject: unknown, b: ((v: Vector) => Ve
 }
 
 function change_selected_vertexes_for_editor_state(state: EditorState, fn: (v: Vector) => Vector): EditorState {
-    return change_selected_actors(state, (actor,selected) => {
+    return change_selected_actors(state, (actor, selected) => {
         return change_selected_vertexes_for_actor(actor, selected.vertexes, fn)
     })
 }
@@ -36,7 +36,7 @@ function change_selected_vertexes_for_actor(a: Actor, vertexes: number[], fn: (v
     }
     const new_brush = change_selected_vertexes_for_brush_model(a.brushModel, vertexes, fn)
     if (new_brush === a.brushModel) {
-        return 
+        return a
     }
     const new_actor = a.shallow_copy()
     new_actor.brushModel = new_brush
@@ -46,7 +46,7 @@ function change_selected_vertexes_for_actor(a: Actor, vertexes: number[], fn: (v
 function change_selected_vertexes_for_brush_model(
     brush: BrushModel, 
     vertexes: number[],
-    fn: (v: Vector) => Vector
+    fn: (v: Vector) => Vector,
 ): BrushModel {
     if (!brush) {
         return brush
