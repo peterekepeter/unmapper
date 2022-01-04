@@ -1,22 +1,24 @@
 import { FunctionComponent, useState } from "react"
-import { Renderer } from "../render/Renderer"
-import { create_wireframe_renderer } from "../render/WireframeRenderer"
-import { Vector } from "../model/Vector"
 import * as React from "react"
-import { create_controller, AppController } from "../controller/AppController"
-import { Rotation } from "../model/Rotation"
-import { Matrix3x3 } from "../model/Matrix3x3"
-import { ViewportMode } from "../model/ViewportMode"
-import { UnrealMap } from "../model/UnrealMap"
-import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "../model/EditorState"
-import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
+
 import { set_viewport_zoom_command as zoom } from "../commands/viewport/set_viewport_zoom"
+import { update_view_location_command } from "../commands/viewport/update_view_location"
+import { update_view_location_rotation_command } from "../commands/viewport/update_view_location_rotation"
+import { AppController, create_controller } from "../controller/AppController"
 import { InteractionRenderState } from "../controller/interactions/InteractionRenderState"
-import { ViewTransform } from "../render/ViewTransform"
-import { create_view_transform } from "../render/transform/create_view_transform"
-import { ViewportEvent } from "../model/ViewportEvent"
-import { EditorError } from "../model/error/EditorError"
 import { EditorSelection } from "../model/EditorSelection"
+import { create_initial_editor_state, EditorOptions, EditorState, ViewportState } from "../model/EditorState"
+import { EditorError } from "../model/error/EditorError"
+import { Matrix3x3 } from "../model/Matrix3x3"
+import { Rotation } from "../model/Rotation"
+import { UnrealMap } from "../model/UnrealMap"
+import { Vector } from "../model/Vector"
+import { ViewportEvent } from "../model/ViewportEvent"
+import { ViewportMode } from "../model/ViewportMode"
+import { Renderer } from "../render/Renderer"
+import { create_view_transform } from "../render/transform/create_view_transform"
+import { ViewTransform } from "../render/ViewTransform"
+import { create_wireframe_renderer } from "../render/WireframeRenderer"
 
 export interface IViewportProps{
     viewport_index: number,
@@ -46,7 +48,8 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     width = 500,
     height = 300,
     controller = create_controller(),
-    state = create_initial_editor_state()}) => {
+    state = create_initial_editor_state(), 
+}) => {
         
 
     const internal_state = React.useRef<InternalState>({
@@ -165,7 +168,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
     function get_ortoho_scale(zoom_level: number){
         const levels_per_double = 2
-        const scale = 1/4096*Math.pow(2, zoom_level/levels_per_double) 
+        const scale = 1/4096*2**(zoom_level/levels_per_double) 
         return scale
     }
     
@@ -185,8 +188,13 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         if (state.options.box_select_mode){
             const [canvas_x, canvas_y] = get_canvas_coords(event)
             const e : ViewportEvent = {
-                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
-                renderer, view_mode, view_transform, viewport_index
+                canvas_x,
+                canvas_y,
+                ctrl_key: event.ctrlKey,
+                renderer,
+                view_mode,
+                view_transform,
+                viewport_index,
             }
             controller.interaction.pointer_down(e)
         }
@@ -203,8 +211,13 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         if (!did_mouse_move || state.options.box_select_mode) {
             const [canvas_x, canvas_y] = get_canvas_coords(event)
             const e : ViewportEvent = {
-                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
-                renderer, view_mode, view_transform, viewport_index
+                canvas_x,
+                canvas_y,
+                ctrl_key: event.ctrlKey,
+                renderer,
+                view_mode,
+                view_transform,
+                viewport_index,
             }
             controller.interaction.pointer_up(e)
         }
@@ -215,6 +228,9 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
 
 
     function handle_wheel(event: React.WheelEvent){
+        if (internal_state.current.view_mode === ViewportMode.Perspective){
+            return false
+        }
         let new_zoom_level = internal_state.current.viewport_state.zoom_level
         if (event.deltaY > 0){
             new_zoom_level--
@@ -223,6 +239,19 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             new_zoom_level ++
         }
         controller.execute(zoom, viewport_index, new_zoom_level)
+        // adjust for target
+        const next_scale = get_ortoho_scale(new_zoom_level)
+        const { renderer, view_mode, view_transform, viewport_state, ortoho_scale } = internal_state.current
+        const [canvas_x, canvas_y] = get_canvas_coords(event)
+        const s = next_scale/ortoho_scale
+        
+        // const zoom_target = controller.interaction.get_viewport_event_world_position({ canvas_x, canvas_y, ctrl_key: event.ctrlKey, renderer, view_mode, view_transform, viewport_index }).location
+        const zoom_target = view_transform.canvas_to_world_location(canvas_x, canvas_y)
+        const d_x = zoom_target.x - view_transform.view_center.x
+        const d_y = zoom_target.y - view_transform.view_center.y
+        const d_z = zoom_target.z - view_transform.view_center.z
+        const new_location = view_transform.view_center.add_numbers(d_x*s - d_x, d_y*s - d_y, d_z*s - d_z)
+        controller.execute(update_view_location_command, viewport_index, new_location )
         return false
     }
 
@@ -232,8 +261,13 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
     
         if (!isMouseDown || state.options.box_select_mode) {
             const e : ViewportEvent = {
-                canvas_x, canvas_y, ctrl_key: event.ctrlKey,
-                renderer, view_mode, view_transform, viewport_index
+                canvas_x,
+                canvas_y,
+                ctrl_key: event.ctrlKey,
+                renderer,
+                view_mode,
+                view_transform,
+                viewport_index,
             }
             controller.interaction.pointer_move(e)
             return
@@ -253,7 +287,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
         event.preventDefault()
     }
 
-    function get_canvas_coords(event: React.PointerEvent<HTMLCanvasElement>):[number, number]{
+    function get_canvas_coords(event: { pageX: number, pageY: number }):[number, number]{
         const { canvas } = internal_state.current
         const rects = canvas.getClientRects()
         const canvas_x = (event.pageX - rects[0].x) * device_pixel_ratio
@@ -272,7 +306,8 @@ function nextViewState(
     moveY: number,
     pointerButtons: number,
     deviceSize: number,
-    ortohoScale: number)
+    ortohoScale: number,
+)
     : [Rotation, Vector] {
     let nextRotation = rotation
     let nextLocation = location
@@ -297,7 +332,8 @@ function nextViewState(
                 nextLocation = location.add_numbers(
                     dir.x * normY * perspectiveMoveSpeed, 
                     dir.y * normY * perspectiveMoveSpeed, 
-                    0)
+                    0,
+                )
                 nextRotation = rotation.add(0, -normX * perspectiveRotateSpeed, 0)
             } else if (rightPress) {
                 nextRotation = rotation.add(normY * perspectiveRotateSpeed, -normX * perspectiveRotateSpeed, 0)
