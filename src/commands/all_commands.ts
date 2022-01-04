@@ -1,5 +1,5 @@
 import { ICommandInfoV2 } from "../controller/command"
-import { align_vertexes_to_8_grid, align_vertexes_to_16_grid, align_vertexes_to_32_grid } from './align_vertexes_to_grid'
+import { get_align_vertexes_to_world_grid_commands } from "./align_vertexes_to_grid"
 import { apply_transform_command } from "./apply_transform"
 import { apply_transform_center_command } from "./apply_transform_center"
 import { clear_status_command } from "./clear_status_command"
@@ -40,9 +40,6 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     clip_geometry_command,
     delete_selected_command,
     extrude_polygons_command,
-    align_vertexes_to_32_grid,
-    align_vertexes_to_16_grid,
-    align_vertexes_to_8_grid,
     flip_polygon_normal_command,
     sort_brushes_command,
     shuffle_brush_polygons_command,
@@ -70,6 +67,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     ...get_generate_commands(),
     ...get_io_commands(),
     ...get_world_grid_commands(),
+    ...get_align_vertexes_to_world_grid_commands(),
 ] }
 
 function get_generate_commands(): ICommandInfoV2[] { return [generate_cube_command] }

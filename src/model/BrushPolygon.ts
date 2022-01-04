@@ -1,8 +1,9 @@
-import { BrushPolygonUvData } from "./BrushPolygonUvData";
+import { BrushPolygonUvData } from "./BrushPolygonUvData"
 import { Vector } from "./Vector"
 
 export class BrushPolygon implements BrushPolygonUvData {
     
+    // todo, rename to center
     median: Vector = null;
     vertexes: number[] = [];
     edges: number[] = [];
