@@ -1,4 +1,5 @@
 import { deep_freeze } from "../../util/deep_freeze"
+import { EditorError, ImplementationError } from "../error"
 import { Vector } from "../Vector"
 
 export interface WavefrontObjSettings
@@ -25,4 +26,5 @@ export function switch_up_axis(v: Vector, s: WavefrontObjSettings) : Vector {
     if (s.up_axis === 'x'){
         return new Vector(v.z, v.y, v.x)
     }
+    throw new ImplementationError("should not be reached")
 }
