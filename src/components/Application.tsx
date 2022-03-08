@@ -17,18 +17,13 @@ export const Application = ({ controller = create_controller() }) => {
             height: '100%',
             background: colors.background,
             color: colors.foreground,
-            gridTemplate: "24px 1fr 24px / 1fr",
+            gridTemplate: "1fr 24px / 1fr",
         }}>
-            <MenuBar controller={controller} ></MenuBar>
             <MainGrid controller={controller} />
             <StatusBar controller={controller} />
         </div>
         <CommandPalette controller={controller} />
     </>
-}
-
-export const MenuBar = ({ controller = create_controller() }) => {
-    return <UiText>test</UiText>
 }
 
 export const MainGrid = ({ controller = create_controller() }) => {
