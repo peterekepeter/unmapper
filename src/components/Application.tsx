@@ -1,15 +1,12 @@
 import * as React from "react"
+
 import { create_controller } from "../controller/AppController"
-import { use_signal } from "./useSignal"
-import { ViewportMode } from "../model/ViewportMode"
-import { Vector } from "../model/Vector"
-import { ViewportPanel } from "./ViewportPanel"
 import { themeColors } from "../theme"
-import { ActorList } from "./ActorList"
-import { PropertyEditor } from "./PropertyEditor"
+import { UiText } from "../ui/UiText"
 import { CommandPalette } from "./CommandPalette"
-import { StatusBar } from "./StatusBar"
 import { PanelLayoutRoot } from "./layout/PanelLayoutRoot"
+import { StatusBar } from "./StatusBar"
+import { use_signal } from "./useSignal"
 
 export const Application = ({ controller = create_controller() }) => {
     const colors = use_signal(themeColors)
@@ -20,13 +17,18 @@ export const Application = ({ controller = create_controller() }) => {
             height: '100%',
             background: colors.background,
             color: colors.foreground,
-            gridTemplate: "1fr 24px / 1fr"
+            gridTemplate: "24px 1fr 24px / 1fr",
         }}>
+            <MenuBar controller={controller} ></MenuBar>
             <MainGrid controller={controller} />
             <StatusBar controller={controller} />
         </div>
         <CommandPalette controller={controller} />
     </>
+}
+
+export const MenuBar = ({ controller = create_controller() }) => {
+    return <UiText>test</UiText>
 }
 
 export const MainGrid = ({ controller = create_controller() }) => {
@@ -43,7 +45,7 @@ export const MainGrid = ({ controller = create_controller() }) => {
             // force layout recalc with 100ms debounce
             timeout = setTimeout(() => setResizeCount(resizeCount + 1), 100)
 
-        };
+        }
         window.addEventListener('resize', handler)
         return () => {
             if (timeout) {
@@ -57,5 +59,5 @@ export const MainGrid = ({ controller = create_controller() }) => {
     return <PanelLayoutRoot 
         layout={state.options.layout}
         controller={controller}
-        />
+    />
 }

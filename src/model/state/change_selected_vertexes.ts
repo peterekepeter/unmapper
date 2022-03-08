@@ -39,7 +39,7 @@ function change_selected_vertexes_for_actor(a: Actor, vertexes: number[], fn: Ve
     }
     const new_brush = change_selected_vertexes_for_brush_model(a, a.brushModel, vertexes, fn)
     if (new_brush === a.brushModel) {
-        return 
+        return a
     }
     const new_actor = a.shallow_copy()
     new_actor.brushModel = new_brush

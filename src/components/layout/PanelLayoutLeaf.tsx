@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import { AppController } from "../../controller/AppController"
 import { PanelType } from "../../model/layout/PanelLayout"
 import { ActorList } from "../ActorList"
@@ -8,11 +9,10 @@ import { ViewportPanel } from "../ViewportPanel"
 export const PanelLayoutLeaf: React.FunctionComponent<{
     panelType: PanelType,
     controller: AppController
-}> = ({panelType, controller}) => {
+}> = ({ panelType, controller }) => {
     switch (panelType){
         case PanelType.Empty:
-            <div>Empty</div>
-            return 
+            return <div>Empty</div>
         case PanelType.Objects:
             return <ActorList controller={controller}/>
         case PanelType.Properties:
@@ -20,7 +20,6 @@ export const PanelLayoutLeaf: React.FunctionComponent<{
         case PanelType.Viewport:
             return <ViewportPanel controller={controller}/>
         default: 
-            <div>NotImplemented</div>
-            return
+            return <div>NotImplemented</div>
     }
 }

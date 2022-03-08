@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { Viewport } from './Viewport';
-import { ViewportMode, ALL_VIEWPORT_MODES } from "../model/ViewportMode";
-import { AppController, create_controller } from '../controller/AppController';
-import { use_signal } from './useSignal';
-import { set_viewport_mode_command } from '../commands/viewport/set_viewport_mode';
-import { UiText } from '../ui/UiText';
-import { HoverEffect } from '../ui/HoverEffect';
+import * as React from 'react'
+
+import { set_viewport_mode_command } from '../commands/viewport/set_viewport_mode'
+import { AppController, create_controller } from '../controller/AppController'
+import { ALL_VIEWPORT_MODES, ViewportMode } from "../model/ViewportMode"
+import { HoverEffect } from '../ui/HoverEffect'
+import { UiText } from '../ui/UiText'
+import { use_signal } from './useSignal'
+import { Viewport } from './Viewport'
 
 export function ViewportPanel(props: {
     viewport_index?: number,
@@ -20,16 +21,16 @@ export function ViewportPanel(props: {
     const [v_index, set_v_index] = React.useState<number>(viewport_index)
     React.useEffect(() => {
         if (v_index == null){
-            const viewport = controller.allocate_viewport();
+            const viewport = controller.allocate_viewport()
             set_v_index(viewport)
             return () => controller.free_viewport(viewport)
+        } else {
+            return () => { /*noop*/ }
         }
     })
 
     if (v_index == null){
-        return <div style={{
-            background: '#222'
-        }}></div>
+        return <div style={{ background: '#222' }}></div>
     }
 
     function viewportContainer(p: HTMLDivElement) {
@@ -54,7 +55,7 @@ export function ViewportPanel(props: {
         position: 'relative',
         gridTemplate: '1fr / 1fr',
         width: '100%',
-        height: '100%'
+        height: '100%',
     }}>
         <div ref={viewportContainer} style={{
             display: 'grid',
@@ -105,22 +106,20 @@ function DropDown<T>(props: { value: T, options: T[], onchange: (new_value: T) =
     }
 }
 
-const DROPDOWN_WRAPPER: React.CSSProperties = {
-    margin: '.25rem'
-}
+const DROPDOWN_WRAPPER: React.CSSProperties = { margin: '.25rem' }
 
 const DROPDOWN_VALUE: React.CSSProperties = {
     display: 'inline-flex',
     flexFlow: 'row',
     alignItems: 'center',
-    padding: '.25rem'
+    padding: '.25rem',
 }
 
 const SVG_ARROW_STYLE: React.CSSProperties = {
     width: '8px',
     height: '6px',
     marginLeft: '.25rem',
-    fill: '#ccc'
+    fill: '#ccc',
 }
 
 const SVG_ARROW: JSX.Element = <>

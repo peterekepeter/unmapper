@@ -160,6 +160,7 @@ export class AppController {
                 return i
             }
         }
+        throw new Error("failed to allocate viewport")
     }
 
 }
