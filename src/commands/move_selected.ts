@@ -40,7 +40,7 @@ export function move_selected(state: EditorState): EditorState {
     return next
 }
 
-function move_selected_actors(state: EditorState, motion: Vector): EditorState {
+export function move_selected_actors(state: EditorState, motion: Vector): EditorState {
     return change_selected_actors(state, a => {
         const new_obj = a.shallow_copy()
         new_obj.location = a.location.add_vector(motion)
@@ -127,4 +127,3 @@ function move_selected_uv_vertexes(state: EditorState, motion: Vector): EditorSt
         return brush
     })
 }
-

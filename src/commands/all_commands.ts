@@ -18,6 +18,7 @@ import { set_interaction_axis_lock_commands } from "./interaction/set_interactio
 import { get_io_commands } from "./io"
 import { measure_command } from "./measure_distance"
 import { merge_points_command } from "./merge_points"
+import { move_by_negative_32_units_command } from "./move_by_negative_32_units"
 import { move_command } from "./move_selected"
 import { recalculate_brush_center_command } from "./recalculate_brush_center"
 import { rotate_command } from "./rotate_selected"
@@ -63,6 +64,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     recalculate_brush_center_command,
     apply_transform_center_command,
     merge_points_command,
+    move_by_negative_32_units_command,
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
     ...get_io_commands(),
