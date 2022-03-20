@@ -215,18 +215,27 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
 
     function render_polygon_centers(brush: BrushModel, world_vertexes: Vector[], world_polygon_centers: Vector[], selection: ActorSelection){
         for (let i = 0; i < brush.polygons.length; i++) {
+            const polygon = brush.polygons[i]
             const is_selected = selection.polygons && selection.polygons.indexOf(i) !== -1
             const point = world_polygon_centers[i]
             const x = render_transform.view_transform_x(point)
             const y = render_transform.view_transform_y(point)
+            const normal_point = point.add_scaled_vector(polygon.normal, 32.0)
+            const normal_x = render_transform.view_transform_x(normal_point)
+            const normal_y = render_transform.view_transform_y(normal_point)
 
             if (!isNaN(x) && !isNaN(y)) {
                 context.fillStyle = is_selected ? vertexSelectedColor : vertexColor
+                context.strokeStyle = context.fillStyle
                 context.beginPath()
                 const size_from_center = 2 * render_transform.device_pixel_ratio
                 const size = size_from_center*2+1
                 context.rect(x - size_from_center, y - size_from_center, size, size)
                 context.fill()
+                context.beginPath()
+                context.moveTo(x, y)
+                context.lineTo(normal_x, normal_y)
+                context.stroke()
             }
         }
     }

@@ -54,6 +54,10 @@ export class Vector {
         return this.add_numbers(v.x, v.y, v.z)
     }
 
+    add_scaled_vector(v: Vector, scale: number): Vector {
+        return this.add_numbers(v.x*scale, v.y*scale, v.z*scale)
+    }
+
     add_numbers(x: number, y: number, z: number): Vector {
         return new Vector(this.x + x, this.y + y, this.z + z)
     }
