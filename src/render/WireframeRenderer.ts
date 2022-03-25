@@ -444,10 +444,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 return
             }
             else if (out_vertex_a.x < 0) {
-                out_vertex_a = intersect_segment_with_plane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +0.1)
+                out_vertex_a = intersect_segment_with_plane(out_vertex_a, out_vertex_b, Vector.FORWARD, Vector.ZERO, +1.0)
             }
             else if (out_vertex_b.x < 0) {
-                out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +0.1)
+                out_vertex_b = intersect_segment_with_plane(out_vertex_b, out_vertex_a, Vector.FORWARD, Vector.ZERO, +1.0)
             }
             const screen_a_x = (out_vertex_a.y / out_vertex_a.x) * device_size + width * .5
             const screen_a_y = (-out_vertex_a.z / out_vertex_a.x) * device_size + height * .5
@@ -472,22 +472,6 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
             context.moveTo(x0, y0)
             context.lineTo(x1, y1)
             context.stroke()
-        }
-        else if (!invalid0 && invalid1 || invalid0 && !invalid1) {
-            // need view transformed Z for clipping
-            const v0 = invalid1 ? vertexA : vertexB
-            const v1 = invalid1 ? vertexB : vertexA
-            const vi = intersect_segment_with_plane(v0, v1, Vector.FORWARD, Vector.ZERO, -0.1)
-            if (vi != null) {
-                const x0 = render_transform.view_transform_x(v0)
-                const y0 = render_transform.view_transform_y(v0)
-                const x1 = render_transform.view_transform_x(vi)
-                const y1 = render_transform.view_transform_y(vi)
-                context.beginPath()
-                context.moveTo(x0, y0)
-                context.lineTo(x1, y1)
-                context.stroke()
-            }
         }
     }
     function render_interaction(state: InteractionRenderState) {
