@@ -1,0 +1,81 @@
+import { BrushModel } from "../../model/BrushModel"
+import { DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION } from "../../model/EditorSelection"
+import { create_initial_editor_state, EditorState } from "../../model/EditorState"
+import { import_map_obj } from "../../model/loader/import_obj/import_map_obj"
+import { Vector } from "../../model/Vector"
+import { recalculate_brush_normal_command } from "../recalculate_brush_normal"
+
+
+describe('initial state', () => {
+
+    let state: EditorState
+    let brush: BrushModel
+
+    beforeAll(() => {
+        state = two_touching_planes_with_opposite_normals()
+        brush = state.map.actors[0].brushModel
+    })
+
+    test('not null', ()=> expect(brush).not.toBeNull())
+
+    test('has 2 polygons with opposite normals', () => {
+        const polyA = brush.polygons[0]
+        const polyB = brush.polygons[1]
+        const result = polyA.normal.add_vector(polyB.normal)
+        expect(result).toEqual(Vector.ZERO)
+    })
+
+    test('polygons are adjacent', () => {
+        const edge = brush.edges.find(e => e.polygons.length === 2)
+        expect(edge).toMatchObject({ polygons: [0, 1] })
+    })
+
+    test('recalculate makes both normals point into same direction', () => {
+        const resultState = recalculate_brush_normal_command.exec(state)
+        const brush = resultState.map.actors[0].brushModel
+        expect(brush.polygons[0].normal).toEqual(brush.polygons[1].normal)
+    })
+
+})
+
+
+function two_touching_planes_with_opposite_normals(): EditorState {
+    const state = create_initial_editor_state()
+    /**
+     *  two adjacent sheets:
+     *           1        2        3
+     *            _______ ________      y:+1.0  
+     *          /       /       /
+     *        /   ^   /   v   /
+     *      /_______/_______/           y: 0.0
+     *    4        5         6
+     * 
+     *  x: -1      0       +1 
+     *  
+     */
+    state.map = import_map_obj(`
+        o TestMesh
+        v -1 +1  0
+        v  0 +1  0
+        v +1 +1  0
+        v -1  0  0
+        v  0  0  0
+        v +1  0  0
+        f 1 2 5 4
+        f 2 5 6 3
+    `, {
+        up_axis: "z",
+        uv_scale: 1.0,
+        world_scale: 1.0,
+    })
+    state.selection = {
+        ...DEFAULT_EDITOR_SELECTION,
+        actors: [
+            {
+                ...DEFAULT_ACTOR_SELECTION,
+                actor_index: 0,
+            },
+        ],
+    }
+    return state
+}

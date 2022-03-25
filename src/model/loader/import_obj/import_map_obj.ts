@@ -4,6 +4,7 @@ import { calculate_polygon_normal } from "../../algorithms/calculate_polygon_nor
 import { BrushModel } from "../../BrushModel"
 import { BrushPolygon } from "../../BrushPolygon"
 import { BrushVertex } from "../../BrushVertex"
+import { EditorError } from "../../error"
 import { KnownClasses } from "../../KnownClasses"
 import { UnrealMap } from "../../UnrealMap"
 import { polygon_uv_from_vertex_uvs } from "../../uvmap/polygon_uv_from_vertex_uvs"
@@ -168,7 +169,9 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
     const normal_index = []
     let token = parser.get_current_token()
     while (token !== T.End && token != null){
-        vertex_index.push(parser.parse_int_and_move_to_next()-1)
+        const value = parser.parse_int_and_move_to_next()
+        EditorError.if(value <= 0, 'corrupted obj data, vertex index should be >= 1')
+        vertex_index.push(value-1)
         if (parser.get_current_token() === T.End){ break }
         if (parser.get_current_token() === '/'){
             parser.accept_and_move_to_next('/')
@@ -244,4 +247,3 @@ function parse_obj_polygon(parser: GenericParser, brush: BrushModel, texture: st
     }
     return polygon
 }
-

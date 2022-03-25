@@ -125,7 +125,8 @@
                     "whitespace",
                     "coord",
                     "coords",
-                    "csg" // constructive solid geometry
+                    "csg", // constructive solid geometry
+                    "normals"
                 ]
             }
         ]
