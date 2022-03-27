@@ -3,7 +3,7 @@ import { DEFAULT_ACTOR_SELECTION, DEFAULT_EDITOR_SELECTION } from "../../model/E
 import { create_initial_editor_state, EditorState } from "../../model/EditorState"
 import { import_map_obj } from "../../model/loader/import_obj/import_map_obj"
 import { Vector } from "../../model/Vector"
-import { recalculate_brush_normal_command } from "../recalculate_brush_normal"
+import { recalculate_brush_normal_command as command } from "../recalculate_brush_normal"
 
 
 describe('initial state', () => {
@@ -31,10 +31,23 @@ describe('initial state', () => {
     })
 
     test('recalculate makes both normals point into same direction', () => {
-        const resultState = recalculate_brush_normal_command.exec(state)
+        const resultState = command.exec(state)
         const brush = resultState.map.actors[0].brushModel
         expect(brush.polygons[0].normal).toEqual(brush.polygons[1].normal)
     })
+
+    test('second recalculate flips the normals', () => {
+        const first = command.exec(state)
+        const second = command.exec(first)
+        const firstBrush = first.map.actors[0].brushModel
+        const secondBrush = second.map.actors[0].brushModel
+        for (let i=0; i<firstBrush.polygons.length; i++){
+            const sum = firstBrush.polygons[i].normal
+                .add_vector(secondBrush.polygons[i].normal)
+            expect(sum).toEqual(Vector.ZERO)
+        }
+    })
+
 
 })
 

@@ -53,8 +53,14 @@ function recalculate_brush_normal(state: EditorState): EditorState {
         }
 
         if (!changed){
-            // no polygons changed, return unchanged input
-            return input_brush
+            // no polygons changed, return flipped normals
+            for (let i=0; i<result_polygons.length; i++){
+                const flipped = result_polygons[i].shallow_copy()
+                flipped.vertexes = [...flipped.vertexes]
+                flipped.vertexes.reverse()
+                flipped.normal = calculate_polygon_normal(input_brush.vertexes, flipped)
+                result_polygons[i] = flipped
+            }
         }
         
         return result_brush
