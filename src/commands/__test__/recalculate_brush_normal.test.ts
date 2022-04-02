@@ -48,6 +48,35 @@ describe('initial state', () => {
         }
     })
 
+    test('first polygon not changed if only second is selected in vertex mode', () => {
+        set_vertex_mode_and_select_polygon(1)
+        const result = command.exec(command.exec(state)) // call it twice for good measure
+        const initialBrush = state.map.actors[0].brushModel
+        const changedBrush = result.map.actors[0].brushModel
+        expect(initialBrush.polygons[0]).toBe(changedBrush.polygons[0])
+        expect(initialBrush.polygons[1]).not.toBe(changedBrush.polygons[1])
+    })
+
+    test('second polygon not changed if only first is selected in vertex mode', () => {
+        set_vertex_mode_and_select_polygon(0)
+        const result = command.exec(command.exec(state)) // call it twice for good measure
+        const initialBrush = state.map.actors[0].brushModel
+        const changedBrush = result.map.actors[0].brushModel
+        expect(initialBrush.polygons[1]).toBe(changedBrush.polygons[1])
+        expect(initialBrush.polygons[0]).not.toBe(changedBrush.polygons[0])
+    })
+
+    function set_vertex_mode_and_select_polygon(index: number){
+        state = {
+            ...state,
+            options: {
+                ...state.options,
+                vertex_mode: true,
+            },
+            selection: { actors: [{ ...state.selection.actors[0], polygons: [index] }] }, 
+        }
+    }
+
 
 })
 

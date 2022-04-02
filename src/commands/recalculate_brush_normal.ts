@@ -4,6 +4,7 @@ import { BrushEdge } from "../model/BrushEdge"
 import { BrushPolygon } from "../model/BrushPolygon"
 import { BrushVertex } from "../model/BrushVertex"
 import { EditorState } from "../model/EditorState"
+import { acos_degrees } from "../model/ExtendedMath"
 import { change_selected_brushes } from "../model/state"
 
 export const recalculate_brush_normal_command: ICommandInfoV2 = {
@@ -13,18 +14,23 @@ export const recalculate_brush_normal_command: ICommandInfoV2 = {
 }
 
 function recalculate_brush_normal(state: EditorState): EditorState {
-    return change_selected_brushes(state, (input_brush) => {
-        const input_polygons = input_brush.polygons
+    const only_works_on_selection = is_edit_mode_and_has_selection(state)
+
+    return change_selected_brushes(state, (input_brush, actor, selection) => {
+        const input_polygon_data = input_brush.polygons
         const marked_poly = new Set<number>()
         const queue: { from: number, to: number, edge: BrushEdge }[] = []
         const result_brush = input_brush.shallow_copy()
         const result_polygons = [...input_brush.polygons]
         result_brush.polygons = result_polygons
+        const input_polygon_indexes = new Set(only_works_on_selection 
+            ? selection.polygons
+            : input_polygon_data.map((_, i) => i))
       
-        while (marked_poly.size < input_brush.polygons.length)
+        while (marked_poly.size < input_polygon_indexes.size)
         {
             // pick starting polygon
-            for (let index = 0; index < input_polygons.length; index++){
+            for (const index of input_polygon_indexes){
                 if (!marked_poly.has(index)){
                     marked_poly.add(index)
                     add_neighbors(index)
@@ -40,13 +46,13 @@ function recalculate_brush_normal(state: EditorState): EditorState {
         }
         
         // recalculate individual normals
-        for (let i=0; i<result_polygons.length; i++){
+        for (const i of input_polygon_indexes){
             result_polygons[i] = calculate_normal(input_brush.vertexes, result_polygons[i])
         }
 
         let changed = false
-        for (let i=0; i<result_polygons.length; i++){
-            if (result_polygons[i] !== input_polygons[i]){
+        for (const i of input_polygon_indexes){
+            if (result_polygons[i] !== input_polygon_data[i]){
                 changed = true
                 break
             }
@@ -54,7 +60,7 @@ function recalculate_brush_normal(state: EditorState): EditorState {
 
         if (!changed){
             // no polygons changed, return flipped normals
-            for (let i=0; i<result_polygons.length; i++){
+            for (const i of input_polygon_indexes){
                 const flipped = result_polygons[i].shallow_copy()
                 flipped.vertexes = [...flipped.vertexes]
                 flipped.vertexes.reverse()
@@ -71,7 +77,10 @@ function recalculate_brush_normal(state: EditorState): EditorState {
                 const edge = input_brush.edges[edge_index]
                 for (const neighbor_polygon_index of edge.polygons){
                     if (marked_poly.has(neighbor_polygon_index)){
-                        continue
+                        continue // skip already marked polygons
+                    }
+                    if (!input_polygon_indexes.has(neighbor_polygon_index)){
+                        continue // skip non input polygons
                     }
                     queue.push({ 
                         from: polygon_index, 
@@ -124,4 +133,19 @@ function calculate_normal(vertexes: BrushVertex[], polygon: BrushPolygon): Brush
     const new_polygon = polygon.shallow_copy()
     new_polygon.normal = normal
     return new_polygon
+}
+
+function is_edit_mode_and_has_selection(state: EditorState): boolean {
+    if (!state.options.vertex_mode){
+        return false
+    }
+    for (const selection of state.selection.actors) {
+        if (selection.polygons.length > 0 ||
+            selection.edges.length >0 ||
+            selection.vertexes.length > 0 ||
+            selection.polygon_vertexes.length > 0){
+            return true
+        }
+    }
+    return false
 }
