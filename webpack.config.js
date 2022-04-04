@@ -5,6 +5,7 @@ module.exports = {
     target: 'web',
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
+    mode: 'development',
 
     resolve: {
         modules: ["src", "node_modules"],

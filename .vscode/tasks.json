@@ -54,6 +54,20 @@
                 "showReuseMessage": true,
                 "clear": false
             }
+        },
+        {
+            "label": "Cosmos",
+            "type": "shell",
+            "command": "npm run cosmos",
+            "presentation": {
+                "group": "group-a",
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
         }
     ]
 }

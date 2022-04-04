@@ -2,11 +2,13 @@ import * as React from "react"
 
 import { create_controller } from "../controller/AppController"
 import { themeColors } from "../theme"
-import { UiText } from "../ui/UiText"
 import { CommandPalette } from "./CommandPalette"
 import { PanelLayoutRoot } from "./layout/PanelLayoutRoot"
+import { MenuBar } from "./MenuBar"
 import { StatusBar } from "./StatusBar"
 import { use_signal } from "./useSignal"
+
+const ENABLE_MENU_BAR = false
 
 export const Application = ({ controller = create_controller() }) => {
     const colors = use_signal(themeColors)
@@ -17,8 +19,9 @@ export const Application = ({ controller = create_controller() }) => {
             height: '100%',
             background: colors.background,
             color: colors.foreground,
-            gridTemplate: "1fr 24px / 1fr",
+            gridTemplate: ENABLE_MENU_BAR ? "24px 1fr 24px / 1fr" : "1fr 24px / 1fr",
         }}>
+            {ENABLE_MENU_BAR ? <MenuBar controller={controller} /> : null}
             <MainGrid controller={controller} />
             <StatusBar controller={controller} />
         </div>
