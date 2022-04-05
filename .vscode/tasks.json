@@ -6,7 +6,7 @@
         {
             "label": "Watch Test",
             "type": "shell",
-            "command": "yarn start-tdd",
+            "command": "npm run start-tdd",
             "problemMatcher": [
                 {
                     "pattern": [
@@ -32,7 +32,7 @@
         {
             "label": "Dev Server",
             "type": "shell",
-            "command": "yarn start-dev-server",
+            "command": "npm run start-dev-server",
             "problemMatcher": [
                 {
                     "pattern": [

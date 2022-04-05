@@ -1,5 +1,3 @@
 dist/
 node_modules/
-
-# use yarn.lock instead of package-lock.json 
 package-lock.json 
