@@ -1,29 +1,20 @@
 import * as React from 'react'
 
-import { use_signal } from '../components/useSignal'
 import { themeColors } from '../theme'
+import { useSignal } from '../util'
+import { useStyle } from '../util/useStyle'
 
-const Decorator: React.FC = ({ children }) => (
-    <ThemedDiv>
+const Decorator: React.FC = ({ children }) => {
+    const colors = useSignal(themeColors)
+    useStyle(`
+        html {
+            background: ${colors.background};
+            color: ${colors.foreground};
+        }
+    `, [colors])
+    return <>
         {children}
-    </ThemedDiv>
-)
-
-interface ThemedDivProps {
-    padding?: number
-}
-
-const ThemedDiv: React.FC<ThemedDivProps> = props => {
-    const colors = use_signal(themeColors)
-    return <div style={{
-        background: colors.background,
-        color: colors.foreground,
-        padding: '16px',
-        width: '100%',
-        height: '100%',
-    }}>
-        {props.children}
-    </div>
+    </>
 }
 
 export default Decorator
