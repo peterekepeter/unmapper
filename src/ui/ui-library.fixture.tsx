@@ -1,8 +1,8 @@
 import * as React from "react"
 
 import { Vector } from "../model/Vector"
+import { DropDown } from "./DropDown"
 import { SectionTitle } from "./SectionTitle"
-import { UiActorClass } from "./UiActorClass"
 import { UiButton } from "./UiButton"
 import { UiText } from "./UiText"
 import { UiVectorInput } from "./UiVectorInput"
@@ -15,16 +15,17 @@ import { UiVectorInput } from "./UiVectorInput"
 const LibraryFixture = (): React.ReactElement => {
     const [vector, setVector] = React.useState(new Vector(124, 421, 32))
     const [previewVector, setPreviewVector] = React.useState(new Vector(124, 421, 32))
+    const [option, setOption] = React.useState("test")
     return <>
         <div>
-            <SectionTitle>Typography</SectionTitle>
+            <Title>Typography</Title>
             <UiText>
                 Basic UiText element. 
                 The quick brown fox jumps over the lazy dog!
             </UiText>
         </div>
         <div>
-            <SectionTitle>Vector Input</SectionTitle>
+            <Title>Vector Input</Title>
             <UiVectorInput
                 value={vector}
                 next_value={setVector}
@@ -36,14 +37,22 @@ const LibraryFixture = (): React.ReactElement => {
             <UiVectorInput value={previewVector}></UiVectorInput>
         </div>
         <div>
-            <SectionTitle>Buttons</SectionTitle>
+            <Title>Buttons</Title>
             <UiButton>Button</UiButton>
         </div>
         <div>
-            <SectionTitle>UiActorClass</SectionTitle>
-            <UiActorClass>Button</UiActorClass>
+            <Title>dropdown</Title>
+            <DropDown value={option} options={["test", "another", "yet-another"]} onchange={setOption}></DropDown>
+            <UiText>Current value: {option}</UiText>
         </div>
     </>
 }
+
+const Title: React.FC = props => 
+    <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+        <SectionTitle>
+            {props.children}
+        </SectionTitle>
+    </div>
 
 export default LibraryFixture
