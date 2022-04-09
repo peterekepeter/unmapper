@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { create_controller } from "../controller/AppController"
-import { themeColors } from "../theme"
+import { themeColors, useStyleClasses } from "../theme"
 import { CommandPalette } from "./CommandPalette"
 import { PanelLayoutRoot } from "./layout/PanelLayoutRoot"
 import { MenuBar } from "./MenuBar"
@@ -11,6 +11,7 @@ import { use_signal } from "./useSignal"
 const ENABLE_MENU_BAR = false
 
 export const Application = ({ controller = create_controller() }) => {
+    useStyleClasses()
     const colors = use_signal(themeColors)
     return <>
         <div style={{

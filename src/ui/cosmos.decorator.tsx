@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { themeColors } from '../theme'
+import { themeColors, useStyleClasses as useRegisteredStyleClasses } from '../theme'
 import { useSignal } from '../util'
 import { useStyle } from '../util/useStyle'
 
@@ -12,6 +12,7 @@ const Decorator: React.FC = ({ children }) => {
             color: ${colors.foreground};
         }
     `, [colors])
+    useRegisteredStyleClasses()
     return <>
         {children}
     </>

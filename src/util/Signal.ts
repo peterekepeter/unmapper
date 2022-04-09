@@ -24,4 +24,3 @@ export class Signal<T> {
         return { cancel: () => this._handlers.splice(this._handlers.indexOf(handler), 1) }
     }
 }
-
