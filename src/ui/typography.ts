@@ -1,5 +1,3 @@
-import { CSSProperties } from "react";
+import { CSSProperties } from "react"
 
-export const font : CSSProperties = {
-    fontFamily : 'Segoe UI, sans-serif'
-};
+export const font : CSSProperties = { fontFamily: 'Segoe UI, sans-serif' }

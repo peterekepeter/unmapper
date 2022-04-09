@@ -2,9 +2,10 @@ import { renderStyleProperties } from './renderStyleProperties'
 import { StyleProperties } from './StyleProperties'
 import { themeColors, ThemeValueType } from './themeColors'
 
-interface StyleClassProperties extends StyleProperties
+export interface StyleClassProperties extends StyleProperties
 {
     hover?: StyleProperties;
+    active?: StyleProperties;
 }
 
 const names = new Set<string>()
@@ -61,6 +62,10 @@ function renderClassCss(result: string[], name: string, props: StyleClassPropert
     if (props.hover)
     {
         renderCssRule(result, ['.', name, ':hover'], props.hover)
+    }
+    if (props.active)
+    {
+        renderCssRule(result, ['.', name, ':active'], props.active)
     }
 }
 

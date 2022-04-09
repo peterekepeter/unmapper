@@ -3,6 +3,7 @@ import * as React from "react"
 import { Vector } from "../model/Vector"
 import { DropDown } from "./DropDown"
 import { SectionTitle } from "./SectionTitle"
+import { TextButton } from "./TextButton"
 import { UiButton } from "./UiButton"
 import { UiText } from "./UiText"
 import { UiVectorInput } from "./UiVectorInput"
@@ -39,6 +40,14 @@ const LibraryFixture = (): React.ReactElement => {
         <div>
             <Title>Buttons</Title>
             <UiButton>Button</UiButton>
+            <UiText> disabled: </UiText>
+            <UiButton disabled>Button</UiButton>
+        </div>
+        <div>
+            <Title>Text Buttons</Title>
+            <TextButton>Button</TextButton>
+            <UiText> disabled: </UiText>
+            <TextButton disabled>Button</TextButton>
         </div>
         <div>
             <Title>dropdown</Title>

@@ -1,3 +1,5 @@
+import { CSSProperties } from "react"
+
 export interface StyleProperties {
     color?: string;
     background?: string;
@@ -6,4 +8,8 @@ export interface StyleProperties {
     boxShadow?: string,
     borderRadius?: string,
     outline?: string,
+    cursor?: CSSProperties['cursor'],
+    fontFamily?: CSSProperties['fontFamily'],
+    textDecoration?: CSSProperties['textDecoration']
+    userSelect?: CSSProperties['userSelect']
 }

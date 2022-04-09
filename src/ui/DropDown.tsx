@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { HoverEffect } from "./HoverEffect"
+import { TextButton } from "./TextButton"
 import { UiText } from "./UiText"
 
 export function DropDown<T>(props: { value: T, options: T[], onchange: (new_value: T) => void }) : React.ReactElement {
@@ -13,10 +14,13 @@ export function DropDown<T>(props: { value: T, options: T[], onchange: (new_valu
             onselect={value => select(value)}
             value={value}
             options={options} />
-        <HoverEffect style={DROPDOWN_VALUE} onClick={drop}>
-            <UiText>{value}</UiText>
-            {is_dropped ? '' : SVG_ARROW}
-        </HoverEffect>
+        <div style={DROPDOWN_VALUE} onClick={drop}>
+            <TextButton>
+                {value}
+                {is_dropped ? '' : SVG_ARROW}
+            </TextButton>
+
+        </div>
     </div>
     function drop() {
         set_dropped(true)
