@@ -24,14 +24,15 @@
         "react",
         "@typescript-eslint",
         "simple-import-sort",
-        "spellcheck"
+        "import",
+        "spellcheck",
+        "unused-imports"
     ],
     "rules": {
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": [
             "warn"
         ],
-        "@typescript-eslint/prefer-for-of": "warn",
         "@typescript-eslint/indent": [
             "warn"
         ],
@@ -109,6 +110,18 @@
         "unicode-bom": [
             "error",
             "never"
+        ],
+        "import/first": "error",
+        "import/no-duplicates": "error",
+        "unused-imports/no-unused-imports": "error",
+        "unused-imports/no-unused-vars": [
+            "warn",
+            {
+                "vars": "all",
+                "varsIgnorePattern": "^_",
+                "args": "after-used",
+                "argsIgnorePattern": "^_"
+            }
         ],
         "simple-import-sort/imports": "warn",
         "simple-import-sort/exports": "warn",
