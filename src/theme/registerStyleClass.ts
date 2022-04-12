@@ -51,7 +51,7 @@ function getUniqueClassName(desiredClassName: string): string {
     let name = desiredClassName
     let i=1
     while (names.has(name)){
-        name = `${name}-${i}`
+        name = `${desiredClassName}-${i}`
         i += 1
     }
     return name

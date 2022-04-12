@@ -1,15 +1,26 @@
 import { CSSProperties } from "react"
 
 export interface StyleProperties {
-    color?: string;
     background?: string;
     border?: string,
-    borderTopColor?: string,
-    boxShadow?: string,
     borderRadius?: string,
-    outline?: string,
+    borderTopColor?: string,
+    bottom?: string;
+    boxShadow?: string,
+    color?: string;
     cursor?: CSSProperties['cursor'],
+    display?: CSSProperties['display'],
     fontFamily?: CSSProperties['fontFamily'],
+    height?: string;
+    left?: string;
+    margin?: string;
+    outline?: string,
+    padding?: string;
+    position?: CSSProperties['position'],
+    right?: string;
     textDecoration?: CSSProperties['textDecoration']
+    top?: string;
     userSelect?: CSSProperties['userSelect']
+    width?: string;
+    zIndex?: number;
 }

@@ -2,6 +2,7 @@ import * as React from "react"
 
 import { Vector } from "../model/Vector"
 import { DropDown } from "./DropDown"
+import { DropMenu } from "./DropMenu"
 import { SectionTitle } from "./SectionTitle"
 import { TextButton } from "./TextButton"
 import { UiButton } from "./UiButton"
@@ -53,6 +54,10 @@ const LibraryFixture = (): React.ReactElement => {
             <Title>dropdown</Title>
             <DropDown value={option} options={["test", "another", "yet-another"]} onchange={setOption}></DropDown>
             <UiText>Current value: {option}</UiText>
+        </div>
+        <div>
+            <Title>drop menu</Title>
+            <DropMenu></DropMenu>
         </div>
     </>
 }

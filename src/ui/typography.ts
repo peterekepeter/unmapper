@@ -1,3 +1,6 @@
 import { CSSProperties } from "react"
 
-export const font : CSSProperties = { fontFamily: 'Segoe UI, sans-serif' }
+// eslint-disable-next-line spellcheck/spell-checker
+export const UI_FONT_FAMILY = 'Segoe UI, sans-serif'
+
+export const font : CSSProperties = { fontFamily: UI_FONT_FAMILY }

@@ -9,7 +9,7 @@ export function DropDown<T>(props: { value: T, options: T[], onchange: (new_valu
     const [is_dropped, set_dropped] = React.useState(false)
     const div = React.useRef<HTMLDivElement>(null)
     return <div style={DROPDOWN_WRAPPER} ref={div} onBlur={onblur} tabIndex={0}>
-        <DropdownOptions<T>
+        <DropownOptions<T>
             enabled={is_dropped}
             onselect={value => select(value)}
             value={value}
@@ -57,7 +57,7 @@ const SVG_ARROW: JSX.Element = <>
     </svg>
 </>
 
-function DropdownOptions<T>(props: { enabled: boolean, options: T[], value: T, onselect: (new_value: T) => void }): JSX.Element {
+function DropownOptions<T>(props: { enabled: boolean, options: T[], value: T, onselect: (new_value: T) => void }): JSX.Element {
     const { options, enabled, onselect: on_select, value } = props
     const sorted: T[] = use_sorted_options(options, value)
     if (!enabled) { return <></> }

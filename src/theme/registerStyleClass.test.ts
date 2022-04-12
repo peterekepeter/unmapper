@@ -10,11 +10,13 @@ test('successfully register basic style class', () => {
     expect(result).toBe('my-class')
 })
 
-test('registering same class twice yields different names', () => {
+test('registering same class multiple times yields different names', () => {
     const result1 = register('wrapper', () => ({}))
     const result2 = register('wrapper', () => ({}))
+    const result3 = register('wrapper', () => ({}))
     expect(result1).toBe('wrapper')
     expect(result2).toBe('wrapper-1')
+    expect(result3).toBe('wrapper-2')
 })
 
 test('can get class count', () => {
@@ -36,7 +38,7 @@ test('render css class with background', () => {
 
 test('render css with 2 properties', () => {
     register('btn', () => ({ color: 'red', background: '#000' }))
-    expect(render()).toBe('.btn{color:red;background:#000}')
+    expect(render()).toBe('.btn{background:#000;color:red}')
 })
 
 test('render css with 2 classes', () => {

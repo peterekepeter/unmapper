@@ -28,9 +28,11 @@ const disabledButton = registerStyleClass('disabled', (theme): StyleClassPropert
 
 export interface TextButtonProps {
     disabled?: boolean
+    className?: string
 }
 
-export const TextButton: React.FC<TextButtonProps> = ({ disabled, children }) => {
-    const className = `${cssClass} ${!disabled?interactiveButton:disabledButton}`
-    return <span className={className}>{children}</span>
+export const TextButton: React.FC<TextButtonProps> = ({ disabled, children, className }) => {
+    const interactivity = !disabled?interactiveButton:disabledButton
+    const compiledClassName = `${cssClass} ${interactivity} ${className??''}`
+    return <span className={compiledClassName}>{children}</span>
 }

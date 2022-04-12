@@ -1,10 +1,11 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent } from "react"
 import * as React from "react"
-import { font } from "./typography";
 
-const uiTextStyle : React.CSSProperties = {
-    ...font
-};
+import { registerStyleClass } from "../theme"
+import { UI_FONT_FAMILY } from "./typography"
+
+
+const uiText = registerStyleClass('ui-text', () => ({ fontFamily: UI_FONT_FAMILY }))
 
 export const UiText: FunctionComponent = ({ children }) => 
-    <span style={uiTextStyle}>{children}</span>;
+    <span className={uiText}>{children}</span>
