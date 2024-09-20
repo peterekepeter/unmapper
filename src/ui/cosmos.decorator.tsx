@@ -4,7 +4,7 @@ import { themeColors, useStyleClasses as useRegisteredStyleClasses } from '../th
 import { useSignal } from '../util'
 import { useStyle } from '../util/useStyle'
 
-const Decorator: React.FC = ({ children }) => {
+const Decorator: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     const colors = useSignal(themeColors)
     useStyle(`
         html {

@@ -10,9 +10,9 @@ import { UiText } from "./UiText"
 import { UiVectorInput } from "./UiVectorInput"
 
 
-// export const Hello: FC<{ greeting: string, name: string }> = ({ greeting, name }) => {
-//     return <h1>{greeting}, {name}!</h1>
-// }
+export const Hello: React.FC<{ greeting: string, name: string }> = ({ greeting, name }) => {
+    return <h1>{greeting}, {name}!</h1>
+}
 
 const LibraryFixture = (): React.ReactElement => {
     const [vector, setVector] = React.useState(new Vector(124, 421, 32))
@@ -62,7 +62,7 @@ const LibraryFixture = (): React.ReactElement => {
     </>
 }
 
-const Title: React.FC = props => 
+const Title: React.FC<{ children?: React.ReactNode }> = props => 
     <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
         <SectionTitle>
             {props.children}

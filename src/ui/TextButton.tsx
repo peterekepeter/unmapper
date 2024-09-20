@@ -27,6 +27,7 @@ const disabledButton = registerStyleClass('disabled', (theme): StyleClassPropert
 }))
 
 export interface TextButtonProps {
+    children?: React.ReactNode,
     disabled?: boolean
     className?: string
 }

@@ -16,7 +16,7 @@ export function DropDown<T>(props: { value: T, options: T[], onchange: (new_valu
             options={options} />
         <div style={DROPDOWN_VALUE} onClick={drop}>
             <TextButton>
-                {value}
+                {String(value)}
                 {is_dropped ? '' : SVG_ARROW}
             </TextButton>
 
@@ -67,7 +67,7 @@ function DropownOptions<T>(props: { enabled: boolean, options: T[], value: T, on
                 key={`${option}`}
                 onClick={() => on_select(option)}
                 style={OPTION_ITEM_STYLE}>
-                <UiText>{option}</UiText>
+                <UiText>{String(option)}</UiText>
             </HoverEffect>)}
         </div>
     </div>

@@ -7,5 +7,5 @@ import { UI_FONT_FAMILY } from "./typography"
 
 const uiText = registerStyleClass('ui-text', () => ({ fontFamily: UI_FONT_FAMILY }))
 
-export const UiText: FunctionComponent = ({ children }) => 
+export const UiText: FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => 
     <span className={uiText}>{children}</span>

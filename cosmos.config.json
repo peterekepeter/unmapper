@@ -1,0 +1,8 @@
+{
+    "plugins": [
+        "react-cosmos-plugin-webpack"
+    ],
+    "webpack": {
+        "configPath": "./webpack.config.js"
+    }
+}
