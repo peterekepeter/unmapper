@@ -73,6 +73,10 @@ export class Vector {
         return this.subtract_numbers(v.x, v.y, v.z)
     }
 
+    negate(): Vector {
+        return new Vector(-this.x, -this.y, -this.z);
+    }
+
     scale(s: number): Vector {
         return new Vector(this.x * s, this.y * s, this.z * s)
     }

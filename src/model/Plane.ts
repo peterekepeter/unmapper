@@ -76,6 +76,10 @@ export class Plane {
         return this.distance - this.normal.dot(ray_origin) / direction_dot_normal
     }
 
+    flip(): Plane {
+        return new Plane(this.normal.scale(-1), -this.distance)
+    }
+
     get_center_position(): Vector{
         return this.normal.scale(this.distance)
     }

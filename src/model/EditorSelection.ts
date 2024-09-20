@@ -60,3 +60,14 @@ export function has_no_geometry_selection(selected_actor: ActorSelection): boole
     }
     return true
 }
+
+
+export function sort_by_actor_index(list: ActorSelection[]): ActorSelection[] {
+    var i,len = list.length;
+    for (i=1; i<len; i+=1){
+        if (list[i].actor_index > list[i-1].actor_index) {
+            return list.slice().sort((a,b) => a.actor_index - b.actor_index);
+        }
+    }
+    return list;
+}

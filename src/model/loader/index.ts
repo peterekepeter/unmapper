@@ -3,6 +3,9 @@ import { importUnrealMap } from "./import/import-unreal-map";
 import { Exporter } from "./export/Exporter";
 import { exportUnrealMap } from "./export/export-unreal-map";
 
+export function is_map_string(input: string): boolean {
+    return input.includes("Begin")
+}
 
 export function load_map_from_string(input : string) : UnrealMap {
     return importUnrealMap(input);

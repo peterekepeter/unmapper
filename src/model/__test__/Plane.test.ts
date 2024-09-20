@@ -114,3 +114,11 @@ describe('ray intersection', () => {
     })
 
 })
+
+describe('flip', () => {
+
+    test('returns plane facing the other side', () => {
+        expect(new Plane(Vector.UP, 1).flip()).toMatchObject({ normal: { x: -0, y: -0, z: -1 }, distance: -1 })
+    })
+
+})

@@ -24,6 +24,9 @@ describe('Vector', () => {
 
     test('subtraction', () =>
         expect(new Vector(3, 2, 1).subtract_numbers(1, 2, 3)).toEqual({ x: 2, y: 0, z: -2 }))
+        
+    test('negated', () =>
+        expect(new Vector(3, 2, 1).negate()).toEqual({ x: -3, y: -2, z: -1 }))
 
     test('can be scaled', () =>
         expect(new Vector(3, 2, 1).scale(0.5)).toEqual({ x: 1.5, y: 1, z: 0.5 }))
