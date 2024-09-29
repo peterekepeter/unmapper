@@ -120,10 +120,16 @@ export const CommandPalette = ({ controller = create_controller() }) => {
 }
 
 function getMatchingCommands(registry: ICommandRegistry, str : string){
-    return registry.get_all_commands_v2().filter(
-        cmd => cmd.description.toLocaleLowerCase()
-            .indexOf(str.toLocaleLowerCase()) >= 0,
-    )
+    const words = str.split(' ').filter(s => s.length > 0).map(s=>s.toLocaleLowerCase())
+    return registry.get_all_commands_v2().filter(cmd => {
+        const descr = cmd.description.toLocaleLowerCase();
+        for (const word of words) {
+            if (!descr.includes(word)) {
+                return false;
+            }
+        }
+        return true;
+    })
 }
 
 const CommandItem = ({ command, selected, onClick, onMouseEnter } : { command:ICommandInfoV2, selected:boolean, onClick:()=>void, onMouseEnter:()=>void }) => {
