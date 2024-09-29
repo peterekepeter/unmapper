@@ -107,4 +107,7 @@ export class PerspectiveViewTransform implements ViewTransform {
         )
         return this._inv_rotation_matrix.apply(screen_vector).add_vector(this.view_center)
     }
+    
+    align_to_pixels() {
+    }
 }

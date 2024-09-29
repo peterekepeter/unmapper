@@ -117,6 +117,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             s.view_transform.view_center = s.viewport_state.center_location
             s.ortoho_scale = get_ortoho_scale(s.viewport_state.zoom_level)
             s.view_transform.scale = s.ortoho_scale
+            s.view_transform.align_to_pixels()
             need_render = true
         }
 
@@ -147,6 +148,7 @@ export const Viewport : FunctionComponent<IViewportProps> = ({
             s.view_transform.height = s.canvas.height
             s.view_transform.device_size = Math.min(s.canvas.width, s.canvas.height)
             s.view_transform.device_pixel_ratio = device_pixel_ratio
+            s.view_transform.align_to_pixels()
             need_render = true
         }
 

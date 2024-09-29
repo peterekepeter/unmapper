@@ -17,4 +17,5 @@ export interface ViewTransform{
     view_transform_x(vector: Vector): number;
     view_transform_y(vector: Vector): number;
     canvas_to_world_location(canvas_x: number, canvas_y: number): Vector;
+    align_to_pixels(): void;
 }

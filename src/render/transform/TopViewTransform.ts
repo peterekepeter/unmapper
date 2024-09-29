@@ -2,7 +2,9 @@ import { BoundingBox } from "../../model/BoundingBox"
 import { Matrix3x3 } from "../../model/Matrix3x3"
 import { Rotation } from "../../model/Rotation"
 import { Vector } from "../../model/Vector"
+import { align_to_grid } from "../../model/algorithms/alignToGrid"
 import { ViewTransform } from "../ViewTransform"
+import { align_2d_view_to_pixels, find_nice_ratio, nice_round } from "./align_to_pixel"
 
 export class TopViewTransform implements ViewTransform {
 
@@ -52,5 +54,9 @@ export class TopViewTransform implements ViewTransform {
 
             this.view_center.z,
         )
+    }
+
+    align_to_pixels() {
+        align_2d_view_to_pixels(this);
     }
 }

@@ -3,6 +3,7 @@ import { Matrix3x3 } from "../../model/Matrix3x3"
 import { Rotation } from "../../model/Rotation"
 import { Vector } from "../../model/Vector"
 import { ViewTransform } from "../ViewTransform"
+import { align_2d_view_to_pixels } from "./align_to_pixel"
 
 export class SideViewTransform implements ViewTransform {
 
@@ -46,4 +47,9 @@ export class SideViewTransform implements ViewTransform {
             this.view_center.z - (canvas_y - this.height/2) / this.device_size / this.scale,
         )
     }
+
+    align_to_pixels() {
+        align_2d_view_to_pixels(this);
+    }
+
 }

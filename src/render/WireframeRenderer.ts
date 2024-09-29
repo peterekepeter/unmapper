@@ -159,10 +159,10 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 const top_left_world = render_transform.canvas_to_world_location(0, 0)
                 const w_00 = align_to_grid(top_left_world, grid)
                 const w_11 = w_00.add_vector(step_3d)
-                let x = render_transform.view_transform_x(w_00)
-                let y = render_transform.view_transform_y(w_00)
-                const x_step = Math.abs(render_transform.view_transform_x(w_11) - x)
-                const y_step = Math.abs(render_transform.view_transform_y(w_11) - y)
+                let x = render_transform.view_transform_x(w_00);
+                let y = render_transform.view_transform_y(w_00);
+                let x_step = Math.abs(render_transform.view_transform_x(w_11) - x)
+                let y_step = Math.abs(render_transform.view_transform_y(w_11) - y)
                 if (x_step < 8){
                     return
                 }
@@ -172,12 +172,12 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                 context.strokeStyle = `rgba(192,192,192,${Math.min((y_step-7)*0.01, 0.1)})`
                 context.beginPath()
                 for (; x<width; x+=x_step){
-                    context.moveTo(x, 0)
-                    context.lineTo(x, height)
+                    context.moveTo(x+0.5, 0)
+                    context.lineTo(x+0.5, height)
                 }
                 for (; y<height; y+=y_step){
-                    context.moveTo(0, y)
-                    context.lineTo(width, y)
+                    context.moveTo(0, y+0.5)
+                    context.lineTo(width, y+0.5)
                 }
                 context.stroke()
                 break
@@ -202,7 +202,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
         const is_selected = state.selection.actors && state.selection.actors.find(s => s.actor_index === index) != null
 
         context.strokeStyle = get_brush_wire_color(actor, is_selected)
-        context.lineWidth = 1.5 * render_transform.device_pixel_ratio
+        context.lineWidth = 1 * render_transform.device_pixel_ratio
 
         render_wire_edges(actor.brushModel, transformed_vertexes, is_selected && state.options.vertex_mode, actor_selection)
 
@@ -243,7 +243,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
     function render_uv_viewport(state: EditorState) {
         context.strokeStyle = state.options.preserve_vertex_uv
             ? uv_preserve_color : uv_color
-        context.lineWidth = 1.5 * render_transform.device_pixel_ratio
+        context.lineWidth = 1 * render_transform.device_pixel_ratio
         
         for (const selection of state.selection.actors) {
             const actor = state.map.actors[selection.actor_index]
@@ -564,22 +564,22 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                         switch (shape.shape){
                             case "Dot":
                                 context.beginPath()
-                                context.arc(x, y, 3 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.arc(x, y, 3.5 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                                 context.fill()
                                 break
                             case "SmallDot":
                                 context.beginPath()
-                                context.arc(x, y, 2 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.arc(x, y, 2.5 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                                 context.fill()
                                 break
                             case "TinyDot":
                                 context.beginPath()
-                                context.arc(x, y, 1 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
+                                context.arc(x, y, 1.5 * render_transform.device_pixel_ratio, 0, Math.PI * 2)
                                 context.fill()
                                 break
                             case "X": {
                                 context.beginPath()
-                                const size_from_center = 2 * render_transform.device_pixel_ratio
+                                const size_from_center = 2.5 * render_transform.device_pixel_ratio
                                 const size = size_from_center*2+1
                                 context.moveTo(x - size, y - size)
                                 context.lineTo(x + size, y + size)
@@ -591,7 +591,7 @@ export function create_wireframe_renderer(canvas: HTMLCanvasElement, geometry_ca
                             default:
                             case "Rectangle": {
                                 context.beginPath()
-                                const size_from_center = 2 * render_transform.device_pixel_ratio
+                                const size_from_center = 2.5 * render_transform.device_pixel_ratio
                                 const size = size_from_center*2+1
                                 context.rect(x - size_from_center, y - size_from_center, size, size)
                                 context.stroke()
