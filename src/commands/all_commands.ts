@@ -16,6 +16,7 @@ import { flip_polygon_normal_command } from './flip_polygon_normal'
 import { generate_cube_command } from "./generators/generate_cube"
 import { set_interaction_axis_lock_commands } from "./interaction/set_interaction_axis_lock"
 import { get_io_commands } from "./io"
+import { join_brush_data_command } from "./join_brush_data"
 import { measure_command } from "./measure_distance"
 import { merge_faces_command } from "./merge_faces"
 import { merge_points_command } from "./merge_points"
@@ -70,6 +71,7 @@ export function get_all_commands_v2(): ICommandInfoV2[] { return [
     apply_transform_center_command,
     merge_points_command,
     merge_faces_command,
+    join_brush_data_command,
     move_by_negative_32_units_command,
     ...set_interaction_axis_lock_commands,
     ...get_generate_commands(),
