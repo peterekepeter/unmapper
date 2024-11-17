@@ -14,13 +14,15 @@
                     "url": "webpack://umaprr/src",
                     "path": "${workspaceFolder}/src"
                 }
-            ]
+            ],
+            "preLaunchTask": "Dev Server"
         },
         {
             "type": "chrome",
             "request": "launch",
             "name": "chrome",
-            "url": "http://localhost:8080"
+            "url": "http://localhost:8080",
+            "preLaunchTask": "Dev Server"
         },
         {
             "type": "node",
