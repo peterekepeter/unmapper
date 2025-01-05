@@ -10,6 +10,10 @@ export const create_set_world_grid_command: (size: number) => ICommandInfoV2 = (
 export function get_world_grid_commands(): ICommandInfoV2[] {
     return [
         create_set_world_grid_command(0),
+        create_set_world_grid_command(0.125),
+        create_set_world_grid_command(0.25),
+        create_set_world_grid_command(0.5),
+        create_set_world_grid_command(1),
         create_set_world_grid_command(2),
         create_set_world_grid_command(4),
         create_set_world_grid_command(8),
