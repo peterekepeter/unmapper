@@ -73,24 +73,40 @@ export const CommandPalette = ({ controller = create_controller() }) => {
 
     function input(event: React.ChangeEvent<HTMLInputElement>){
         setValue(event.target.value)
+        setSelectedIndex(0);
     }
 
     function keydown(event : React.KeyboardEvent<HTMLInputElement>)
     {
         if (event.key === 'Escape'){
+            event.preventDefault();
             cancel()
         }
         else if (event.key === 'Enter'){
+            event.preventDefault();
             submit()
         } 
         else if(event.key === 'ArrowUp')
         {
-            setSelectedIndex(selectedIndex - 1)
+            event.preventDefault();
+            setWrappedIndex(selectedIndex - 1)
         } 
         else if (event.key === 'ArrowDown') 
         {
-            setSelectedIndex(selectedIndex + 1)
+            event.preventDefault();
+            setWrappedIndex(selectedIndex + 1)
         }
+    }
+
+    function setWrappedIndex(index: number) {
+        const cmds = getMatchingCommands(controller.commands, value);
+        if (index < 0) {
+            index = cmds.length -1;
+        }
+        if (index >= cmds.length) {
+            index = 0;
+        }
+        setSelectedIndex(index);
     }
 
     function submit(){
@@ -137,13 +153,23 @@ const CommandItem = ({ command, selected, onClick, onMouseEnter } : { command:IC
         ? themeColors.value.accent + '2'
         : 'none'
         
-    return <div style={{
+    const elemRef = React.useRef<HTMLDivElement>();
+
+    React.useEffect(() => {
+        if (selected) {
+            elemRef.current.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
+        }
+    });
+
+    return <div autoFocus={selected} style={{
         padding: '6px',
         fontSize: '14px', 
         background, 
         display: 'flex', 
         cursor: 'pointer',
     }} 
+    
+    ref={elemRef}
     onClick={onClick}
     onMouseEnter={onMouseEnter}>
         <UiText>{command.description}</UiText>
