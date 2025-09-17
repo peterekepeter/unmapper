@@ -103,6 +103,23 @@ End Actor
 End Map
 `))
 
+test("handle surface syntax", () => check_reimport(`
+Begin Map
+Begin Actor Class=Light Name=Light5
+     Level=LevelInfo'MyLevel.LevelInfo0'
+     Tag="Light"
+     Region=(Zone=LevelInfo'MyLevel.LevelInfo0',iLeaf=359,ZoneNumber=1)
+     Location=(X=1169.045532,Y=-924.225403,Z=1054.900024)
+     OldLocation=(X=704.000000,Y=64.000000,Z=871.900024)
+     bSelected=True
+     LightRadius=128
+     Name="Light5"
+End Actor
+Begin Surface
+End Surface
+End Map
+`))
+
 function check_reimport(input : string){
     const loaded = load_map_from_string(input)
     const reExported = store_map_to_string(loaded)

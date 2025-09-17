@@ -20,6 +20,30 @@ export function importUnrealMap(arg : string | GenericParser) : UnrealMap {
             break
         }
     }
+    
+    if (parser.get_current_token() == "Begin" && parser.get_relative_token(+1) == "Surface")
+    {
+        parser.move_to_next();
+        parser.move_to_next();
+
+        let token = parser.get_current_token();
+        
+        while (token) {
+            if (parser.get_current_token() === "End" && parser.get_relative_token(+1) === "Surface")
+            {
+                parser.move_to_next();
+                parser.move_to_next();
+                break;
+            }
+            else 
+            {
+                parser.move_to_next();
+            }
+            token = parser.get_current_token();
+        }
+
+    }
+
 
     parser.accept_and_move_to_next("End")
     parser.accept_and_move_to_next("Map")
