@@ -34,6 +34,7 @@ export class InteractionController {
             return // noop
         }
         else if (command_info.uses_interaction_buffer){
+            console.log('buffered exec', command_info)
             this._buffered.next_command(command_info)
         } 
         else {

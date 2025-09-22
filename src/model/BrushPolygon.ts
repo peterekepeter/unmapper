@@ -5,7 +5,9 @@ export class BrushPolygon implements BrushPolygonUvData {
     
     // todo, rename to center
     median: Vector = null;
+    /** list of vertex references */
     vertexes: number[] = [];
+    /** list of edge references */
     edges: number[] = [];
     item = '';
     flags = 0;

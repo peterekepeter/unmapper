@@ -33,6 +33,7 @@ function exec_clip_geometry(state: EditorState): EditorState {
 export function get_world_plane_from_interaction_buffer(interaction: InteractionBuffer): Plane {
     const { points, viewport_mode } = interaction
     let world_plane: Plane = null
+    console.log(points);
     if (points.length == 2)
     {
         if (viewport_mode === ViewportMode.Top){

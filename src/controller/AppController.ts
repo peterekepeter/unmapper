@@ -49,6 +49,7 @@ export class AppController {
             this.execute(command_info)
         }
         else {
+            console.log('execute interaction')
             this.interaction.interactively_execute(command_info)
         }
     }
