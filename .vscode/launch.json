@@ -7,6 +7,20 @@
         {
             "type": "firefox",
             "request": "launch",
+            "name": "librewolf",
+            "url": "http://localhost:8080",
+            "pathMappings": [
+                {
+                    "url": "webpack://umaprr/src",
+                    "path": "${workspaceFolder}/src"
+                }
+            ],
+            "firefoxExecutable": "/usr/bin/librewolf",
+            "preLaunchTask": "Dev Server"
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
             "name": "firefox",
             "url": "http://localhost:8080",
             "pathMappings": [
@@ -31,7 +45,7 @@
             "program": "${workspaceFolder}/node_modules/.bin/jest",
             "args": [
                 "--runInBand",
-                "--watchAll=false"
+                "--watch",
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
